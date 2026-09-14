@@ -18,6 +18,7 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3000;
 
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -358,7 +359,7 @@ app.post('/api/admin/play-now', async (req, res) => {
 
 // Códigos QR
 app.get('/api/qrs', async (req, res) => {
-  const protocol = req.protocol;
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
   const host = req.get('host');
   const baseUrl = `${protocol}://${host}`;
   const settings = db.getSettings();
