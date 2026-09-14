@@ -219,6 +219,7 @@ async function loadPlaylists() {
           </div>
 
           <div class="pt-2 flex gap-2">
+            <button onclick="viewPlaylistTracks('${p.id}')" class="btn-secondary text-xs py-2 px-3">Ver Temas</button>
             ${!isActive ? `<button onclick="activatePlaylist('${p.id}')" class="btn-primary text-xs py-2 px-3 flex-1">Activar como Base</button>` : '<button disabled class="btn-secondary text-xs py-2 px-3 flex-1 opacity-50">En Reproducción</button>'}
           </div>
         </div>
@@ -381,17 +382,26 @@ async function saveSettings() {
   alert('¡Ajustes guardados correctamente!');
 }
 
-// 8. Navegación de Pestañas
+// 8. Navegación de Pestañas (Corrección de IDs de botones y contenido)
 function switchTab(tabId) {
-  const tabs = ['queue', 'playlists', 'ai', 'stats', 'settings'];
-  tabs.forEach(t => {
-    const btn = document.getElementById('tabBtn' + capitalize(t));
-    const content = document.getElementById('tabContent' + capitalize(t));
-    if (t === tabId) {
-      btn.className = 'pb-3 border-b-2 border-amber-400 text-amber-400 flex items-center gap-2';
+  const tabs = {
+    queue: { btn: 'tabBtnQueue', content: 'tabContentQueue' },
+    playlists: { btn: 'tabBtnPlaylists', content: 'tabContentPlaylists' },
+    ai: { btn: 'tabBtnAI', content: 'tabContentAI' },
+    stats: { btn: 'tabBtnStats', content: 'tabContentStats' },
+    settings: { btn: 'tabBtnSettings', content: 'tabContentSettings' }
+  };
+
+  Object.entries(tabs).forEach(([id, ids]) => {
+    const btn = document.getElementById(ids.btn);
+    const content = document.getElementById(ids.content);
+    if (!btn || !content) return;
+
+    if (id === tabId) {
+      btn.className = 'pb-3 border-b-2 border-amber-400 text-amber-400 flex items-center gap-2 font-bold';
       content.classList.remove('hidden');
     } else {
-      btn.className = 'pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2';
+      btn.className = 'pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 font-normal';
       content.classList.add('hidden');
     }
   });
@@ -400,11 +410,182 @@ function switchTab(tabId) {
   if (tabId === 'stats') loadTrends();
 }
 
-function capitalize(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+// 9. Modales de Creación y Edición de Listas
+let newCustomPlaylistTracks = [];
+let tempSearchResultsForPlaylist = [];
+
+function openNewPlaylistModal() {
+  newCustomPlaylistTracks = [];
+  tempSearchResultsForPlaylist = [];
+  document.getElementById('newPlaylistName').value = '';
+  document.getElementById('newPlaylistDesc').value = '';
+  document.getElementById('playlistSearchSongInput').value = '';
+  document.getElementById('playlistSearchResults').innerHTML = '';
+  document.getElementById('playlistSearchResults').classList.add('hidden');
+  renderModalAddedTracks();
+  document.getElementById('newPlaylistModal').classList.remove('hidden');
+}
+
+function closeNewPlaylistModal() {
+  document.getElementById('newPlaylistModal').classList.add('hidden');
+}
+
+async function searchSongForPlaylist() {
+  const input = document.getElementById('playlistSearchSongInput');
+  const query = input.value.trim();
+  if (!query) return;
+
+  const resultsBox = document.getElementById('playlistSearchResults');
+  resultsBox.classList.remove('hidden');
+  resultsBox.innerHTML = `<p class="text-xs text-gray-400 py-2">Buscando...</p>`;
+
+  try {
+    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    tempSearchResultsForPlaylist = data.results || [];
+
+    if (tempSearchResultsForPlaylist.length === 0) {
+      resultsBox.innerHTML = `<p class="text-xs text-gray-500 py-2">No se encontraron resultados.</p>`;
+      return;
+    }
+
+    resultsBox.innerHTML = tempSearchResultsForPlaylist.slice(0, 4).map((v, i) => `
+      <div class="flex items-center justify-between p-2 rounded-lg bg-black/40 border border-white/5 text-xs">
+        <div class="flex items-center gap-2 min-w-0 flex-1">
+          <img src="${v.thumbnail}" class="w-9 h-7 rounded object-cover">
+          <div class="min-w-0 flex-1">
+            <p class="font-bold text-white truncate">${escapeHtml(v.title)}</p>
+            <p class="text-[10px] text-gray-400 truncate">${escapeHtml(v.artist)} • ${v.duration}</p>
+          </div>
+        </div>
+        <button onclick="addTrackToModalList(${i})" class="btn-primary text-[11px] py-1 px-2.5 ml-2">
+          + Agregar
+        </button>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function addTrackToModalList(index) {
+  const track = tempSearchResultsForPlaylist[index];
+  if (!track) return;
+
+  newCustomPlaylistTracks.push({
+    videoId: track.videoId,
+    title: track.title,
+    artist: track.artist,
+    genre: 'Crossover',
+    duration: track.duration,
+    thumbnail: track.thumbnail
+  });
+
+  renderModalAddedTracks();
+}
+
+function removeTrackFromModalList(index) {
+  newCustomPlaylistTracks.splice(index, 1);
+  renderModalAddedTracks();
+}
+
+function renderModalAddedTracks() {
+  const countEl = document.getElementById('modalTrackCount');
+  const listEl = document.getElementById('modalAddedTracks');
+
+  countEl.textContent = newCustomPlaylistTracks.length;
+
+  if (newCustomPlaylistTracks.length === 0) {
+    listEl.innerHTML = `<p class="text-xs text-gray-500 py-3 text-center">Aún no has agregado canciones. Busca arriba para agregar.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = newCustomPlaylistTracks.map((t, idx) => `
+    <div class="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5 text-xs">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        <span class="text-gray-400 font-mono text-[10px]">#${idx + 1}</span>
+        <img src="${t.thumbnail}" class="w-8 h-6 rounded object-cover">
+        <div class="min-w-0 flex-1">
+          <p class="font-bold text-white truncate text-[11px]">${escapeHtml(t.title)}</p>
+          <p class="text-[10px] text-gray-400 truncate">${escapeHtml(t.artist)}</p>
+        </div>
+      </div>
+      <button onclick="removeTrackFromModalList(${idx})" class="text-red-400 hover:text-red-300 ml-2 text-xs">✕</button>
+    </div>
+  `).join('');
+}
+
+async function saveCustomNewPlaylist() {
+  const name = document.getElementById('newPlaylistName').value.trim();
+  const description = document.getElementById('newPlaylistDesc').value.trim();
+
+  if (!name) return alert('Por favor ingresa un nombre para la lista.');
+  if (newCustomPlaylistTracks.length === 0) return alert('Agrega al menos una canción a la lista.');
+
+  try {
+    const res = await fetch('/api/playlists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        description,
+        tracks: newCustomPlaylistTracks
+      })
+    });
+
+    if (!res.ok) throw new Error('Error al guardar');
+
+    closeNewPlaylistModal();
+    loadPlaylists();
+    alert('¡Lista creada y guardada con éxito!');
+  } catch (err) {
+    alert('No se pudo guardar la lista.');
+  }
+}
+
+// 10. Ver temas de una lista existente
+async function viewPlaylistTracks(playlistId) {
+  try {
+    const res = await fetch('/api/playlists');
+    const data = await res.json();
+    const playlist = (data.playlists || []).find(p => p.id === playlistId);
+
+    if (!playlist) return;
+
+    document.getElementById('viewPlaylistTitle').textContent = playlist.name;
+    document.getElementById('viewPlaylistDesc').textContent = playlist.description || '';
+
+    const listEl = document.getElementById('viewPlaylistTracksList');
+    if (!playlist.tracks || playlist.tracks.length === 0) {
+      listEl.innerHTML = `<p class="text-gray-500 py-4 text-center">Esta lista no tiene canciones.</p>`;
+    } else {
+      listEl.innerHTML = playlist.tracks.map((t, idx) => `
+        <div class="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/5">
+          <span class="font-bold text-amber-400 text-xs w-5">#${idx + 1}</span>
+          <img src="${t.thumbnail}" class="w-12 h-9 rounded-lg object-cover">
+          <div class="min-w-0 flex-1">
+            <p class="font-bold text-white text-xs truncate">${escapeHtml(t.title)}</p>
+            <p class="text-[11px] text-gray-400 truncate">${escapeHtml(t.artist)} • <span class="text-amber-400">${t.genre || 'Crossover'}</span></p>
+          </div>
+          <button onclick="playNowDirect('${t.videoId}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.genre || 'Crossover'}'); closeViewPlaylistModal();" class="btn-primary text-[10px] py-1 px-2.5">
+            Sonar Ya
+          </button>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('viewPlaylistModal').classList.remove('hidden');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function closeViewPlaylistModal() {
+  document.getElementById('viewPlaylistModal').classList.add('hidden');
 }
 
 function escapeHtml(text) {
   if (!text) return '';
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
+
