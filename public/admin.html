@@ -120,9 +120,14 @@
           <h2 class="text-lg font-bold text-white">Listas Base del Bar</h2>
           <p class="text-xs text-gray-400">Estas listas son el "hilo conductor" para que el bar nunca pare de sonar cuando nadie pide canciones.</p>
         </div>
-        <button onclick="openNewPlaylistModal()" class="btn-primary text-xs flex items-center gap-1.5">
-          <span>➕</span> Nueva Lista
-        </button>
+        <div class="flex gap-2">
+          <button onclick="promptImportYouTubePlaylist()" class="btn-secondary text-xs flex items-center gap-1.5">
+            <span>📥</span> Importar Playlist de YouTube
+          </button>
+          <button onclick="openNewPlaylistModal()" class="btn-primary text-xs flex items-center gap-1.5">
+            <span>➕</span> Nueva Lista
+          </button>
+        </div>
       </div>
 
       <div id="playlistsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

@@ -235,6 +235,29 @@ async function activatePlaylist(id) {
   loadPlaylists();
 }
 
+async function promptImportYouTubePlaylist() {
+  const url = prompt('Pega el enlace de la playlist de YouTube (ej: https://www.youtube.com/playlist?list=...):');
+  if (!url || !url.trim()) return;
+
+  const cleanUrl = url.trim();
+
+  try {
+    const res = await fetch('/api/playlists/import-youtube', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: cleanUrl })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al importar lista');
+
+    alert(`¡Éxito! Se importó "${data.playlist.name}" con ${data.playlist.tracks.length} canciones.`);
+    loadPlaylists();
+  } catch (err) {
+    alert(err.message || 'No se pudo importar la lista. Verifica que el enlace sea de una lista pública o no listada.');
+  }
+}
+
 // 5. Generador con IA (Gemini)
 async function generatePlaylistAI() {
   const prompt = document.getElementById('aiPromptInput').value.trim();

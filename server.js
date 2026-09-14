@@ -242,6 +242,20 @@ app.post('/api/playlists', (req, res) => {
   res.json({ success: true, playlist: newPlaylist });
 });
 
+// Importar lista completa pegando enlace de YouTube
+app.post('/api/playlists/import-youtube', async (req, res) => {
+  const { url } = req.body;
+  if (!url) return res.status(400).json({ error: 'Falta el enlace de la lista de YouTube' });
+
+  const imported = await youtube.importPlaylist(url);
+  if (!imported || !imported.tracks || imported.tracks.length === 0) {
+    return res.status(400).json({ error: 'No se pudo leer la lista de YouTube. Asegúrate de que el enlace sea de una lista pública o no listada.' });
+  }
+
+  db.addPlaylist(imported);
+  res.json({ success: true, playlist: imported });
+});
+
 // Activar lista base activa
 app.post('/api/playlists/:id/activate', (req, res) => {
   const playlist = db.getPlaylist(req.params.id);
