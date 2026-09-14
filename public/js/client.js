@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSearch();
   fetchInitialStatus();
   setupSocketListeners();
+  renderPopularHits();
 });
 
 // 1. Detección y manejo de la Mesa
@@ -161,16 +162,60 @@ function quickSearch(genreText) {
   performSearch(genreText);
 }
 
+const POPULAR_HITS = [
+  { videoId: 'ROgcM9-N9jM', title: 'SE ME OLVIDA', artist: 'Feid & Maisak', genre: 'Reggaetón', duration: '3:45', thumbnail: 'https://i.ytimg.com/vi/ROgcM9-N9jM/hqdefault.jpg' },
+  { videoId: '7KxkMLAZlzw', title: 'Cali Pachanguero', artist: 'Grupo Niche', genre: 'Salsa', duration: '5:10', thumbnail: 'https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg' },
+  { videoId: 'YIo5Rq8ptFU', title: 'Nadie Es Eterno', artist: 'Darío Gómez', genre: 'Popular', duration: '3:50', thumbnail: 'https://i.ytimg.com/vi/YIo5Rq8ptFU/hqdefault.jpg' },
+  { videoId: 'JLwmBfrbYR4', title: 'Sobredosis', artist: 'Los Titanes', genre: 'Salsa', duration: '3:12', thumbnail: 'https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg' },
+  { videoId: 'EtZ4LRr9mQ8', title: 'La Plata', artist: 'Diomedes Díaz', genre: 'Vallenato', duration: '4:20', thumbnail: 'https://i.ytimg.com/vi/EtZ4LRr9mQ8/hqdefault.jpg' },
+  { videoId: 'l2ABZsKHl2Y', title: 'Guaro (Remix)', artist: 'Pipe Bueno, Carin León', genre: 'Popular', duration: '5:20', thumbnail: 'https://i.ytimg.com/vi/l2ABZsKHl2Y/hqdefault.jpg' }
+];
+
+function renderPopularHits() {
+  const container = document.getElementById('popularHitsList');
+  if (!container) return;
+  container.innerHTML = POPULAR_HITS.map((song, i) => `
+    <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 hover:border-amber-500/30 transition">
+      <div class="flex items-center gap-2.5 min-w-0 flex-1">
+        <img src="${song.thumbnail}" class="w-11 h-9 rounded-lg object-cover">
+        <div class="min-w-0 flex-1">
+          <p class="font-bold text-white text-xs truncate">${song.title}</p>
+          <p class="text-[10px] text-gray-400 truncate">${song.artist} • <span class="text-amber-400 font-semibold">${song.genre}</span></p>
+        </div>
+      </div>
+      <button onclick="requestDirectHit(${i})" class="btn-primary text-xs py-1.5 px-3 whitespace-nowrap ml-2">
+        Pedir 🎵
+      </button>
+    </div>
+  `).join('');
+}
+
+function requestDirectHit(index) {
+  const song = POPULAR_HITS[index];
+  if (!song) return;
+
+  selectedSongForModal = song;
+
+  document.getElementById('modalThumb').src = song.thumbnail;
+  document.getElementById('modalTitle').textContent = song.title;
+  document.getElementById('modalArtist').textContent = song.artist;
+  document.getElementById('modalTable').textContent = `Mesa ${currentTable}`;
+
+  document.getElementById('confirmModal').classList.remove('hidden');
+}
+
 async function performSearch(query) {
   const resultsSection = document.getElementById('searchResultsSection');
+  const suggestionsSection = document.getElementById('suggestionsSection');
   const resultsList = document.getElementById('searchResultsList');
   const resultsCount = document.getElementById('resultsCount');
 
+  if (suggestionsSection) suggestionsSection.classList.add('hidden');
   resultsSection.classList.remove('hidden');
   resultsList.innerHTML = `
     <div class="text-center py-6">
       <div class="inline-block w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-xs text-gray-400 mt-2">Buscando versiones en YouTube...</p>
+      <p class="text-xs text-gray-400 mt-2">Buscando canciones individuales en YouTube...</p>
     </div>
   `;
 
@@ -180,12 +225,12 @@ async function performSearch(query) {
     const videos = data.results || [];
 
     if (videos.length === 0) {
-      resultsList.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">No se encontraron versiones. Intenta con otro término.</p>`;
-      resultsCount.textContent = '0 versiones';
+      resultsList.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">No se encontraron canciones individuales. Intenta escribir el nombre del artista o canción.</p>`;
+      resultsCount.textContent = '0 canciones';
       return;
     }
 
-    resultsCount.textContent = `${videos.length} versiones encontradas`;
+    resultsCount.textContent = `${videos.length} canciones encontradas`;
 
     resultsList.innerHTML = videos.map((v, i) => `
       <div class="glass-card p-2.5 flex items-center gap-3 hover:border-amber-500/40 transition">
@@ -196,7 +241,7 @@ async function performSearch(query) {
         <div class="flex-1 min-w-0">
           <h4 class="text-xs font-bold text-white truncate leading-tight">${escapeHtml(v.title)}</h4>
           <p class="text-[11px] text-gray-400 truncate">${escapeHtml(v.artist)}</p>
-          <span class="text-[10px] text-amber-400/80 font-medium">YouTube</span>
+          <span class="text-[10px] text-amber-400/80 font-medium">Canción individual</span>
         </div>
         <button onclick="openConfirmModal(${i})" class="btn-primary text-xs py-2 px-3 whitespace-nowrap">
           Pedir 🎵
@@ -215,6 +260,8 @@ async function performSearch(query) {
 
 function hideSearchResults() {
   document.getElementById('searchResultsSection').classList.add('hidden');
+  const suggestionsSection = document.getElementById('suggestionsSection');
+  if (suggestionsSection) suggestionsSection.classList.remove('hidden');
 }
 
 // 5. Modal de Confirmación

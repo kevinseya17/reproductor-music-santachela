@@ -68,18 +68,32 @@
 
       <!-- Filtros rápidos de género -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
-        <button onclick="quickSearch('Salsa brava')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🎺 Salsa</button>
-        <button onclick="quickSearch('Música popular cantina')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🥃 Popular / Despecho</button>
-        <button onclick="quickSearch('Vallenato clásico')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🪗 Vallenato</button>
-        <button onclick="quickSearch('Reggaeton clasico')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🔥 Reggaetón</button>
-        <button onclick="quickSearch('Rock en español clasicos')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🎸 Rock</button>
+        <button onclick="quickSearch('Salsa exitos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🎺 Salsa</button>
+        <button onclick="quickSearch('Musica popular despecho canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🥃 Popular / Despecho</button>
+        <button onclick="quickSearch('Vallenato exitos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🪗 Vallenato</button>
+        <button onclick="quickSearch('Reggaeton exitos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🔥 Reggaetón</button>
+        <button onclick="quickSearch('Rock en español clasicos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🎸 Rock</button>
+      </div>
+    </section>
+
+    <!-- Sección: Éxitos Populares para pedir de una vez (visible si no hay búsqueda activa) -->
+    <section id="suggestionsSection" class="glass-card p-4 space-y-3">
+      <div class="flex items-center justify-between border-b border-white/5 pb-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+          <span>🔥</span> Temas clásicos para pedir
+        </h3>
+        <span class="text-[11px] text-gray-400">1 clic</span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-2 text-xs" id="popularHitsList">
+        <!-- Inyectado dinámicamente -->
       </div>
     </section>
 
     <!-- Resultados de Búsqueda -->
     <section id="searchResultsSection" class="hidden space-y-2">
       <div class="flex items-center justify-between px-1">
-        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Elige tu versión en YouTube</h3>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Canciones individuales encontradas</h3>
         <span id="resultsCount" class="text-xs text-amber-400 font-medium"></span>
       </div>
       <div id="searchResultsList" class="space-y-2">
