@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reproductor Bar & TV | Music Bar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    /* Reproductor embebido a pantalla completa o con overlay */
+    #playerContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: auto;
+    }
+    #playerOverlay {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(10,12,16,0.95) 0%, rgba(10,12,16,0.2) 30%, rgba(10,12,16,0.4) 100%);
+    }
+    .interactive {
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body class="bg-black text-white h-screen overflow-hidden select-none">
+
+  <!-- Contenedor del video de YouTube -->
+  <div id="playerContainer">
+    <div id="ytPlayer"></div>
+  </div>
+
+  <!-- Capa Overlay Informativa para TV y Bar -->
+  <div id="playerOverlay" class="flex flex-col justify-between p-8">
+
+    <!-- Header Superior: Logo del Bar y QR para pedir -->
+    <header class="flex items-center justify-between">
+      <div class="flex items-center gap-3 bg-black/60 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10">
+        <span class="text-3xl">🎷</span>
+        <div>
+          <h1 id="barName" class="text-xl font-bold tracking-tight text-amber-400">Music Bar</h1>
+          <p class="text-xs text-gray-400 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            En Vivo • YouTube Premium
+          </p>
+        </div>
+      </div>
+
+      <!-- QR en esquina de la TV para que la gente escanee la pantalla -->
+      <div class="flex items-center gap-3 bg-black/70 backdrop-blur-md p-3 rounded-2xl border border-amber-500/30 interactive">
+        <img id="screenQr" src="" alt="QR" class="w-16 h-16 rounded-lg bg-white p-1">
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-amber-400">¿Quieres música?</p>
+          <p class="text-xs font-semibold text-white">Escanea para pedir</p>
+          <p class="text-[10px] text-gray-400">Desde tu mesa</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Centro: Alerta cuando entra nuevo pedido -->
+    <div id="newRequestNotification" class="self-center hidden animate-bounce bg-amber-500 text-black px-6 py-3 rounded-full font-bold text-sm shadow-2xl flex items-center gap-2">
+      <span>🎉</span>
+      <span id="newRequestText">¡Nuevo pedido de la Mesa 4!</span>
+    </div>
+
+    <!-- Footer Inferior: Información del tema sonando y siguiente -->
+    <footer class="space-y-4">
+      <div class="flex items-end justify-between gap-6">
+
+        <!-- Info de la Canción Actual -->
+        <div class="bg-black/75 backdrop-blur-xl p-5 rounded-3xl border border-white/15 max-w-2xl flex items-center gap-5 shadow-2xl interactive">
+          <img id="currentThumb" src="" class="w-24 h-24 rounded-2xl object-cover shadow-md border border-white/10">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span id="currentGenre" class="genre-badge genre-Salsa">Salsa</span>
+              <span id="requestedByBadge" class="bg-amber-500/20 text-amber-300 text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                ✨ Lista Base
+              </span>
+            </div>
+            <h2 id="currentTitle" class="text-2xl font-bold tracking-tight text-white leading-tight">Cargando música...</h2>
+            <p id="currentArtist" class="text-base text-gray-300 font-medium">Conectando al sistema del bar</p>
+          </div>
+        </div>
+
+        <!-- Siguiente Canción -->
+        <div class="hidden lg:flex items-center gap-3 bg-black/60 backdrop-blur-md px-5 py-4 rounded-2xl border border-white/10 max-w-sm interactive">
+          <div class="text-2xl">⏭️</div>
+          <div class="min-w-0">
+            <p class="text-[10px] uppercase font-bold text-gray-400">A continuación:</p>
+            <p id="nextTitle" class="text-xs font-bold text-white truncate">Cargando siguiente tema...</p>
+            <p id="nextGenre" class="text-[11px] text-amber-400 truncate">Salsa</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Barra de Controles Rápidos para el Barman / Encargado -->
+      <div class="flex items-center justify-between pt-2 border-t border-white/10 text-xs text-gray-400 interactive">
+        <div class="flex items-center gap-4">
+          <button id="playPauseBtn" onclick="togglePlayPause()" class="hover:text-amber-400 flex items-center gap-1.5 font-bold">
+            <span id="playPauseIcon">⏸️</span> Pausar
+          </button>
+          <button onclick="skipSong()" class="hover:text-amber-400 flex items-center gap-1.5 font-bold">
+            <span>⏭️</span> Saltar canción
+          </button>
+          <button onclick="toggleFullscreen()" class="hover:text-amber-400 flex items-center gap-1.5">
+            <span>⛶</span> Pantalla Completa
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span>🔊</span>
+          <input type="range" id="volumeSlider" min="0" max="100" value="100" onchange="setVolume(this.value)" class="w-24 accent-amber-500 cursor-pointer">
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="/js/player.js"></script>
+</body>
+</html>

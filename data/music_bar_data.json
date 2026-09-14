@@ -1,0 +1,434 @@
+{
+  "settings": {
+    "barName": "La Rockola Music Bar",
+    "maxRequestsPerTable": 2,
+    "cooldownMinutes": 10,
+    "autoDJEnabled": true,
+    "smartSlottingWindow": 3,
+    "activePlaylistId": "salsa-pesada",
+    "geminiApiKey": "",
+    "totalTables": 20
+  },
+  "playlists": [
+    {
+      "id": "rumba-cantina",
+      "name": "🔥 Viernes de Rumba y Cantina",
+      "description": "Mezcla equilibrada de Salsa brava, Música Popular de despecho y Vallenato.",
+      "tracks": [
+        {
+          "videoId": "h8xU6_4d4o4",
+          "title": "Cali Pachanguero",
+          "artist": "Grupo Niche",
+          "genre": "Salsa",
+          "duration": "5:10",
+          "thumbnail": "https://i.ytimg.com/vi/h8xU6_4d4o4/hqdefault.jpg"
+        },
+        {
+          "videoId": "Z9Y0w4aVbFk",
+          "title": "Sobredosis",
+          "artist": "Los Titanes",
+          "genre": "Salsa",
+          "duration": "4:45",
+          "thumbnail": "https://i.ytimg.com/vi/Z9Y0w4aVbFk/hqdefault.jpg"
+        },
+        {
+          "videoId": "7XqO7D4vJcQ",
+          "title": "Rebelión",
+          "artist": "Joe Arroyo",
+          "genre": "Salsa",
+          "duration": "4:45",
+          "thumbnail": "https://i.ytimg.com/vi/7XqO7D4vJcQ/hqdefault.jpg"
+        },
+        {
+          "videoId": "hT_nvWreIhg",
+          "title": "Nadie Es Eterno",
+          "artist": "Darío Gómez",
+          "genre": "Popular",
+          "duration": "3:50",
+          "thumbnail": "https://i.ytimg.com/vi/hT_nvWreIhg/hqdefault.jpg"
+        },
+        {
+          "videoId": "bEs_Vv9L0iE",
+          "title": "Guaro (Remix)",
+          "artist": "Pipe Bueno, Carin León, Alzate, Jessi Uribe",
+          "genre": "Popular",
+          "duration": "5:20",
+          "thumbnail": "https://i.ytimg.com/vi/bEs_Vv9L0iE/hqdefault.jpg"
+        },
+        {
+          "videoId": "Cceg_rTqUq8",
+          "title": "El Precio de tu Error",
+          "artist": "Luis Alberto Posada",
+          "genre": "Popular",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/Cceg_rTqUq8/hqdefault.jpg"
+        },
+        {
+          "videoId": "xP8k0n09p8c",
+          "title": "La Plata",
+          "artist": "Diomedes Díaz",
+          "genre": "Vallenato",
+          "duration": "4:20",
+          "thumbnail": "https://i.ytimg.com/vi/xP8k0n09p8c/hqdefault.jpg"
+        },
+        {
+          "videoId": "k4V3gjsz7i0",
+          "title": "Obsesión",
+          "artist": "Peter Manjarrés",
+          "genre": "Vallenato",
+          "duration": "4:15",
+          "thumbnail": "https://i.ytimg.com/vi/k4V3gjsz7i0/hqdefault.jpg"
+        }
+      ]
+    },
+    {
+      "id": "salsa-pesada",
+      "name": "🎺 Salsa Brava y Clásica",
+      "description": "100% Salsa para salsómanos y bailadores.",
+      "tracks": [
+        {
+          "videoId": "9bZkp7q19f0",
+          "title": "Llorarás",
+          "artist": "Oscar D'León",
+          "genre": "Salsa",
+          "duration": "3:50",
+          "thumbnail": "https://i.ytimg.com/vi/9bZkp7q19f0/hqdefault.jpg"
+        },
+        {
+          "videoId": "fJ9rUzIMcZQ",
+          "title": "El Día de Mi Suerte",
+          "artist": "Héctor Lavoe & Willie Colón",
+          "genre": "Salsa",
+          "duration": "4:30",
+          "thumbnail": "https://i.ytimg.com/vi/fJ9rUzIMcZQ/hqdefault.jpg"
+        },
+        {
+          "videoId": "3JZ4pnNfyxQ",
+          "title": "Idilio",
+          "artist": "Willie Colón",
+          "genre": "Salsa",
+          "duration": "5:05",
+          "thumbnail": "https://i.ytimg.com/vi/3JZ4pnNfyxQ/hqdefault.jpg"
+        },
+        {
+          "videoId": "kXYiU_JCYtU",
+          "title": "Pedro Navaja",
+          "artist": "Rubén Blades",
+          "genre": "Salsa",
+          "duration": "7:20",
+          "thumbnail": "https://i.ytimg.com/vi/kXYiU_JCYtU/hqdefault.jpg"
+        }
+      ]
+    },
+    {
+      "id": "despecho-cantina",
+      "name": "🥃 Cantina y Despecho Puro",
+      "description": "Música popular, ranchera y norteña para el trago y el sentimiento.",
+      "tracks": [
+        {
+          "videoId": "Cceg_rTqUq8",
+          "title": "El Precio de tu Error",
+          "artist": "Luis Alberto Posada",
+          "genre": "Popular",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/Cceg_rTqUq8/hqdefault.jpg"
+        },
+        {
+          "videoId": "hT_nvWreIhg",
+          "title": "Nadie Es Eterno",
+          "artist": "Darío Gómez",
+          "genre": "Popular",
+          "duration": "3:50",
+          "thumbnail": "https://i.ytimg.com/vi/hT_nvWreIhg/hqdefault.jpg"
+        },
+        {
+          "videoId": "3nQNiWdeH2Q",
+          "title": "Dulce Pecado",
+          "artist": "Jessi Uribe",
+          "genre": "Popular",
+          "duration": "3:40",
+          "thumbnail": "https://i.ytimg.com/vi/3nQNiWdeH2Q/hqdefault.jpg"
+        },
+        {
+          "videoId": "d020hgfb_AQ",
+          "title": "Maldita Traición",
+          "artist": "Alzate",
+          "genre": "Popular",
+          "duration": "4:10",
+          "thumbnail": "https://i.ytimg.com/vi/d020hgfb_AQ/hqdefault.jpg"
+        }
+      ]
+    }
+  ],
+  "queue": [],
+  "history": [
+    {
+      "id": "base_1789356937096_iqpxa",
+      "videoId": "h8xU6_4d4o4",
+      "title": "Cali Pachanguero",
+      "artist": "Grupo Niche",
+      "genre": "Salsa",
+      "duration": "5:10",
+      "thumbnail": "https://i.ytimg.com/vi/h8xU6_4d4o4/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ Residente (Lista Base)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789356937096,
+      "startedAt": 1789356937096,
+      "playedAt": "2026-09-14T03:39:54.084Z"
+    },
+    {
+      "id": "req_1789356988369_qc4lv",
+      "videoId": "JLwmBfrbYR4",
+      "title": "Sobredosis",
+      "artist": "Los Titanes",
+      "genre": "Salsa",
+      "duration": "3:12",
+      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hq720.jpg",
+      "requestedBy": {
+        "table": "4",
+        "name": "Mesa 4 Carlos"
+      },
+      "isBaseTrack": false,
+      "addedAt": 1789356988369,
+      "startedAt": 1789357194090,
+      "playedAt": "2026-09-14T03:39:54.234Z"
+    },
+    {
+      "id": "req_1789357009312_wou1u",
+      "videoId": "7XqO7D4vJcQ",
+      "title": "Rebelion",
+      "artist": "Joe Arroyo",
+      "genre": "Salsa",
+      "duration": "4:45",
+      "thumbnail": "https://i.ytimg.com/vi/7XqO7D4vJcQ/hqdefault.jpg",
+      "requestedBy": {
+        "table": "3",
+        "name": "Mesa 3"
+      },
+      "isBaseTrack": false,
+      "addedAt": 1789357009312,
+      "startedAt": 1789357194240,
+      "playedAt": "2026-09-14T03:39:55.897Z"
+    },
+    {
+      "id": "req_1789357000309_gbidm",
+      "videoId": "hT_nvWreIhg",
+      "title": "Nadie es eterno",
+      "artist": "Dario Gomez",
+      "genre": "Popular",
+      "duration": "3:50",
+      "thumbnail": "https://i.ytimg.com/vi/hT_nvWreIhg/hqdefault.jpg",
+      "requestedBy": {
+        "table": "2",
+        "name": "Mesa 2"
+      },
+      "isBaseTrack": false,
+      "addedAt": 1789357000309,
+      "startedAt": 1789357195905,
+      "playedAt": "2026-09-14T03:40:56.173Z"
+    },
+    {
+      "id": "req_1789357020564_8lavf",
+      "videoId": "9bZkp7q19f0",
+      "title": "Lloraras",
+      "artist": "Oscar D Leon",
+      "genre": "Crossover",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/9bZkp7q19f0/hqdefault.jpg",
+      "requestedBy": {
+        "table": "4",
+        "name": "Mesa 4"
+      },
+      "isBaseTrack": false,
+      "addedAt": 1789357020564,
+      "startedAt": 1789357256180,
+      "playedAt": "2026-09-14T03:41:48.278Z"
+    },
+    {
+      "id": "req_1789357299943_2eru6",
+      "videoId": "erYoMl5gyu8",
+      "title": "#Héctor Lavoe, Willie Colón, Frankie Ruiz, Ismael Rivera  Salsa Brava Para Bailar",
+      "artist": "Salsa Brava Legacy",
+      "genre": "Salsa",
+      "duration": "1:31:05",
+      "thumbnail": "https://i.ytimg.com/vi/erYoMl5gyu8/hq720.jpg",
+      "requestedBy": {
+        "table": "4",
+        "name": "para mi primo"
+      },
+      "isBaseTrack": false,
+      "addedAt": 1789357299943,
+      "startedAt": 1789357308287,
+      "playedAt": "2026-09-14T03:41:50.025Z"
+    },
+    {
+      "id": "base_1789357310030_zgn9v",
+      "videoId": "9bZkp7q19f0",
+      "title": "Llorarás",
+      "artist": "Oscar D'León",
+      "genre": "Salsa",
+      "duration": "3:50",
+      "thumbnail": "https://i.ytimg.com/vi/9bZkp7q19f0/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ Residente (Lista Base)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789357310030,
+      "startedAt": 1789357310030,
+      "playedAt": "2026-09-14T03:41:53.548Z"
+    },
+    {
+      "id": "base_1789357313552_9b1co",
+      "videoId": "fJ9rUzIMcZQ",
+      "title": "El Día de Mi Suerte",
+      "artist": "Héctor Lavoe & Willie Colón",
+      "genre": "Salsa",
+      "duration": "4:30",
+      "thumbnail": "https://i.ytimg.com/vi/fJ9rUzIMcZQ/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ Residente (Lista Base)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789357313552,
+      "startedAt": 1789357313552,
+      "playedAt": "2026-09-14T03:41:54.964Z"
+    },
+    {
+      "id": "base_1789357314968_obh0x",
+      "videoId": "3JZ4pnNfyxQ",
+      "title": "Idilio",
+      "artist": "Willie Colón",
+      "genre": "Salsa",
+      "duration": "5:05",
+      "thumbnail": "https://i.ytimg.com/vi/3JZ4pnNfyxQ/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ Residente (Lista Base)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789357314968,
+      "startedAt": 1789357314968,
+      "playedAt": "2026-09-14T03:41:55.898Z"
+    },
+    {
+      "id": "base_1789357315903_nzw81",
+      "videoId": "kXYiU_JCYtU",
+      "title": "Pedro Navaja",
+      "artist": "Rubén Blades",
+      "genre": "Salsa",
+      "duration": "7:20",
+      "thumbnail": "https://i.ytimg.com/vi/kXYiU_JCYtU/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ Residente (Lista Base)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789357315903,
+      "startedAt": 1789357315903,
+      "playedAt": "2026-09-14T03:41:56.314Z"
+    },
+    {
+      "id": "base_1789357316318_ws75b",
+      "videoId": "9bZkp7q19f0",
+      "title": "Llorarás",
+      "artist": "Oscar D'León",
+      "genre": "Salsa",
+      "duration": "3:50",
+      "thumbnail": "https://i.ytimg.com/vi/9bZkp7q19f0/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ Residente (Lista Base)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789357316318,
+      "startedAt": 1789357316318,
+      "playedAt": "2026-09-14T03:41:56.645Z"
+    },
+    {
+      "id": "base_1789357316650_7dumh",
+      "videoId": "fJ9rUzIMcZQ",
+      "title": "El Día de Mi Suerte",
+      "artist": "Héctor Lavoe & Willie Colón",
+      "genre": "Salsa",
+      "duration": "4:30",
+      "thumbnail": "https://i.ytimg.com/vi/fJ9rUzIMcZQ/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ Residente (Lista Base)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789357316650,
+      "startedAt": 1789357316650,
+      "playedAt": "2026-09-14T03:41:56.849Z"
+    },
+    {
+      "id": "base_1789357316854_lfyz2",
+      "videoId": "3JZ4pnNfyxQ",
+      "title": "Idilio",
+      "artist": "Willie Colón",
+      "genre": "Salsa",
+      "duration": "5:05",
+      "thumbnail": "https://i.ytimg.com/vi/3JZ4pnNfyxQ/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ Residente (Lista Base)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789357316854,
+      "startedAt": 1789357316854,
+      "playedAt": "2026-09-14T03:41:58.522Z"
+    },
+    {
+      "id": "base_1789357318526_21oat",
+      "videoId": "kXYiU_JCYtU",
+      "title": "Pedro Navaja",
+      "artist": "Rubén Blades",
+      "genre": "Salsa",
+      "duration": "7:20",
+      "thumbnail": "https://i.ytimg.com/vi/kXYiU_JCYtU/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ Residente (Lista Base)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789357318526,
+      "startedAt": 1789357318526,
+      "playedAt": "2026-09-14T03:42:27.898Z"
+    },
+    {
+      "id": "forced_1789357347902",
+      "videoId": "2NQ4xj3dFhg",
+      "title": "Salsa Brava [Vinyl Set #1]",
+      "artist": "El Marchante",
+      "genre": "Salsa",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/2NQ4xj3dFhg/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ / Bar"
+      },
+      "isBaseTrack": false,
+      "startedAt": 1789357347902,
+      "playedAt": "2026-09-14T03:42:29.644Z"
+    }
+  ],
+  "tableRequests": {
+    "2": [
+      1789357000312
+    ],
+    "3": [
+      1789357009315
+    ],
+    "4": [
+      1789356988374,
+      1789357020568,
+      1789357299947,
+      1789357343536
+    ]
+  }
+}
