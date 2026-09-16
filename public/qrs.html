@@ -22,17 +22,17 @@
     }
   </style>
 </head>
-<body class="bg-gray-950 text-white min-h-screen p-8">
+<body class="bg-gray-950 text-white min-h-screen p-4 sm:p-8">
 
   <div class="max-w-6xl mx-auto space-y-6">
 
     <!-- Header no imprimible -->
-    <div class="no-print flex items-center justify-between bg-gray-900 p-6 rounded-2xl border border-white/10">
+    <div class="no-print flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-gray-900 p-4 sm:p-6 rounded-2xl border border-white/10">
       <div>
-        <h1 class="text-xl font-bold text-amber-400">Generador de Códigos QR para Mesas</h1>
+        <h1 class="text-lg sm:text-xl font-bold text-amber-400">Generador de Códigos QR para Mesas</h1>
         <p class="text-xs text-gray-400 mt-1">Imprime estos códigos para colocarlos en los soportes acrílicos o pegatinas de cada mesa.</p>
       </div>
-      <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-400 text-black font-bold px-6 py-3 rounded-xl text-sm flex items-center gap-2 shadow-lg cursor-pointer">
+      <button onclick="window.print()" class="w-full sm:w-auto justify-center bg-amber-500 hover:bg-amber-400 text-black font-bold px-6 py-3 rounded-xl text-sm flex items-center gap-2 shadow-lg cursor-pointer">
         <span>🖨️</span> Imprimir Tarjetas de Mesas
       </button>
     </div>

@@ -38,25 +38,25 @@
   </div>
 
   <!-- Capa Overlay Informativa para TV y Bar -->
-  <div id="playerOverlay" class="flex flex-col justify-between p-8">
+  <div id="playerOverlay" class="flex flex-col justify-between p-3 sm:p-8">
 
     <!-- Header Superior: Logo del Bar y QR para pedir -->
-    <header class="flex items-center justify-between">
-      <div class="flex items-center gap-3 bg-black/60 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10">
-        <span class="text-3xl">🎷</span>
+    <header class="flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2 sm:gap-3 bg-black/60 backdrop-blur-md px-3 sm:px-5 py-2 sm:py-3 rounded-2xl border border-white/10">
+        <span class="text-2xl sm:text-3xl">🎷</span>
         <div>
-          <h1 id="barName" class="text-xl font-bold tracking-tight text-amber-400">Music Bar</h1>
-          <p class="text-xs text-gray-400 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          <h1 id="barName" class="text-sm sm:text-xl font-bold tracking-tight text-amber-400">Music Bar</h1>
+          <p class="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1.5 sm:gap-2">
+            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500 animate-pulse"></span>
             En Vivo • YouTube Premium
           </p>
         </div>
       </div>
 
       <!-- QR en esquina de la TV para que la gente escanee la pantalla -->
-      <div class="flex items-center gap-3 bg-black/70 backdrop-blur-md p-3 rounded-2xl border border-amber-500/30 interactive">
-        <img id="screenQr" src="" alt="QR" class="w-16 h-16 rounded-lg bg-white p-1">
-        <div>
+      <div class="flex items-center gap-2 sm:gap-3 bg-black/70 backdrop-blur-md p-2 sm:p-3 rounded-2xl border border-amber-500/30 interactive">
+        <img id="screenQr" src="" alt="QR" class="w-10 h-10 sm:w-16 sm:h-16 rounded-lg bg-white p-0.5 sm:p-1">
+        <div class="hidden sm:block">
           <p class="text-[11px] font-bold uppercase tracking-wider text-amber-400">¿Quieres música?</p>
           <p class="text-xs font-semibold text-white">Escanea para pedir</p>
           <p class="text-[10px] text-gray-400">Desde tu mesa</p>
@@ -91,17 +91,17 @@
       <div class="flex items-end justify-between gap-6">
 
         <!-- Info de la Canción Actual -->
-        <div class="bg-black/75 backdrop-blur-xl p-5 rounded-3xl border border-white/15 max-w-2xl flex items-center gap-5 shadow-2xl interactive">
-          <img id="currentThumb" src="" class="w-24 h-24 rounded-2xl object-cover shadow-md border border-white/10">
-          <div class="space-y-1">
+        <div class="bg-black/75 backdrop-blur-xl p-3 sm:p-5 rounded-2xl sm:rounded-3xl border border-white/15 max-w-2xl flex items-center gap-3 sm:gap-5 shadow-2xl interactive">
+          <img id="currentThumb" src="" class="w-14 h-14 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl object-cover shadow-md border border-white/10 flex-shrink-0">
+          <div class="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
             <div class="flex items-center gap-2">
-              <span id="currentGenre" class="genre-badge genre-Salsa">Salsa</span>
-              <span id="requestedByBadge" class="bg-amber-500/20 text-amber-300 text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-500/30">
+              <span id="currentGenre" class="genre-badge genre-Salsa text-[10px] sm:text-xs">Salsa</span>
+              <span id="requestedByBadge" class="bg-amber-500/20 text-amber-300 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
                 ✨ Lista Base
               </span>
             </div>
-            <h2 id="currentTitle" class="text-2xl font-bold tracking-tight text-white leading-tight">Cargando música...</h2>
-            <p id="currentArtist" class="text-base text-gray-300 font-medium">Conectando al sistema del bar</p>
+            <h2 id="currentTitle" class="text-sm sm:text-2xl font-bold tracking-tight text-white leading-tight truncate">Cargando música...</h2>
+            <p id="currentArtist" class="text-xs sm:text-base text-gray-300 font-medium truncate">Conectando al sistema del bar</p>
           </div>
         </div>
 

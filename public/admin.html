@@ -11,35 +11,35 @@
 <body class="bg-[#0a0c10] text-gray-100 min-h-screen">
 
   <!-- Header Admin -->
-  <header class="glass-header px-6 py-4 flex items-center justify-between">
+  <header class="glass-header px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
     <div class="flex items-center gap-3">
-      <span class="text-3xl">🎛️</span>
+      <span class="text-2xl sm:text-3xl">🎛️</span>
       <div>
-        <h1 class="text-lg font-bold text-white flex items-center gap-2">
+        <h1 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
           <span id="adminBarName">Music Bar</span> 
-          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">Panel DJ</span>
+          <span class="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">Panel DJ</span>
         </h1>
-        <p class="text-xs text-gray-400">Control de cola, listas maestras e Inteligencia Artificial</p>
+        <p class="text-[11px] sm:text-xs text-gray-400">Control de cola, listas maestras e Inteligencia Artificial</p>
       </div>
     </div>
 
-    <div class="flex items-center gap-3">
-      <button id="btnMicMode" onclick="toggleMicMode()" class="btn-secondary text-xs flex items-center gap-1.5 transition-all duration-300">
+    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
+      <button id="btnMicMode" onclick="toggleMicMode()" class="btn-secondary text-xs flex items-center gap-1.5 transition-all duration-300 py-1.5 px-3">
         <span id="micModeIcon">🎙️</span> <span id="micModeText">Modo Micrófono</span>
       </button>
-      <a href="/player.html" target="_blank" class="btn-secondary text-xs flex items-center gap-1.5">
+      <a href="/player.html" target="_blank" class="btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3">
         <span>📺</span> Abrir Pantalla TV
       </a>
-      <a href="/qrs.html" target="_blank" class="btn-secondary text-xs flex items-center gap-1.5">
+      <a href="/qrs.html" target="_blank" class="btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3">
         <span>🖨️</span> Imprimir QRs
       </a>
     </div>
   </header>
 
-  <div class="max-w-7xl mx-auto p-6 space-y-6">
+  <div class="max-w-7xl mx-auto p-3.5 sm:p-6 space-y-6">
 
     <!-- Navegación de Pestañas -->
-    <nav class="flex border-b border-white/10 gap-6 text-sm font-semibold overflow-x-auto pb-1">
+    <nav class="flex border-b border-white/10 gap-4 sm:gap-6 text-xs sm:text-sm font-semibold overflow-x-auto pb-1 no-scrollbar">
       <button onclick="switchTab('queue')" id="tabBtnQueue" class="pb-3 border-b-2 border-amber-400 text-amber-400 flex items-center gap-2 whitespace-nowrap">
         <span>📋</span> Cola En Vivo (<span id="queueCounter">0</span>)
       </button>
