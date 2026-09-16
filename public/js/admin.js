@@ -52,6 +52,15 @@ function renderAdminState(data) {
     if (document.getElementById('settingRequestMode')) {
       document.getElementById('settingRequestMode').value = settings.requestMode || 'open';
     }
+    if (document.getElementById('settingFadeTransition')) {
+      document.getElementById('settingFadeTransition').checked = settings.fadeTransitionEnabled !== false;
+    }
+    if (document.getElementById('settingMaxSongDuration')) {
+      document.getElementById('settingMaxSongDuration').value = settings.maxSongDuration !== undefined ? settings.maxSongDuration : 210;
+    }
+    if (document.getElementById('settingDynamicDuration')) {
+      document.getElementById('settingDynamicDuration').checked = settings.dynamicDurationOnQueue !== false;
+    }
 
     // Renderizar ajustes de control, filtro y promociones
     renderBlacklistWords(settings.blacklistWords);
@@ -562,6 +571,9 @@ async function saveSettings() {
   const autoDJEnabled = document.getElementById('settingAutoDJ').checked;
   const geminiApiKey = document.getElementById('settingApiKey').value.trim();
   const requestMode = document.getElementById('settingRequestMode')?.value || 'open';
+  const fadeTransitionEnabled = document.getElementById('settingFadeTransition')?.checked !== false;
+  const maxSongDuration = parseInt(document.getElementById('settingMaxSongDuration')?.value || 210);
+  const dynamicDurationOnQueue = document.getElementById('settingDynamicDuration')?.checked !== false;
 
   await fetch('/api/settings', {
     method: 'POST',
@@ -573,7 +585,10 @@ async function saveSettings() {
       totalTables,
       autoDJEnabled,
       geminiApiKey,
-      requestMode
+      requestMode,
+      fadeTransitionEnabled,
+      maxSongDuration,
+      dynamicDurationOnQueue
     })
   });
 

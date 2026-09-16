@@ -5,6 +5,22 @@ let currentVideoId = null;
 let isPlayerReady = false;
 let pendingVideoId = null;
 
+// Configuración y estado de reproducción / DJ
+let currentSettings = {
+  fadeTransitionEnabled: true,
+  maxSongDuration: 210, // 3:30 min por defecto
+  dynamicDurationOnQueue: true
+};
+let currentQueue = [];
+let currentlyPlayingSong = null;
+let masterVolume = 100;
+let isFading = false;
+let activeFadeInterval = null;
+let progressMonitorInterval = null;
+let hasReportedSongEnded = false;
+let isFadingInNewSong = false;
+let savedVolumeBeforeMic = 100;
+
 // 1. YouTube IFrame API Callback global
 window.onYouTubeIframeAPIReady = function() {
   ytPlayer = new YT.Player('ytPlayer', {
@@ -28,7 +44,11 @@ window.onYouTubeIframeAPIReady = function() {
 
 function onPlayerReady(event) {
   isPlayerReady = true;
+  masterVolume = ytPlayer.getVolume() || 100;
   event.target.playVideo();
+
+  startProgressMonitor();
+  startPromoRotation();
 
   if (pendingVideoId) {
     loadAndPlay(pendingVideoId);
@@ -40,10 +60,19 @@ function onPlayerStateChange(event) {
   const playPauseIcon = document.getElementById('playPauseIcon');
 
   if (event.data === YT.PlayerState.ENDED) {
-    console.log('Canción terminada, solicitando siguiente...');
-    socket.emit('song-ended');
+    if (!hasReportedSongEnded) {
+      hasReportedSongEnded = true;
+      console.log('Canción terminada por YouTube, solicitando siguiente...');
+      socket.emit('song-ended');
+    }
   } else if (event.data === YT.PlayerState.PLAYING) {
     if (playPauseIcon) playPauseIcon.textContent = '⏸️';
+
+    // Si requiere Fade-In suave al iniciar la canción
+    if (isFadingInNewSong && currentSettings.fadeTransitionEnabled !== false) {
+      isFadingInNewSong = false;
+      fadeVolume(0, masterVolume, 1800);
+    }
   } else if (event.data === YT.PlayerState.PAUSED) {
     if (playPauseIcon) playPauseIcon.textContent = '▶️';
   }
@@ -52,13 +81,36 @@ function onPlayerStateChange(event) {
 function onPlayerError(event) {
   console.warn('Error en video de YouTube (código ' + event.data + '), saltando al siguiente...');
   setTimeout(() => {
-    socket.emit('song-ended');
+    if (!hasReportedSongEnded) {
+      hasReportedSongEnded = true;
+      socket.emit('song-ended');
+    }
   }, 1500);
 }
 
 function loadAndPlay(videoId) {
   if (!videoId) return;
   currentVideoId = videoId;
+  hasReportedSongEnded = false;
+  isFading = false;
+
+  if (activeFadeInterval) {
+    clearInterval(activeFadeInterval);
+    activeFadeInterval = null;
+  }
+
+  // Preparar volumen para inicio suave (Fade In)
+  if (currentSettings.fadeTransitionEnabled !== false) {
+    isFadingInNewSong = true;
+    if (isPlayerReady && ytPlayer && ytPlayer.setVolume) {
+      ytPlayer.setVolume(0);
+    }
+  } else {
+    isFadingInNewSong = false;
+    if (isPlayerReady && ytPlayer && ytPlayer.setVolume) {
+      ytPlayer.setVolume(masterVolume);
+    }
+  }
 
   if (isPlayerReady && ytPlayer && ytPlayer.loadVideoById) {
     ytPlayer.loadVideoById({
@@ -83,14 +135,22 @@ function togglePlayPause() {
 
 async function skipSong() {
   try {
-    await fetch('/api/admin/skip', { method: 'POST' });
+    // Si la transición suave está activa, desvanecer rápido y saltar
+    if (currentSettings.fadeTransitionEnabled !== false && ytPlayer && isPlayerReady) {
+      fadeVolume(ytPlayer.getVolume(), 0, 700, async () => {
+        await fetch('/api/admin/skip', { method: 'POST' });
+      });
+    } else {
+      await fetch('/api/admin/skip', { method: 'POST' });
+    }
   } catch (err) {
     console.error('Error saltando canción:', err);
   }
 }
 
 function setVolume(val) {
-  if (ytPlayer && isPlayerReady) {
+  masterVolume = val;
+  if (ytPlayer && isPlayerReady && !isFading) {
     ytPlayer.setVolume(val);
   }
 }
@@ -105,14 +165,123 @@ function toggleFullscreen() {
   }
 }
 
-// 3. Sincronización en tiempo real vía Socket.io
+// 3. Monitor de Progreso, Límite de Duración y Fade-Out
+function startProgressMonitor() {
+  if (progressMonitorInterval) clearInterval(progressMonitorInterval);
+
+  progressMonitorInterval = setInterval(() => {
+    if (!ytPlayer || !isPlayerReady) return;
+    if (hasReportedSongEnded) return;
+
+    try {
+      const state = ytPlayer.getPlayerState();
+      if (state !== YT.PlayerState.PLAYING) return;
+
+      const currentTime = ytPlayer.getCurrentTime();
+      const duration = ytPlayer.getDuration();
+      if (!duration || duration <= 0) return;
+
+      // Calcular límite de duración configurado
+      let targetMaxDuration = duration;
+      const configuredMax = currentSettings.maxSongDuration || 0; // 0 = sin límite
+
+      if (configuredMax > 0) {
+        if (currentSettings.dynamicDurationOnQueue) {
+          // Solo recortar si hay pedidos de clientes en cola o si el tema actual fue pedido por una mesa
+          const hasPendingRequests = (currentQueue && currentQueue.length > 0) || (currentlyPlayingSong?.requestedBy?.table);
+          if (hasPendingRequests) {
+            targetMaxDuration = Math.min(configuredMax, duration);
+          }
+        } else {
+          targetMaxDuration = Math.min(configuredMax, duration);
+        }
+      }
+
+      const timeLeft = targetMaxDuration - currentTime;
+
+      // Si quedan 6 segundos o menos para el límite/final y el fundido está activo
+      if (currentSettings.fadeTransitionEnabled !== false && timeLeft <= 6 && timeLeft > 0.8) {
+        if (!isFading) {
+          isFading = true;
+          const fadeDuration = Math.max(1200, Math.round(timeLeft * 1000));
+          console.log(`Iniciando Fade Out suave de ${Math.round(timeLeft)}s...`);
+          fadeVolume(ytPlayer.getVolume(), 0, fadeDuration, () => {
+            if (!hasReportedSongEnded) {
+              hasReportedSongEnded = true;
+              isFading = false;
+              console.log('Canción terminada con Fade Out, solicitando siguiente...');
+              socket.emit('song-ended');
+            }
+          });
+        }
+      } else if (timeLeft <= 0.8 || currentTime >= targetMaxDuration) {
+        // Fin de tiempo o fin de video sin fundido
+        if (!hasReportedSongEnded) {
+          hasReportedSongEnded = true;
+          isFading = false;
+          console.log('Tiempo límite cumplido, pasando al siguiente tema...');
+          socket.emit('song-ended');
+        }
+      }
+    } catch (e) {
+      // Chequeos transitorios durante la carga del iframe
+    }
+  }, 400);
+}
+
+// 4. Fundido de Volumen (Fade Suave)
+function fadeVolume(fromVol, targetVol, durationMs = 1500, onComplete = null) {
+  if (!ytPlayer || !isPlayerReady) {
+    if (onComplete) onComplete();
+    return;
+  }
+
+  if (activeFadeInterval) {
+    clearInterval(activeFadeInterval);
+    activeFadeInterval = null;
+  }
+
+  const steps = 20;
+  const stepTime = Math.max(20, Math.round(durationMs / steps));
+  const volStep = (targetVol - fromVol) / steps;
+  let currentStep = 0;
+
+  ytPlayer.setVolume(Math.max(0, Math.min(100, Math.round(fromVol))));
+
+  activeFadeInterval = setInterval(() => {
+    currentStep++;
+    const newVol = Math.round(fromVol + (volStep * currentStep));
+    if (ytPlayer && isPlayerReady) {
+      ytPlayer.setVolume(Math.max(0, Math.min(100, newVol)));
+    }
+    if (currentStep >= steps) {
+      clearInterval(activeFadeInterval);
+      activeFadeInterval = null;
+      if (ytPlayer && isPlayerReady) {
+        ytPlayer.setVolume(Math.max(0, Math.min(100, targetVol)));
+      }
+      if (onComplete) onComplete();
+    }
+  }, stepTime);
+}
+
+// 5. Sincronización en tiempo real vía Socket.io
 socket.on('state-changed', (data) => {
   if (!data) return;
   const { currentlyPlaying, queue, settings } = data;
 
-  if (settings && settings.barName) {
-    document.getElementById('barName').textContent = settings.barName;
+  if (settings) {
+    currentSettings = { ...currentSettings, ...settings };
+    if (settings.barName) {
+      document.getElementById('barName').textContent = settings.barName;
+    }
+    if (settings.promos && Array.isArray(settings.promos)) {
+      activePromos = settings.promos;
+    }
   }
+
+  currentQueue = queue || [];
+  currentlyPlayingSong = currentlyPlaying;
 
   if (currentlyPlaying) {
     // Si la canción cambió, cargar el nuevo video
@@ -157,11 +326,6 @@ socket.on('state-changed', (data) => {
     }
   }
 
-  // Actualizar lista de promociones si vienen en settings
-  if (settings && settings.promos && Array.isArray(settings.promos)) {
-    activePromos = settings.promos;
-  }
-
   // Siguiente canción
   if (queue && queue.length > 0) {
     const next = queue[0];
@@ -193,40 +357,19 @@ function startPromoRotation() {
 }
 
 // Modo Micrófono / Anuncio con Fade Suave de Volumen
-let savedVolumeBeforeMic = 100;
-
 socket.on('mic-mode', ({ active }) => {
   const indicator = document.getElementById('micModeIndicator');
   if (!ytPlayer || !isPlayerReady) return;
 
   if (active) {
     if (indicator) indicator.classList.remove('hidden');
-    savedVolumeBeforeMic = ytPlayer.getVolume() || 100;
-    fadeVolume(15, 1200);
+    savedVolumeBeforeMic = ytPlayer.getVolume() || masterVolume || 100;
+    fadeVolume(savedVolumeBeforeMic, 15, 1200);
   } else {
     if (indicator) indicator.classList.add('hidden');
-    fadeVolume(savedVolumeBeforeMic, 1200);
+    fadeVolume(ytPlayer.getVolume(), savedVolumeBeforeMic, 1200);
   }
 });
-
-function fadeVolume(targetVol, durationMs = 1200) {
-  if (!ytPlayer || !isPlayerReady) return;
-  const startVol = ytPlayer.getVolume();
-  const steps = 20;
-  const stepTime = durationMs / steps;
-  const volStep = (targetVol - startVol) / steps;
-  let currentStep = 0;
-
-  const interval = setInterval(() => {
-    currentStep++;
-    const newVol = Math.round(startVol + (volStep * currentStep));
-    ytPlayer.setVolume(Math.max(0, Math.min(100, newVol)));
-    if (currentStep >= steps) {
-      clearInterval(interval);
-      ytPlayer.setVolume(targetVol);
-    }
-  }, stepTime);
-}
 
 // Alerta animada en pantalla cuando entra una petición
 socket.on('new-request-alert', (data) => {
