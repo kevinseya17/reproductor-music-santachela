@@ -459,38 +459,53 @@ app.delete('/api/playlists/:id/tracks/:index', (req, res) => {
   res.json({ success: true, playlist, removedTrack: removed[0] });
 });
 
-// Generar lista con IA (Gemini)
+// Generar lista con IA (Gemini con fallback automático inteligente de YouTube)
 app.post('/api/playlists/ai-generate', async (req, res) => {
   const { prompt } = req.body;
+  if (!prompt || !prompt.trim()) {
+    return res.status(400).json({ error: 'Por favor escribe qué tipo de música quieres para la lista.' });
+  }
+
   const settings = db.getSettings();
   const apiKey = settings.geminiApiKey || process.env.GEMINI_API_KEY;
 
-  if (!apiKey) {
-    return res.status(400).json({
-      error: 'Se requiere configurar la clave de API de Gemini en Ajustes para generar listas con IA.'
-    });
-  }
-
   try {
-    const generatedTracks = await aiDj.generatePlaylistWithAI(prompt, apiKey);
-    
-    // Buscar cada canción en YouTube para asociar su videoId y miniatura real
-    const fullTracks = [];
-    for (const t of generatedTracks) {
-      const searchRes = await youtube.search(`${t.title} ${t.artist}`, 1);
-      if (searchRes && searchRes.length > 0) {
-        fullTracks.push({
-          videoId: searchRes[0].videoId,
-          title: t.title,
-          artist: t.artist,
-          genre: t.genre || 'Crossover',
-          duration: searchRes[0].duration,
-          thumbnail: searchRes[0].thumbnail
-        });
+    let fullTracks = [];
+
+    if (apiKey) {
+      try {
+        const generatedTracks = await aiDj.generatePlaylistWithAI(prompt, apiKey);
+        for (const t of generatedTracks) {
+          const searchRes = await youtube.search(`${t.title} ${t.artist}`, 1);
+          if (searchRes && searchRes.length > 0) {
+            fullTracks.push({
+              videoId: searchRes[0].videoId,
+              title: t.title,
+              artist: t.artist,
+              genre: t.genre || 'Crossover',
+              duration: searchRes[0].duration,
+              thumbnail: searchRes[0].thumbnail
+            });
+          }
+        }
+      } catch (geminiErr) {
+        console.warn('Error en Gemini, usando generador inteligente automático:', geminiErr.message);
+        fullTracks = await aiDj.generatePlaylistFallback(prompt);
       }
+    } else {
+      // Sin clave de Gemini configurada: usar generador inteligente directo de YouTube
+      fullTracks = await aiDj.generatePlaylistFallback(prompt);
     }
 
-    res.json({ success: true, tracks: fullTracks });
+    if (!fullTracks || fullTracks.length === 0) {
+      return res.status(404).json({ error: 'No se encontraron temas para esa búsqueda. Intenta con otros términos.' });
+    }
+
+    res.json({
+      success: true,
+      usedGemini: !!apiKey,
+      tracks: fullTracks
+    });
   } catch (err) {
     console.error('Error generando con IA:', err);
     res.status(500).json({ error: err.message || 'Error al generar lista' });

@@ -435,7 +435,7 @@ async function generatePlaylistAI() {
 
   const btn = document.getElementById('generateAIBtn');
   btn.disabled = true;
-  btn.innerHTML = `<span>⏳</span> Generando lista con Gemini...`;
+  btn.innerHTML = `<span>⏳</span> Buscando y armando las mejores canciones...`;
 
   try {
     const res = await fetch('/api/playlists/ai-generate', {
