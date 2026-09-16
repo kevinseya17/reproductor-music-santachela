@@ -63,25 +63,25 @@
     <!-- ============================================== -->
     <!-- PESTAÑA 1: COLA EN VIVO -->
     <!-- ============================================== -->
-    <div id="tabContentQueue" class="space-y-6">
+    <div id="tabContentQueue" class="space-y-4 sm:space-y-6">
       
       <!-- Sonando Ahora -->
-      <div class="glass-card p-6 border-amber-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div class="flex items-center gap-5">
-          <img id="adminNowThumb" src="" class="w-20 h-20 rounded-2xl object-cover border border-white/10 shadow-lg">
-          <div>
-            <div class="flex items-center gap-2 mb-1">
-              <span class="text-xs uppercase font-bold tracking-wider text-amber-400">Sonando Ahora</span>
-              <span id="adminNowGenre" class="genre-badge genre-Salsa">Salsa</span>
-              <span id="adminNowRequested" class="text-xs text-gray-400"></span>
+      <div class="glass-card p-4 sm:p-6 border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+        <div class="flex items-center gap-3 sm:gap-5 min-w-0 flex-1 w-full">
+          <img id="adminNowThumb" src="" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-white/10 shadow-lg flex-shrink-0">
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              <span class="text-[10px] sm:text-xs uppercase font-bold tracking-wider text-amber-400">Sonando Ahora</span>
+              <span id="adminNowGenre" class="genre-badge genre-Salsa text-[10px] sm:text-xs">Salsa</span>
+              <span id="adminNowRequested" class="text-[10px] sm:text-xs text-gray-400"></span>
             </div>
-            <h2 id="adminNowTitle" class="text-xl font-bold text-white leading-tight">Cargando...</h2>
-            <p id="adminNowArtist" class="text-sm text-gray-400">Artista</p>
+            <h2 id="adminNowTitle" class="text-base sm:text-xl font-bold text-white leading-tight truncate">Cargando...</h2>
+            <p id="adminNowArtist" class="text-xs sm:text-sm text-gray-400 truncate">Artista</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-3 w-full md:w-auto">
-          <button onclick="skipCurrentSong()" class="btn-primary text-sm flex items-center gap-2 py-2.5 px-5">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <button onclick="skipCurrentSong()" class="btn-primary text-xs sm:text-sm flex items-center justify-center gap-2 py-2.5 px-5 w-full sm:w-auto font-bold">
             <span>⏭️</span> Saltar Tema
           </button>
         </div>
@@ -89,12 +89,12 @@
 
       <!-- Buscador Manual para el DJ / Barman -->
       <div class="glass-card p-4 space-y-3">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+        <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
           <span>⚡</span> Agregar canción rápida a la cola (como DJ)
         </h3>
-        <div class="flex gap-2">
-          <input type="text" id="adminSearchInput" placeholder="Buscar canción o pegar link de YouTube..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-amber-400">
-          <button onclick="adminSearchSong()" class="btn-secondary text-sm px-4">Buscar</button>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input type="text" id="adminSearchInput" placeholder="Buscar canción o pegar link de YouTube..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white outline-none focus:border-amber-400">
+          <button onclick="adminSearchSong()" class="btn-secondary text-xs sm:text-sm px-4 py-2.5">Buscar</button>
         </div>
         <div id="adminSearchResults" class="hidden space-y-2 pt-2">
           <!-- Inyectado dinámicamente -->
@@ -102,15 +102,15 @@
       </div>
 
       <!-- Lista de canciones en espera -->
-      <div class="glass-card p-6 space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="font-bold text-base text-white flex items-center gap-2">
-            <span>🎶</span> Canciones organizadas en espera por el DJ IA
+      <div class="glass-card p-4 sm:p-6 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <h3 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+            <span>🎶</span> Canciones en espera (<span id="queueCounter">0</span>)
           </h3>
-          <span class="text-xs text-gray-400">Las canciones se organizan automáticamente por tandas armónicas</span>
+          <span class="text-[11px] sm:text-xs text-gray-400">Organizadas por tandas armónicas de DJ</span>
         </div>
 
-        <div id="adminQueueList" class="space-y-2">
+        <div id="adminQueueList" class="space-y-2.5">
           <!-- Inyectado dinámicamente -->
         </div>
       </div>
@@ -120,24 +120,24 @@
     <!-- ============================================== -->
     <!-- PESTAÑA 2: LISTAS MAESTRAS (EL NORTE) -->
     <!-- ============================================== -->
-    <div id="tabContentPlaylists" class="hidden space-y-6">
-      <div class="flex items-center justify-between">
+    <div id="tabContentPlaylists" class="hidden space-y-4 sm:space-y-6">
+      <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div>
-          <h2 class="text-lg font-bold text-white">Listas Base del Bar</h2>
-          <p class="text-xs text-gray-400">Estas listas son el "hilo conductor" para que el bar nunca pare de sonar cuando nadie pide canciones.</p>
+          <h2 class="text-base sm:text-lg font-bold text-white">Listas Base del Bar</h2>
+          <p class="text-[11px] sm:text-xs text-gray-400">Música de fondo cuando nadie está pidiendo canciones.</p>
         </div>
-        <div class="flex flex-wrap gap-2">
-          <button onclick="exportPlaylistsBackup()" class="btn-secondary text-xs flex items-center gap-1.5" title="Descargar copia de seguridad de tus listas">
-            <span>💾</span> Respaldar Listas
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <button onclick="exportPlaylistsBackup()" class="btn-secondary text-xs flex items-center gap-1 py-1.5 px-2.5" title="Descargar copia de seguridad de tus listas">
+            <span>💾</span> Respaldar
           </button>
-          <button onclick="triggerImportBackup()" class="btn-secondary text-xs flex items-center gap-1.5" title="Restaurar listas desde archivo de copia">
+          <button onclick="triggerImportBackup()" class="btn-secondary text-xs flex items-center gap-1 py-1.5 px-2.5" title="Restaurar listas desde archivo de copia">
             <span>📂</span> Restaurar
           </button>
           <input type="file" id="importBackupFileInput" accept=".json" class="hidden" onchange="handleBackupFileSelected(event)">
-          <button onclick="openImportModal()" class="btn-secondary text-xs flex items-center gap-1.5">
-            <span>📥</span> Importar de YouTube
+          <button onclick="openImportModal()" class="btn-secondary text-xs flex items-center gap-1 py-1.5 px-2.5">
+            <span>📥</span> Importar
           </button>
-          <button onclick="openNewPlaylistModal()" class="btn-primary text-xs flex items-center gap-1.5">
+          <button onclick="openNewPlaylistModal()" class="btn-primary text-xs flex items-center gap-1 py-1.5 px-3 font-bold">
             <span>➕</span> Nueva Lista
           </button>
         </div>
@@ -454,24 +454,24 @@
   </div>
 
   <!-- Modal Nueva Lista Base -->
-  <div id="newPlaylistModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#161b26] border border-white/15 rounded-3xl w-full max-w-lg p-6 space-y-4 animate-in fade-in duration-200 max-h-[90vh] overflow-y-auto">
+  <div id="newPlaylistModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-[#161b26] border border-white/15 rounded-2xl sm:rounded-3xl w-full max-w-lg p-4 sm:p-6 space-y-4 animate-in fade-in duration-200 max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
           <span>➕</span> Crear Nueva Lista Base
         </h3>
-        <button onclick="closeNewPlaylistModal()" class="text-gray-400 hover:text-white">✕</button>
+        <button onclick="closeNewPlaylistModal()" class="text-gray-400 hover:text-white p-1">✕</button>
       </div>
 
       <div class="space-y-3">
         <div>
           <label class="block text-xs font-semibold text-gray-400 mb-1">Nombre de la lista:</label>
-          <input type="text" id="newPlaylistName" placeholder="Ej: Sábado Parrandero y Salsa" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+          <input type="text" id="newPlaylistName" placeholder="Ej: Sábado Parrandero y Salsa" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white outline-none focus:border-amber-400">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-gray-400 mb-1">Descripción:</label>
-          <input type="text" id="newPlaylistDesc" placeholder="Ej: Salsa dura, merengue y despecho para fin de semana" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+          <input type="text" id="newPlaylistDesc" placeholder="Ej: Salsa dura, merengue y despecho para fin de semana" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white outline-none focus:border-amber-400">
         </div>
 
         <!-- Agregar temas a la nueva lista -->
@@ -502,23 +502,23 @@
   </div>
 
   <!-- Modal Ver y Editar Canciones de una Lista Existente -->
-  <div id="viewPlaylistModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#161b26] border border-white/15 rounded-3xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto animate-in fade-in duration-200">
+  <div id="viewPlaylistModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-[#161b26] border border-white/15 rounded-2xl sm:rounded-3xl w-full max-w-xl p-4 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto animate-in fade-in duration-200">
       
       <!-- Encabezado de la lista -->
-      <div class="flex items-start justify-between border-b border-white/10 pb-3">
-        <div>
+      <div class="flex flex-col sm:flex-row gap-2 sm:items-start justify-between border-b border-white/10 pb-3">
+        <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2">
-            <h3 id="viewPlaylistTitle" class="text-base font-bold text-white">Nombre de Lista</h3>
-            <span id="viewPlaylistTrackCount" class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">0 temas</span>
+            <h3 id="viewPlaylistTitle" class="text-sm sm:text-base font-bold text-white truncate">Nombre de Lista</h3>
+            <span id="viewPlaylistTrackCount" class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30 whitespace-nowrap">0 temas</span>
           </div>
-          <p id="viewPlaylistDesc" class="text-xs text-gray-400 mt-0.5"></p>
+          <p id="viewPlaylistDesc" class="text-[11px] sm:text-xs text-gray-400 mt-0.5 truncate"></p>
         </div>
-        <div class="flex items-center gap-2">
-          <button id="btnDeleteCurrentPlaylist" onclick="deleteCurrentOpenedPlaylist()" class="btn-secondary text-xs py-1.5 px-2.5 text-red-400 hover:text-red-300 border-red-500/30" title="Eliminar lista completa">
+        <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+          <button id="btnDeleteCurrentPlaylist" onclick="deleteCurrentOpenedPlaylist()" class="btn-secondary text-[11px] sm:text-xs py-1.5 px-2.5 text-red-400 hover:text-red-300 border-red-500/30" title="Eliminar lista completa">
             🗑️ Eliminar Lista
           </button>
-          <button onclick="closeViewPlaylistModal()" class="text-gray-400 hover:text-white text-lg ml-1">✕</button>
+          <button onclick="closeViewPlaylistModal()" class="text-gray-400 hover:text-white text-lg ml-1 p-1">✕</button>
         </div>
       </div>
 
@@ -545,16 +545,16 @@
   </div>
 
   <!-- Modal Importador de Playlists de YouTube (Masivo y por Búsqueda) -->
-  <div id="importPlaylistsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#161b26] border border-white/15 rounded-3xl w-full max-w-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto animate-in fade-in duration-200">
+  <div id="importPlaylistsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-[#161b26] border border-white/15 rounded-2xl sm:rounded-3xl w-full max-w-xl p-4 sm:p-6 space-y-4 max-h-[92vh] overflow-y-auto animate-in fade-in duration-200">
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
         <div>
-          <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
             <span>📥</span> Importador de Playlists de YouTube
           </h3>
-          <p class="text-xs text-gray-400">Trae todas las listas de tu cuenta de YouTube a la vez</p>
+          <p class="text-[11px] sm:text-xs text-gray-400">Trae todas las listas de tu cuenta de YouTube a la vez</p>
         </div>
-        <button onclick="closeImportModal()" class="text-gray-400 hover:text-white text-lg">✕</button>
+        <button onclick="closeImportModal()" class="text-gray-400 hover:text-white text-lg p-1">✕</button>
       </div>
 
       <!-- Pestañas internas del modal -->

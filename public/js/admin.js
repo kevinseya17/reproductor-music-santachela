@@ -100,31 +100,35 @@ function renderQueueList(queue) {
   }
 
   container.innerHTML = queue.map((song, i) => `
-    <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/15 transition gap-4">
-      <div class="flex items-center gap-3 min-w-0 flex-1">
-        <span class="text-xs font-bold text-amber-400 w-5">#${i + 1}</span>
-        <img src="${song.thumbnail}" class="w-12 h-10 rounded-lg object-cover">
-        <div class="min-w-0">
-          <p class="text-sm font-bold text-white truncate leading-tight">${escapeHtml(song.title)}</p>
-          <div class="flex items-center gap-2 mt-0.5">
-            <span class="text-xs text-gray-400 truncate">${escapeHtml(song.artist)}</span>
-            <span class="genre-badge genre-${song.genre || 'Crossover'} text-[10px] py-0.2 px-2">${song.genre}</span>
-            <span class="text-[11px] text-amber-400/90 font-medium">📍 ${song.requestedBy?.name || 'Mesa'}</span>
+    <div class="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition space-y-2.5">
+      <div class="flex items-start gap-3 min-w-0">
+        <span class="text-xs font-bold text-amber-400 w-5 pt-0.5">#${i + 1}</span>
+        <img src="${song.thumbnail}" class="w-14 h-11 rounded-xl object-cover flex-shrink-0 border border-white/10">
+        <div class="min-w-0 flex-1">
+          <p class="text-xs sm:text-sm font-bold text-white truncate leading-tight">${escapeHtml(song.title)}</p>
+          <div class="flex flex-wrap items-center gap-1.5 mt-1">
+            <span class="text-[11px] sm:text-xs text-gray-400 truncate">${escapeHtml(song.artist)}</span>
+            <span class="genre-badge genre-${song.genre || 'Crossover'} text-[9px] sm:text-[10px] py-0.2 px-2">${song.genre}</span>
+            <span class="text-[10px] sm:text-[11px] text-amber-400/90 font-medium">📍 ${song.requestedBy?.name || 'Mesa'}</span>
           </div>
           ${song.requestedBy?.dedication ? `<p class="text-[11px] text-pink-300 font-medium italic mt-1 truncate">🎂 "${escapeHtml(song.requestedBy.dedication)}"</p>` : ''}
         </div>
       </div>
 
-      <div class="flex items-center gap-1.5 shrink-0">
-        ${song.requestedBy?.table && song.requestedBy.table !== 'DJ' ? `
-          <button onclick="banTableDirect('${escapeHtml(song.requestedBy.table)}')" class="btn-secondary text-xs px-2 py-1.5 text-amber-300 hover:text-amber-200 border-amber-500/30" title="Pausar pedidos de esta mesa">
-            ⏸️ Mesa ${escapeHtml(song.requestedBy.table)}
-          </button>
-        ` : ''}
-        <button onclick="moveQueueItem(${i}, -1)" ${i === 0 ? 'disabled class="opacity-30"' : 'class="btn-secondary text-xs px-2.5 py-1.5"'} title="Subir">↑</button>
-        <button onclick="moveQueueItem(${i}, 1)" ${i === queue.length - 1 ? 'disabled class="opacity-30"' : 'class="btn-secondary text-xs px-2.5 py-1.5"'} title="Bajar">↓</button>
-        <button onclick="playNowDirect('${song.videoId}', '${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.genre}')" class="btn-primary text-xs py-1.5 px-3">Sonar Ya</button>
-        <button onclick="removeQueueItem('${song.id}')" class="btn-secondary text-xs py-1.5 px-2.5 text-red-400 hover:text-red-300" title="Eliminar">✕</button>
+      <div class="flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-white/5">
+        <div class="flex items-center gap-1">
+          <button onclick="moveQueueItem(${i}, -1)" ${i === 0 ? 'disabled class="opacity-30"' : 'class="btn-secondary text-xs px-2.5 py-1.5"'} title="Subir">↑</button>
+          <button onclick="moveQueueItem(${i}, 1)" ${i === queue.length - 1 ? 'disabled class="opacity-30"' : 'class="btn-secondary text-xs px-2.5 py-1.5"'} title="Bajar">↓</button>
+          ${song.requestedBy?.table && song.requestedBy.table !== 'DJ' ? `
+            <button onclick="banTableDirect('${escapeHtml(song.requestedBy.table)}')" class="btn-secondary text-[11px] px-2 py-1.5 text-amber-300 hover:text-amber-200 border-amber-500/30" title="Pausar pedidos de esta mesa">
+              ⏸️ Mesa ${escapeHtml(song.requestedBy.table)}
+            </button>
+          ` : ''}
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="playNowDirect('${song.videoId}', '${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.genre}')" class="btn-primary text-xs py-1.5 px-3 font-bold">Sonar Ya</button>
+          <button onclick="removeQueueItem('${song.id}')" class="btn-secondary text-xs py-1.5 px-2.5 text-red-400 hover:text-red-300" title="Eliminar">✕</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -283,11 +287,11 @@ async function loadPlaylists() {
             <span>🎵 ${p.tracks ? p.tracks.length : 0} temas listos</span>
           </div>
 
-          <div class="pt-2 flex items-center gap-2">
-            <button onclick="viewPlaylistTracks('${p.id}')" class="btn-secondary text-xs py-2 px-3 flex-1 font-semibold" title="Ver y editar canciones">
+          <div class="pt-2 flex flex-wrap items-center gap-2">
+            <button onclick="viewPlaylistTracks('${p.id}')" class="btn-secondary text-xs py-2 px-3 flex-1 min-w-[130px] font-semibold" title="Ver y editar canciones">
               ✏️ Ver y Editar (${p.tracks ? p.tracks.length : 0})
             </button>
-            ${!isActive ? `<button onclick="activatePlaylist('${p.id}')" class="btn-primary text-xs py-2 px-3">Activar</button>` : '<button disabled class="btn-secondary text-xs py-2 px-3 opacity-50">Sonando</button>'}
+            ${!isActive ? `<button onclick="activatePlaylist('${p.id}')" class="btn-primary text-xs py-2 px-3 font-bold">Activar</button>` : '<button disabled class="btn-secondary text-xs py-2 px-3 opacity-50">Sonando</button>'}
             ${!isActive ? `<button onclick="deletePlaylistDirect('${p.id}', '${escapeHtml(p.name)}')" class="btn-secondary text-xs py-2 px-2.5 text-red-400 hover:text-red-300" title="Eliminar lista">🗑️</button>` : ''}
           </div>
         </div>
