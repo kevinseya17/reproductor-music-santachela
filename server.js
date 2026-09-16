@@ -455,14 +455,22 @@ app.post('/api/request', async (req, res) => {
 
     const currentQueue = db.getQueue();
 
-    // 3. Si no hay nada sonando actualmente, reproducir de inmediato
-    if (!currentlyPlaying) {
+    // 3. Si no hay nada sonando o lo que suena es música de fondo de la lista base (isBaseTrack),
+    // darle paso inmediato al pedido del cliente para que suene de una vez
+    if (!currentlyPlaying || currentlyPlaying.isBaseTrack) {
+      if (currentlyPlaying) {
+        db.addToHistory(currentlyPlaying);
+      }
       currentlyPlaying = { ...song, startedAt: Date.now() };
       db.recordTableRequest(tableClean);
       io.emit('state-changed', {
         currentlyPlaying,
         queue: db.getQueue(),
         settings
+      });
+      io.emit('new-request-alert', {
+        song,
+        position: 1
       });
       return res.json({
         success: true,

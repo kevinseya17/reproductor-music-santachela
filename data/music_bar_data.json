@@ -198,7 +198,68 @@
     }
   ],
   "queue": [],
-  "history": [],
-  "tableRequests": {},
+  "history": [
+    {
+      "id": "base_1789597066557_adqdo",
+      "videoId": "JLwmBfrbYR4",
+      "title": "Sobredosis",
+      "artist": "Los Titanes",
+      "genre": "Salsa",
+      "duration": "3:12",
+      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789597066557,
+      "startedAt": 1789597066557,
+      "playedAt": "2026-09-16T22:17:58.440Z"
+    },
+    {
+      "id": "req_1789597078440_fgq5j",
+      "videoId": "7KxkMLAZlzw",
+      "title": "Cali Pachanguero",
+      "artist": "Grupo Niche",
+      "genre": "Salsa",
+      "duration": "5:10",
+      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "requestedBy": {
+        "table": "4",
+        "name": "Mesa 4",
+        "dedication": ""
+      },
+      "isBaseTrack": false,
+      "addedAt": 1789597078440,
+      "startedAt": 1789597078446,
+      "playedAt": "2026-09-16T22:18:27.939Z"
+    },
+    {
+      "id": "req_1789597100155_l52yf",
+      "videoId": "oWBf9hfW_4Y",
+      "title": "Rebelión",
+      "artist": "Joe Arroyo",
+      "genre": "Salsa",
+      "duration": "4:45",
+      "thumbnail": "https://i.ytimg.com/vi/oWBf9hfW_4Y/hqdefault.jpg",
+      "requestedBy": {
+        "table": "2",
+        "name": "Mesa 2",
+        "dedication": ""
+      },
+      "isBaseTrack": false,
+      "addedAt": 1789597100155,
+      "startedAt": 1789597107947,
+      "playedAt": "2026-09-16T22:18:27.958Z"
+    }
+  ],
+  "tableRequests": {
+    "2": [
+      1789597100161
+    ],
+    "4": [
+      1789597078446
+    ]
+  },
   "bannedTables": {}
 }
