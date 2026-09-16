@@ -235,26 +235,140 @@ async function activatePlaylist(id) {
   loadPlaylists();
 }
 
-async function promptImportYouTubePlaylist() {
-  const url = prompt('Pega el enlace de la playlist de YouTube (ej: https://www.youtube.com/playlist?list=...):');
-  if (!url || !url.trim()) return;
+// 4.1 Modal y Funciones de Importación de Playlists
+function openImportModal() {
+  document.getElementById('multipleUrlsInput').value = '';
+  document.getElementById('searchChannelPlaylistInput').value = '';
+  document.getElementById('channelPlaylistsResults').innerHTML = '<p class="text-xs text-gray-500 text-center py-4">Escribe el nombre de tu canal o bar arriba para buscar tus listas.</p>';
+  switchImportTab('links');
+  document.getElementById('importPlaylistsModal').classList.remove('hidden');
+}
 
-  const cleanUrl = url.trim();
+function closeImportModal() {
+  document.getElementById('importPlaylistsModal').classList.add('hidden');
+}
+
+function switchImportTab(tab) {
+  const btnLinks = document.getElementById('importTabBtnLinks');
+  const btnSearch = document.getElementById('importTabBtnSearch');
+  const viewLinks = document.getElementById('importViewLinks');
+  const viewSearch = document.getElementById('importViewSearch');
+
+  if (tab === 'links') {
+    btnLinks.className = 'pb-2 border-b-2 border-amber-400 text-amber-400';
+    btnSearch.className = 'pb-2 border-b-2 border-transparent text-gray-400 hover:text-white';
+    viewLinks.classList.remove('hidden');
+    viewSearch.classList.add('hidden');
+  } else {
+    btnSearch.className = 'pb-2 border-b-2 border-amber-400 text-amber-400';
+    btnLinks.className = 'pb-2 border-b-2 border-transparent text-gray-400 hover:text-white';
+    viewSearch.classList.remove('hidden');
+    viewLinks.classList.add('hidden');
+  }
+}
+
+async function executeImportMultiple() {
+  const input = document.getElementById('multipleUrlsInput').value;
+  const urls = input.split(/[\n,]+/).map(u => u.trim()).filter(u => u.length > 0);
+
+  if (urls.length === 0) {
+    return alert('Pega al menos un enlace de lista de YouTube.');
+  }
+
+  const btn = document.getElementById('btnImportMultiple');
+  btn.disabled = true;
+  btn.innerHTML = `<span>⏳</span> Importando ${urls.length} lista(s)... Por favor espera`;
+
+  try {
+    const res = await fetch('/api/playlists/import-multiple', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al importar listas');
+
+    let msg = `¡Se importaron con éxito ${data.totalImported} lista(s) a Santa Chela!`;
+    if (data.errors && data.errors.length > 0) {
+      msg += `\n(${data.errors.length} lista(s) no se pudieron leer, verifica que sean públicas).`;
+    }
+    alert(msg);
+    closeImportModal();
+    loadPlaylists();
+  } catch (err) {
+    alert(err.message || 'Error al importar.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<span>🚀</span> Importar Todas las Listas Ahora`;
+  }
+}
+
+async function executeSearchPlaylists() {
+  const input = document.getElementById('searchChannelPlaylistInput');
+  const query = input.value.trim();
+  if (!query) return;
+
+  const resultsBox = document.getElementById('channelPlaylistsResults');
+  resultsBox.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Buscando playlists en YouTube...</p>`;
+
+  try {
+    const res = await fetch(`/api/playlists/search-youtube?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    const playlists = data.playlists || [];
+
+    if (playlists.length === 0) {
+      resultsBox.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">No se encontraron listas públicas con ese nombre. Intenta con otro término o pega los links directos.</p>`;
+      return;
+    }
+
+    resultsBox.innerHTML = playlists.map((p) => `
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-amber-500/30 transition text-xs">
+        <div class="flex items-center gap-3 min-w-0 flex-1">
+          <img src="${p.thumbnail || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100'}" class="w-12 h-9 rounded object-cover">
+          <div class="min-w-0 flex-1">
+            <p class="font-bold text-white truncate">${escapeHtml(p.title)}</p>
+            <p class="text-[10px] text-gray-400 truncate">${escapeHtml(p.author)} • <span class="text-amber-400 font-semibold">${p.videoCount} canciones</span></p>
+          </div>
+        </div>
+        <button onclick="importFoundPlaylist('${p.url}', this)" class="btn-primary text-xs py-1.5 px-3 whitespace-nowrap ml-2">
+          + Importar
+        </button>
+      </div>
+    `).join('');
+  } catch (err) {
+    resultsBox.innerHTML = `<p class="text-xs text-red-400 text-center py-4">Error al buscar playlists.</p>`;
+  }
+}
+
+async function importFoundPlaylist(url, btnElement) {
+  if (btnElement) {
+    btnElement.disabled = true;
+    btnElement.textContent = 'Importando...';
+  }
 
   try {
     const res = await fetch('/api/playlists/import-youtube', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: cleanUrl })
+      body: JSON.stringify({ url })
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Error al importar lista');
+    if (!res.ok) throw new Error(data.error);
 
-    alert(`¡Éxito! Se importó "${data.playlist.name}" con ${data.playlist.tracks.length} canciones.`);
+    alert(`¡Lista "${data.playlist.name}" importada con éxito (${data.playlist.tracks.length} temas)!`);
     loadPlaylists();
+    if (btnElement) {
+      btnElement.textContent = '✓ Importada';
+      btnElement.className = 'btn-secondary text-xs py-1.5 px-3 opacity-60';
+    }
   } catch (err) {
-    alert(err.message || 'No se pudo importar la lista. Verifica que el enlace sea de una lista pública o no listada.');
+    alert(err.message || 'No se pudo importar la lista.');
+    if (btnElement) {
+      btnElement.disabled = false;
+      btnElement.textContent = '+ Importar';
+    }
   }
 }
 

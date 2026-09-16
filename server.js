@@ -256,6 +256,65 @@ app.post('/api/playlists/import-youtube', async (req, res) => {
   res.json({ success: true, playlist: imported });
 });
 
+// Importación masiva de múltiples playlists (varios links a la vez)
+app.post('/api/playlists/import-multiple', async (req, res) => {
+  const { urls } = req.body;
+  if (!urls || !Array.isArray(urls) || urls.length === 0) {
+    return res.status(400).json({ error: 'Debes ingresar al menos un enlace de lista.' });
+  }
+
+  const imported = [];
+  const errors = [];
+
+  for (const rawUrl of urls) {
+    const cleanUrl = (rawUrl || '').trim();
+    if (!cleanUrl) continue;
+
+    try {
+      const pl = await youtube.importPlaylist(cleanUrl);
+      if (pl && pl.tracks && pl.tracks.length > 0) {
+        db.addPlaylist(pl);
+        imported.push(pl);
+      } else {
+        errors.push(cleanUrl);
+      }
+    } catch (err) {
+      errors.push(cleanUrl);
+    }
+  }
+
+  res.json({
+    success: true,
+    totalImported: imported.length,
+    playlists: imported,
+    errors
+  });
+});
+
+// Buscar playlists en YouTube por nombre de canal o tema
+app.get('/api/playlists/search-youtube', async (req, res) => {
+  const query = req.query.q;
+  if (!query) return res.json({ playlists: [] });
+
+  try {
+    const ytSearch = require('yt-search');
+    const r = await ytSearch(`${query.trim()} playlist`);
+    const playlists = (r && r.playlists) ? r.playlists.slice(0, 10).map(p => ({
+      listId: p.listId,
+      url: p.url,
+      title: p.title,
+      videoCount: p.videoCount,
+      author: p.author?.name || 'YouTube',
+      thumbnail: p.thumbnail || ''
+    })) : [];
+
+    res.json({ playlists });
+  } catch (err) {
+    console.error('Error buscando playlists en YouTube:', err);
+    res.json({ playlists: [] });
+  }
+});
+
 // Activar lista base activa
 app.post('/api/playlists/:id/activate', (req, res) => {
   const playlist = db.getPlaylist(req.params.id);
