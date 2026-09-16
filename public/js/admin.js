@@ -241,9 +241,12 @@ async function loadPlaylists() {
             <span>🎵 ${p.tracks ? p.tracks.length : 0} temas listos</span>
           </div>
 
-          <div class="pt-2 flex gap-2">
-            <button onclick="viewPlaylistTracks('${p.id}')" class="btn-secondary text-xs py-2 px-3">Ver Temas</button>
-            ${!isActive ? `<button onclick="activatePlaylist('${p.id}')" class="btn-primary text-xs py-2 px-3 flex-1">Activar como Base</button>` : '<button disabled class="btn-secondary text-xs py-2 px-3 flex-1 opacity-50">En Reproducción</button>'}
+          <div class="pt-2 flex items-center gap-2">
+            <button onclick="viewPlaylistTracks('${p.id}')" class="btn-secondary text-xs py-2 px-3 flex-1 font-semibold" title="Ver y editar canciones">
+              ✏️ Ver y Editar (${p.tracks ? p.tracks.length : 0})
+            </button>
+            ${!isActive ? `<button onclick="activatePlaylist('${p.id}')" class="btn-primary text-xs py-2 px-3">Activar</button>` : '<button disabled class="btn-secondary text-xs py-2 px-3 opacity-50">Sonando</button>'}
+            ${!isActive ? `<button onclick="deletePlaylistDirect('${p.id}', '${escapeHtml(p.name)}')" class="btn-secondary text-xs py-2 px-2.5 text-red-400 hover:text-red-300" title="Eliminar lista">🗑️</button>` : ''}
           </div>
         </div>
       `;
@@ -997,9 +1000,12 @@ async function saveCustomNewPlaylist() {
   }
 }
 
-// 10. Ver temas de una lista existente
+// 10. Ver y Editar temas de una lista existente
+let currentViewingPlaylistId = null;
+
 async function viewPlaylistTracks(playlistId) {
   try {
+    currentViewingPlaylistId = playlistId;
     const res = await fetch('/api/playlists');
     const data = await res.json();
     const playlist = (data.playlists || []).find(p => p.id === playlistId);
@@ -1008,25 +1014,14 @@ async function viewPlaylistTracks(playlistId) {
 
     document.getElementById('viewPlaylistTitle').textContent = playlist.name;
     document.getElementById('viewPlaylistDesc').textContent = playlist.description || '';
+    document.getElementById('viewPlaylistTrackCount').textContent = `${playlist.tracks ? playlist.tracks.length : 0} temas`;
 
-    const listEl = document.getElementById('viewPlaylistTracksList');
-    if (!playlist.tracks || playlist.tracks.length === 0) {
-      listEl.innerHTML = `<p class="text-gray-500 py-4 text-center">Esta lista no tiene canciones.</p>`;
-    } else {
-      listEl.innerHTML = playlist.tracks.map((t, idx) => `
-        <div class="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/5">
-          <span class="font-bold text-amber-400 text-xs w-5">#${idx + 1}</span>
-          <img src="${t.thumbnail}" class="w-12 h-9 rounded-lg object-cover">
-          <div class="min-w-0 flex-1">
-            <p class="font-bold text-white text-xs truncate">${escapeHtml(t.title)}</p>
-            <p class="text-[11px] text-gray-400 truncate">${escapeHtml(t.artist)} • <span class="text-amber-400">${t.genre || 'Crossover'}</span></p>
-          </div>
-          <button onclick="playNowDirect('${t.videoId}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.genre || 'Crossover'}'); closeViewPlaylistModal();" class="btn-primary text-[10px] py-1 px-2.5">
-            Sonar Ya
-          </button>
-        </div>
-      `).join('');
-    }
+    // Limpiar buscador de temas dentro del modal
+    document.getElementById('addSongToPlaylistInput').value = '';
+    document.getElementById('addSongToPlaylistResults').innerHTML = '';
+    document.getElementById('addSongToPlaylistResults').classList.add('hidden');
+
+    renderPlaylistTracksInModal(playlist);
 
     document.getElementById('viewPlaylistModal').classList.remove('hidden');
   } catch (err) {
@@ -1034,8 +1029,162 @@ async function viewPlaylistTracks(playlistId) {
   }
 }
 
+function renderPlaylistTracksInModal(playlist) {
+  const listEl = document.getElementById('viewPlaylistTracksList');
+  if (!playlist.tracks || playlist.tracks.length === 0) {
+    listEl.innerHTML = `<p class="text-gray-500 py-6 text-center text-xs">Esta lista no tiene canciones aún. Usa el buscador de arriba para agregar temas.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = playlist.tracks.map((t, idx) => `
+    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition gap-2">
+      <div class="flex items-center gap-2.5 min-w-0 flex-1">
+        <span class="font-bold text-amber-400 text-xs w-5">#${idx + 1}</span>
+        <img src="${t.thumbnail}" class="w-12 h-9 rounded-lg object-cover">
+        <div class="min-w-0 flex-1">
+          <p class="font-bold text-white text-xs truncate">${escapeHtml(t.title)}</p>
+          <p class="text-[10px] text-gray-400 truncate">${escapeHtml(t.artist)} • <span class="text-amber-400">${t.genre || 'Crossover'}</span></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button onclick="playNowDirect('${t.videoId}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.genre || 'Crossover'}'); closeViewPlaylistModal();" class="btn-primary text-[11px] py-1.5 px-2.5">
+          Sonar Ya
+        </button>
+        <button onclick="removeTrackFromPlaylist(${idx})" class="btn-secondary text-[11px] py-1.5 px-2 text-red-400 hover:text-red-300 border-red-500/20" title="Quitar de esta lista">
+          🗑️ Quitar
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Buscar canción para agregar a la lista abierta actualmente
+async function searchSongToAddToCurrentPlaylist() {
+  const input = document.getElementById('addSongToPlaylistInput');
+  const query = input.value.trim();
+  if (!query) return;
+
+  const resultsBox = document.getElementById('addSongToPlaylistResults');
+  resultsBox.classList.remove('hidden');
+  resultsBox.innerHTML = `<p class="text-xs text-gray-400 py-2">Buscando en YouTube...</p>`;
+
+  try {
+    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    const videos = data.results || [];
+
+    if (videos.length === 0) {
+      resultsBox.innerHTML = `<p class="text-xs text-gray-500 py-2">No se encontraron canciones.</p>`;
+      return;
+    }
+
+    resultsBox.innerHTML = videos.slice(0, 5).map(v => `
+      <div class="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-white/5 text-xs">
+        <div class="flex items-center gap-2 min-w-0 flex-1">
+          <img src="${v.thumbnail}" class="w-10 h-7 rounded object-cover">
+          <div class="min-w-0 flex-1">
+            <p class="font-bold text-white truncate text-[11px]">${escapeHtml(v.title)}</p>
+            <p class="text-[10px] text-gray-400 truncate">${escapeHtml(v.artist)} • ${v.duration}</p>
+          </div>
+        </div>
+        <button onclick="addTrackToCurrentPlaylistDirect('${v.videoId}', '${escapeHtml(v.title)}', '${escapeHtml(v.artist)}', '${v.duration}', '${v.thumbnail}')" class="btn-primary text-[11px] py-1 px-3 ml-2 font-bold whitespace-nowrap">
+          + Agregar
+        </button>
+      </div>
+    `).join('');
+  } catch (err) {
+    resultsBox.innerHTML = `<p class="text-xs text-red-400 py-2">Error al buscar canciones.</p>`;
+  }
+}
+
+// Agregar canción a la lista abierta
+async function addTrackToCurrentPlaylistDirect(videoId, title, artist, duration, thumbnail) {
+  if (!currentViewingPlaylistId) return;
+
+  try {
+    const res = await fetch(`/api/playlists/${currentViewingPlaylistId}/tracks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        videoId,
+        title,
+        artist,
+        duration,
+        thumbnail,
+        genre: 'Crossover'
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    // Refrescar modal y grid de listas
+    document.getElementById('viewPlaylistTrackCount').textContent = `${data.playlist.tracks.length} temas`;
+    renderPlaylistTracksInModal(data.playlist);
+    document.getElementById('addSongToPlaylistResults').classList.add('hidden');
+    document.getElementById('addSongToPlaylistInput').value = '';
+    loadPlaylists();
+  } catch (err) {
+    alert(err.message || 'Error al agregar canción');
+  }
+}
+
+// Quitar canción de la lista abierta
+async function removeTrackFromPlaylist(index) {
+  if (!currentViewingPlaylistId) return;
+
+  try {
+    const res = await fetch(`/api/playlists/${currentViewingPlaylistId}/tracks/${index}`, {
+      method: 'DELETE'
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    // Refrescar modal y grid de listas
+    document.getElementById('viewPlaylistTrackCount').textContent = `${data.playlist.tracks.length} temas`;
+    renderPlaylistTracksInModal(data.playlist);
+    loadPlaylists();
+  } catch (err) {
+    alert(err.message || 'Error al quitar canción');
+  }
+}
+
+// Eliminar lista abierta actualmente desde el modal
+async function deleteCurrentOpenedPlaylist() {
+  if (!currentViewingPlaylistId) return;
+  const title = document.getElementById('viewPlaylistTitle').textContent;
+  if (!confirm(`¿Estás seguro de eliminar la lista "${title}" por completo?`)) return;
+
+  try {
+    const res = await fetch(`/api/playlists/${currentViewingPlaylistId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Error al eliminar');
+
+    closeViewPlaylistModal();
+    loadPlaylists();
+    alert(`Lista "${title}" eliminada.`);
+  } catch (err) {
+    alert('No se pudo eliminar la lista.');
+  }
+}
+
+// Eliminar lista directamente desde su tarjeta
+async function deletePlaylistDirect(playlistId, playlistName) {
+  if (!confirm(`¿Estás seguro de eliminar la lista "${playlistName}"?`)) return;
+
+  try {
+    const res = await fetch(`/api/playlists/${playlistId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Error al eliminar');
+
+    loadPlaylists();
+  } catch (err) {
+    alert('No se pudo eliminar la lista.');
+  }
+}
+
 function closeViewPlaylistModal() {
   document.getElementById('viewPlaylistModal').classList.add('hidden');
+  currentViewingPlaylistId = null;
 }
 
 function escapeHtml(text) {

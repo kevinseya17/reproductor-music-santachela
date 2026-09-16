@@ -379,6 +379,70 @@ app.post('/api/playlists/:id/activate', (req, res) => {
   res.json({ success: true, activePlaylist: playlist });
 });
 
+// Actualizar información o temas de una lista
+app.put('/api/playlists/:id', (req, res) => {
+  const { name, description, tracks } = req.body;
+  const updated = db.updatePlaylist(req.params.id, {
+    ...(name !== undefined ? { name } : {}),
+    ...(description !== undefined ? { description } : {}),
+    ...(tracks !== undefined ? { tracks } : {})
+  });
+
+  if (!updated) return res.status(404).json({ error: 'Lista no encontrada' });
+  res.json({ success: true, playlist: updated });
+});
+
+// Eliminar lista
+app.delete('/api/playlists/:id', (req, res) => {
+  const playlist = db.getPlaylist(req.params.id);
+  if (!playlist) return res.status(404).json({ error: 'Lista no encontrada' });
+
+  db.deletePlaylist(req.params.id);
+  res.json({ success: true });
+});
+
+// Agregar canción a una lista existente
+app.post('/api/playlists/:id/tracks', (req, res) => {
+  const playlist = db.getPlaylist(req.params.id);
+  if (!playlist) return res.status(404).json({ error: 'Lista no encontrada' });
+
+  const { videoId, title, artist, genre, duration, thumbnail } = req.body;
+  if (!videoId || !title) {
+    return res.status(400).json({ error: 'Faltan datos de la canción' });
+  }
+
+  const newTrack = {
+    videoId,
+    title,
+    artist: artist || 'Artista',
+    genre: genre || 'Crossover',
+    duration: duration || '3:30',
+    thumbnail: thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+  };
+
+  if (!playlist.tracks) playlist.tracks = [];
+  playlist.tracks.push(newTrack);
+  db.updatePlaylist(req.params.id, { tracks: playlist.tracks });
+
+  res.json({ success: true, playlist, track: newTrack });
+});
+
+// Quitar canción de una lista por su índice
+app.delete('/api/playlists/:id/tracks/:index', (req, res) => {
+  const playlist = db.getPlaylist(req.params.id);
+  if (!playlist) return res.status(404).json({ error: 'Lista no encontrada' });
+
+  const index = parseInt(req.params.index, 10);
+  if (isNaN(index) || index < 0 || index >= (playlist.tracks || []).length) {
+    return res.status(400).json({ error: 'Índice de canción no válido' });
+  }
+
+  const removed = playlist.tracks.splice(index, 1);
+  db.updatePlaylist(req.params.id, { tracks: playlist.tracks });
+
+  res.json({ success: true, playlist, removedTrack: removed[0] });
+});
+
 // Generar lista con IA (Gemini)
 app.post('/api/playlists/ai-generate', async (req, res) => {
   const { prompt } = req.body;
