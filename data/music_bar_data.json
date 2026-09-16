@@ -46,8 +46,13 @@
       }
     ],
     "scheduleEnabled": true,
-    "basePlaybackMode": "crossover",
-    "crossoverBatchSize": 2
+    "basePlaybackMode": "genre_focus",
+    "crossoverBatchSize": 2,
+    "crossoverPlaylists": [],
+    "sequentialOrderType": "custom",
+    "sequentialPlaylistOrder": [],
+    "focusGenre": "Salsa",
+    "genrePlaybackStyle": "shuffle"
   },
   "playlists": [
     {

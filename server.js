@@ -28,11 +28,12 @@ let currentlyPlaying = null;
 let currentPlaylistIndex = 0;
 let micModeActive = false;
 
-// Variables de estado para Modo Crossover y Secuencial
+// Variables de estado para Modo Crossover, Secuencial y Género Específico
 let crossoverCurrentListIdx = 0;
 let crossoverSongCountInCurrentList = 0;
 let sequentialListIdx = 0;
 let sequentialSongIdx = 0;
+let genreFocusIndex = 0;
 
 // Evaluador automático de horarios musicales (cada 60 segundos)
 function checkSchedule() {
@@ -96,31 +97,73 @@ function getNextBaseSong() {
 
     if (eligiblePlaylists.length > 0) {
       const batchSize = Math.max(1, settings.crossoverBatchSize || 3);
-      if (crossoverCurrentListIdx >= eligiblePlaylists.length) {
-        crossoverCurrentListIdx = 0;
+      let selectedTrack = null;
+      let activeList = null;
+      let listsChecked = 0;
+
+      // Buscar una canción fresca. Si una lista agotó sus canciones sin repetir, pasar a la siguiente sin repetir
+      while (listsChecked < eligiblePlaylists.length) {
+        if (crossoverCurrentListIdx >= eligiblePlaylists.length) {
+          crossoverCurrentListIdx = 0;
+        }
+
+        activeList = eligiblePlaylists[crossoverCurrentListIdx];
+        const numTracks = activeList.tracks.length;
+        let freshTrack = null;
+        const startIdx = (activeList._crossoverIndex || 0) % numTracks;
+
+        for (let i = 0; i < numTracks; i++) {
+          const cIdx = (startIdx + i) % numTracks;
+          const candidate = activeList.tracks[cIdx];
+          const windowSize = Math.max(5, Math.min(25, numTracks * 2));
+          const isRecent = db.isRecentlyPlayed(candidate.videoId, candidate.title, candidate.artist, windowSize);
+
+          if (!isRecent || (numTracks === 1 && crossoverSongCountInCurrentList === 0 && !db.isRecentlyPlayed(candidate.videoId, candidate.title, candidate.artist, 2))) {
+            freshTrack = candidate;
+            activeList._crossoverIndex = cIdx + 1;
+            break;
+          }
+        }
+
+        if (freshTrack) {
+          selectedTrack = freshTrack;
+          crossoverSongCountInCurrentList++;
+          // Si completó la tanda o agotó las canciones disponibles de esta lista, rotar para la próxima
+          if (crossoverSongCountInCurrentList >= batchSize || crossoverSongCountInCurrentList >= numTracks) {
+            crossoverCurrentListIdx = (crossoverCurrentListIdx + 1) % eligiblePlaylists.length;
+            crossoverSongCountInCurrentList = 0;
+          }
+          break;
+        } else {
+          // No hay más de este género / lista que no se hayan repetido: pasar inmediatamente a la siguiente
+          crossoverCurrentListIdx = (crossoverCurrentListIdx + 1) % eligiblePlaylists.length;
+          crossoverSongCountInCurrentList = 0;
+          listsChecked++;
+        }
       }
 
-      const activeList = eligiblePlaylists[crossoverCurrentListIdx];
-      // Tomamos la pista según el contador de esa lista
-      const trackIndex = (activeList._crossoverIndex || 0) % activeList.tracks.length;
-      activeList._crossoverIndex = trackIndex + 1;
-      const track = activeList.tracks[trackIndex];
-
-      crossoverSongCountInCurrentList++;
-      // Si ya completó la tanda de esta lista, rotar a la siguiente lista del ciclo
-      if (crossoverSongCountInCurrentList >= batchSize) {
+      // Si todo el repertorio ya sonó recientemente, tomar la siguiente en ciclo
+      if (!selectedTrack) {
+        activeList = eligiblePlaylists[crossoverCurrentListIdx];
+        const trackIndex = (activeList._crossoverIndex || 0) % activeList.tracks.length;
+        activeList._crossoverIndex = trackIndex + 1;
+        selectedTrack = activeList.tracks[trackIndex];
         crossoverCurrentListIdx = (crossoverCurrentListIdx + 1) % eligiblePlaylists.length;
         crossoverSongCountInCurrentList = 0;
       }
 
+      const songGenre = selectedTrack.genre && selectedTrack.genre !== 'Crossover'
+        ? selectedTrack.genre
+        : aiDj.classifyGenreFast(selectedTrack.title, selectedTrack.artist, activeList.name);
+
       return {
         id: `base_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-        videoId: track.videoId,
-        title: track.title,
-        artist: track.artist,
-        genre: track.genre || 'Crossover',
-        duration: track.duration || '3:30',
-        thumbnail: track.thumbnail || `https://i.ytimg.com/vi/${track.videoId}/hqdefault.jpg`,
+        videoId: selectedTrack.videoId,
+        title: selectedTrack.title,
+        artist: selectedTrack.artist,
+        genre: songGenre || 'Crossover',
+        duration: selectedTrack.duration || '3:30',
+        thumbnail: selectedTrack.thumbnail || `https://i.ytimg.com/vi/${selectedTrack.videoId}/hqdefault.jpg`,
         requestedBy: { table: null, name: `DJ Crossover (${activeList.name})` },
         isBaseTrack: true,
         addedAt: Date.now()
@@ -130,13 +173,21 @@ function getNextBaseSong() {
 
   // ----------------------------------------------------
   // MODO 3: SECUENCIAL / CONSECUTIVO EN CADENA
+  // Suena toda una lista completa y al terminar pasa a la siguiente
   // ----------------------------------------------------
   if (mode === 'sequential') {
-    const selectedIds = Array.isArray(settings.crossoverPlaylists) && settings.crossoverPlaylists.length > 0
-      ? settings.crossoverPlaylists
-      : allPlaylists.map(p => p.id);
+    let orderedIds = [];
+    if (settings.sequentialOrderType === 'custom' && Array.isArray(settings.sequentialPlaylistOrder) && settings.sequentialPlaylistOrder.length > 0) {
+      // Usar orden personalizado del usuario
+      orderedIds = settings.sequentialPlaylistOrder;
+    } else {
+      // Orden natural (de la primera a la última según listas seleccionadas)
+      orderedIds = Array.isArray(settings.crossoverPlaylists) && settings.crossoverPlaylists.length > 0
+        ? settings.crossoverPlaylists
+        : allPlaylists.map(p => p.id);
+    }
 
-    const eligiblePlaylists = selectedIds
+    const eligiblePlaylists = orderedIds
       .map(id => db.getPlaylist(id))
       .filter(p => p && p.tracks && p.tracks.length > 0);
 
@@ -148,7 +199,7 @@ function getNextBaseSong() {
 
       let currentList = eligiblePlaylists[sequentialListIdx];
       if (sequentialSongIdx >= currentList.tracks.length) {
-        // Terminó esta lista completa, pasar a la siguiente
+        // Terminó esta lista completa, avanzar a la siguiente lista de la cadena
         sequentialListIdx = (sequentialListIdx + 1) % eligiblePlaylists.length;
         sequentialSongIdx = 0;
         currentList = eligiblePlaylists[sequentialListIdx];
@@ -157,18 +208,91 @@ function getNextBaseSong() {
       const track = currentList.tracks[sequentialSongIdx];
       sequentialSongIdx++;
 
+      const songGenre = track.genre && track.genre !== 'Crossover'
+        ? track.genre
+        : aiDj.classifyGenreFast(track.title, track.artist, currentList.name);
+
       return {
         id: `base_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         videoId: track.videoId,
         title: track.title,
         artist: track.artist,
-        genre: track.genre || 'Crossover',
+        genre: songGenre || 'Crossover',
         duration: track.duration || '3:30',
         thumbnail: track.thumbnail || `https://i.ytimg.com/vi/${track.videoId}/hqdefault.jpg`,
-        requestedBy: { table: null, name: `Secuencia DJ (${currentList.name})` },
+        requestedBy: { table: null, name: `Cadena DJ (${currentList.name})` },
         isBaseTrack: true,
         addedAt: Date.now()
       };
+    }
+  }
+
+  // ----------------------------------------------------
+  // MODO 4: GÉNERO ESPECÍFICO MULTILISTAS ('genre_focus')
+  // Suenan canciones de un solo género tomadas de cualquier lista
+  // ----------------------------------------------------
+  if (mode === 'genre_focus') {
+    const focusGenre = settings.focusGenre || 'Salsa';
+    const focusStyle = settings.genrePlaybackStyle || 'shuffle';
+
+    // Recopilar todas las canciones de este género de todas las listas disponibles
+    const matchedTracks = [];
+    for (const pl of allPlaylists) {
+      if (Array.isArray(pl.tracks)) {
+        for (const t of pl.tracks) {
+          const g = (t.genre && t.genre !== 'Crossover')
+            ? t.genre
+            : aiDj.classifyGenreFast(t.title, t.artist, pl.name);
+
+          if (g.toLowerCase() === focusGenre.toLowerCase()) {
+            matchedTracks.push({
+              track: t,
+              playlistName: pl.name,
+              genre: g
+            });
+          }
+        }
+      }
+    }
+
+    if (matchedTracks.length > 0) {
+      let chosenItem = null;
+
+      if (focusStyle === 'shuffle') {
+        // Buscar un tema de este género que NO haya sonado recientemente
+        const freshCandidates = matchedTracks.filter(item => 
+          !db.isRecentlyPlayed(item.track.videoId, item.track.title, item.track.artist, Math.min(25, matchedTracks.length - 1))
+        );
+
+        if (freshCandidates.length > 0) {
+          const randIdx = Math.floor(Math.random() * freshCandidates.length);
+          chosenItem = freshCandidates[randIdx];
+        } else {
+          // Si todos ya sonaron recientemente, elegir uno al azar
+          const randIdx = Math.floor(Math.random() * matchedTracks.length);
+          chosenItem = matchedTracks[randIdx];
+        }
+      } else {
+        // Modo orden secuencial agrupado
+        const currentIdx = (genreFocusIndex || 0) % matchedTracks.length;
+        genreFocusIndex = currentIdx + 1;
+        chosenItem = matchedTracks[currentIdx];
+      }
+
+      if (chosenItem) {
+        return {
+          id: `base_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+          videoId: chosenItem.track.videoId,
+          title: chosenItem.track.title,
+          artist: chosenItem.track.artist,
+          genre: chosenItem.genre,
+          duration: chosenItem.track.duration || '3:30',
+          thumbnail: chosenItem.track.thumbnail || `https://i.ytimg.com/vi/${chosenItem.track.videoId}/hqdefault.jpg`,
+          requestedBy: { table: null, name: `DJ 100% ${focusGenre} (${chosenItem.playlistName})` },
+          isBaseTrack: true,
+          addedAt: Date.now()
+        };
+      }
     }
   }
 
@@ -407,11 +531,21 @@ app.post('/api/playlists', (req, res) => {
     .slice(0, 25);
 
   const id = customId || `${cleanSlug || 'lista'}-${Date.now().toString(36)}`;
+  const processedTracks = (Array.isArray(tracks) ? tracks : []).map(t => {
+    const detectedGenre = (t.genre && t.genre !== 'Crossover')
+      ? t.genre
+      : aiDj.classifyGenreFast(t.title, t.artist, name);
+    return {
+      ...t,
+      genre: detectedGenre || 'Crossover'
+    };
+  });
+
   const newPlaylist = {
     id,
     name,
     description: description || '',
-    tracks: Array.isArray(tracks) ? tracks : []
+    tracks: processedTracks
   };
 
   db.addPlaylist(newPlaylist);
@@ -504,14 +638,52 @@ app.post('/api/playlists/:id/activate', (req, res) => {
   const playlist = db.getPlaylist(req.params.id);
   if (!playlist) return res.status(404).json({ error: 'Lista no encontrada' });
 
-  db.updateSettings({ activePlaylistId: req.params.id });
+  // 1. Guardar como lista activa
+  let settings = db.getSettings();
+  let crossoverList = Array.isArray(settings.crossoverPlaylists) ? [...settings.crossoverPlaylists] : [];
+
+  // Si la rotación está activa y no estaba incluida, incluirla automáticamente
+  if (crossoverList.length > 0 && !crossoverList.includes(req.params.id)) {
+    crossoverList.push(req.params.id);
+  }
+
+  db.updateSettings({
+    activePlaylistId: req.params.id,
+    crossoverPlaylists: crossoverList
+  });
+
   currentPlaylistIndex = 0;
 
-  io.emit('state-changed', {
-    currentlyPlaying,
-    queue: db.getQueue(),
-    settings: db.getSettings()
-  });
+  // 2. Alinear índices de rotación Crossover y Secuencial al inicio de esta lista
+  const allPlaylists = db.getPlaylists();
+  const selectedIds = crossoverList.length > 0 ? crossoverList : allPlaylists.map(p => p.id);
+  const eligiblePlaylists = selectedIds
+    .map(id => db.getPlaylist(id))
+    .filter(p => p && p.tracks && p.tracks.length > 0);
+
+  const foundIdx = eligiblePlaylists.findIndex(p => p.id === req.params.id);
+  if (foundIdx !== -1) {
+    crossoverCurrentListIdx = foundIdx;
+    crossoverSongCountInCurrentList = 0;
+    sequentialListIdx = foundIdx;
+    sequentialSongIdx = 0;
+    if (playlist._crossoverIndex !== undefined) {
+      playlist._crossoverIndex = 0;
+    }
+  }
+
+  // 3. Si actualmente suena música de fondo base (sin pedidos de clientes en cola),
+  // avanzar de inmediato para que empiece a sonar la lista recién activada sin demoras
+  const queue = db.getQueue();
+  if (queue.length === 0 && (!currentlyPlaying || currentlyPlaying.isBaseTrack)) {
+    advanceToNextSong();
+  } else {
+    io.emit('state-changed', {
+      currentlyPlaying,
+      queue: db.getQueue(),
+      settings: db.getSettings()
+    });
+  }
 
   res.json({ success: true, activePlaylist: playlist });
 });
@@ -548,11 +720,15 @@ app.post('/api/playlists/:id/tracks', (req, res) => {
     return res.status(400).json({ error: 'Faltan datos de la canción' });
   }
 
+  const detectedGenre = (genre && genre !== 'Crossover')
+    ? genre
+    : aiDj.classifyGenreFast(title, artist, playlist.name);
+
   const newTrack = {
     videoId,
     title,
     artist: artist || 'Artista',
-    genre: genre || 'Crossover',
+    genre: detectedGenre || 'Crossover',
     duration: duration || '3:30',
     thumbnail: thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
   };
@@ -578,6 +754,41 @@ app.delete('/api/playlists/:id/tracks/:index', (req, res) => {
   db.updatePlaylist(req.params.id, { tracks: playlist.tracks });
 
   res.json({ success: true, playlist, removedTrack: removed[0] });
+});
+
+// Modificar género de una canción específica en una lista
+app.put('/api/playlists/:id/tracks/:index/genre', (req, res) => {
+  const { genre } = req.body;
+  const index = parseInt(req.params.index, 10);
+  const updated = db.updateTrackGenre(req.params.id, index, genre);
+  if (!updated) return res.status(404).json({ error: 'No se pudo actualizar el género' });
+  res.json({ success: true, track: updated });
+});
+
+// Auto-clasificar géneros de todas las canciones de una lista específica
+app.post('/api/playlists/:id/auto-classify', (req, res) => {
+  const playlist = db.getPlaylist(req.params.id);
+  if (!playlist) return res.status(404).json({ error: 'Lista no encontrada' });
+
+  let updatedCount = 0;
+  if (Array.isArray(playlist.tracks)) {
+    for (const t of playlist.tracks) {
+      const detected = aiDj.classifyGenreFast(t.title, t.artist, playlist.name);
+      if (detected && detected !== 'Crossover') {
+        t.genre = detected;
+        updatedCount++;
+      }
+    }
+  }
+
+  db.updatePlaylist(req.params.id, { tracks: playlist.tracks });
+  res.json({ success: true, updatedCount, playlist });
+});
+
+// Auto-clasificar géneros de TODAS las listas existentes del bar
+app.post('/api/playlists/auto-classify-all', (req, res) => {
+  const updatedCount = db.autoClassifyAllTracks();
+  res.json({ success: true, updatedCount, playlists: db.getPlaylists() });
 });
 
 // Generar lista con IA (Gemini con fallback automático inteligente de YouTube)

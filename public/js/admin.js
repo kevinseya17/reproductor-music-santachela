@@ -86,7 +86,7 @@ function renderAdminState(data) {
 
     const reqEl = document.getElementById('adminNowRequested');
     if (currentlyPlaying.requestedBy && currentlyPlaying.requestedBy.table) {
-      const ded = currentlyPlaying.requestedBy.dedication ? ` | 🎂 "${escapeHtml(currentlyPlaying.requestedBy.dedication)}"` : '';
+      const ded = currentlyPlaying.requestedBy.dedication ? ` | "${escapeHtml(currentlyPlaying.requestedBy.dedication)}"` : '';
       reqEl.innerHTML = `• Pedida por: Mesa ${currentlyPlaying.requestedBy.table}${ded}`;
     } else {
       reqEl.textContent = `• Lista Base`;
@@ -115,9 +115,9 @@ function renderQueueList(queue) {
           <div class="flex flex-wrap items-center gap-1.5 mt-1">
             <span class="text-[11px] sm:text-xs text-gray-400 truncate">${escapeHtml(song.artist)}</span>
             <span class="genre-badge genre-${song.genre || 'Crossover'} text-[9px] sm:text-[10px] py-0.2 px-2">${song.genre}</span>
-            <span class="text-[10px] sm:text-[11px] text-amber-400/90 font-medium">📍 ${song.requestedBy?.name || 'Mesa'}</span>
+            <span class="text-[10px] sm:text-[11px] text-amber-400/90 font-medium">${song.requestedBy?.name || 'Mesa'}</span>
           </div>
-          ${song.requestedBy?.dedication ? `<p class="text-[11px] text-pink-300 font-medium italic mt-1 truncate">🎂 "${escapeHtml(song.requestedBy.dedication)}"</p>` : ''}
+          ${song.requestedBy?.dedication ? `<p class="text-[11px] text-pink-300 font-medium italic mt-1 truncate">"${escapeHtml(song.requestedBy.dedication)}"</p>` : ''}
         </div>
       </div>
 
@@ -127,7 +127,7 @@ function renderQueueList(queue) {
           <button onclick="moveQueueItem(${i}, 1)" ${i === queue.length - 1 ? 'disabled class="opacity-30"' : 'class="btn-secondary text-xs px-2.5 py-1.5"'} title="Bajar">↓</button>
           ${song.requestedBy?.table && song.requestedBy.table !== 'DJ' ? `
             <button onclick="banTableDirect('${escapeHtml(song.requestedBy.table)}')" class="btn-secondary text-[11px] px-2 py-1.5 text-amber-300 hover:text-amber-200 border-amber-500/30" title="Pausar pedidos de esta mesa">
-              ⏸️ Mesa ${escapeHtml(song.requestedBy.table)}
+              Pausar Mesa ${escapeHtml(song.requestedBy.table)}
             </button>
           ` : ''}
         </div>
@@ -295,7 +295,6 @@ async function loadPlaylists() {
     if (!playlists || playlists.length === 0) {
       grid.innerHTML = `
         <div class="col-span-full text-center py-10 bg-white/5 border border-white/10 rounded-2xl p-6">
-          <p class="text-3xl mb-2">📂</p>
           <h4 class="text-white font-bold text-base">No hay listas de reproducción aún</h4>
           <p class="text-xs text-gray-400 mt-1 max-w-sm mx-auto">Crea tu primera lista con el botón "+ Nueva Lista" de arriba o importa canciones para comenzar.</p>
         </div>
@@ -318,22 +317,22 @@ async function loadPlaylists() {
               ${isActive ? '<span class="genre-badge genre-Popular">Activa Ahora</span>' : ''}
               ${(currentMode === 'crossover' || currentMode === 'sequential') ? `
                 <button onclick="togglePlaylistInRotation('${p.id}')" class="text-[10px] px-2 py-0.5 rounded-full font-bold transition ${isIncludedInRotation ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 'bg-white/10 text-gray-400 border border-white/10'}" title="Activar/Desactivar de la rotación automática">
-                  ${isIncludedInRotation ? '✓ En Rotación' : '＋ No incluida'}
+                  ${isIncludedInRotation ? 'En Rotación' : 'Fuera de Rotación'}
                 </button>
               ` : ''}
             </div>
           </div>
 
           <div class="text-xs text-gray-400">
-            <span>🎵 ${p.tracks ? p.tracks.length : 0} temas listos</span>
+            <span>${p.tracks ? p.tracks.length : 0} temas listos</span>
           </div>
 
           <div class="pt-2 flex flex-wrap items-center gap-2">
             <button onclick="viewPlaylistTracks('${p.id}')" class="btn-secondary text-xs py-2 px-3 flex-1 min-w-[130px] font-semibold" title="Ver y editar canciones">
-              ✏️ Ver y Editar (${p.tracks ? p.tracks.length : 0})
+              Ver y Editar (${p.tracks ? p.tracks.length : 0})
             </button>
             ${!isActive ? `<button onclick="activatePlaylist('${p.id}')" class="btn-primary text-xs py-2 px-3 font-bold">Activar</button>` : '<button disabled class="btn-secondary text-xs py-2 px-3 opacity-50">Sonando</button>'}
-            ${!isActive ? `<button onclick="deletePlaylistDirect('${p.id}', '${escapeHtml(p.name)}')" class="btn-secondary text-xs py-2 px-2.5 text-red-400 hover:text-red-300" title="Eliminar lista">🗑️</button>` : ''}
+            ${!isActive ? `<button onclick="deletePlaylistDirect('${p.id}', '${escapeHtml(p.name)}')" class="btn-secondary text-xs py-2 px-2.5 text-red-400 hover:text-red-300" title="Eliminar lista">Eliminar</button>` : ''}
           </div>
         </div>
       `;
@@ -343,13 +342,17 @@ async function loadPlaylists() {
   }
 }
 
-// 4.0 Funciones de Modo de Reproducción Base (Única, Crossover, Consecutivo)
+// 4.0 Funciones de Modo de Reproducción Base (Única, Crossover, Consecutivo, Género Específico)
 function renderBasePlaybackModeControls(settings) {
   const mode = settings.basePlaybackMode || 'single';
   const badge = document.getElementById('basePlaybackModeBadge');
   const crossoverPanel = document.getElementById('crossoverSettingsPanel');
   const sequentialPanel = document.getElementById('sequentialSettingsPanel');
+  const genreFocusPanel = document.getElementById('genreFocusSettingsPanel');
   const batchSelect = document.getElementById('crossoverBatchSizeSelect');
+  const seqOrderSelect = document.getElementById('sequentialOrderTypeSelect');
+  const focusGenreSelect = document.getElementById('focusGenreSelect');
+  const genreStyleSelect = document.getElementById('genrePlaybackStyleSelect');
 
   // Marcar radio button
   const radios = document.getElementsByName('basePlaybackModeRadio');
@@ -360,20 +363,188 @@ function renderBasePlaybackModeControls(settings) {
   if (batchSelect && settings.crossoverBatchSize) {
     batchSelect.value = settings.crossoverBatchSize;
   }
+  if (seqOrderSelect && settings.sequentialOrderType) {
+    seqOrderSelect.value = settings.sequentialOrderType;
+  }
+  if (focusGenreSelect && settings.focusGenre) {
+    focusGenreSelect.value = settings.focusGenre;
+  }
+  if (genreStyleSelect && settings.genrePlaybackStyle) {
+    genreStyleSelect.value = settings.genrePlaybackStyle;
+  }
+
+  // Ocultar todos los paneles
+  if (crossoverPanel) crossoverPanel.classList.add('hidden');
+  if (sequentialPanel) sequentialPanel.classList.add('hidden');
+  if (genreFocusPanel) genreFocusPanel.classList.add('hidden');
 
   if (mode === 'crossover') {
-    if (badge) badge.innerHTML = `<span class="text-amber-400 font-bold">🔀 Modo: Crossover (${settings.crossoverBatchSize || 3} temas x lista)</span>`;
+    if (badge) badge.innerHTML = `<span class="text-amber-400 font-bold">Modo: Crossover (${settings.crossoverBatchSize || 2} temas x lista)</span>`;
     if (crossoverPanel) crossoverPanel.classList.remove('hidden');
-    if (sequentialPanel) sequentialPanel.classList.add('hidden');
   } else if (mode === 'sequential') {
-    if (badge) badge.innerHTML = `<span class="text-sky-400 font-bold">📋 Modo: Consecutivo en Cadena</span>`;
-    if (crossoverPanel) crossoverPanel.classList.add('hidden');
-    if (sequentialPanel) sequentialPanel.classList.remove('hidden');
+    const isCustom = settings.sequentialOrderType === 'custom';
+    if (badge) badge.innerHTML = `<span class="text-sky-400 font-bold">Modo: Consecutivo (${isCustom ? 'Orden Personalizado' : 'Orden Natural'})</span>`;
+    if (sequentialPanel) {
+      sequentialPanel.classList.remove('hidden');
+      renderSequentialChainList(settings);
+    }
+  } else if (mode === 'genre_focus') {
+    const genre = settings.focusGenre || 'Salsa';
+    if (badge) badge.innerHTML = `<span class="text-emerald-400 font-bold">Modo: 100% ${genre}</span>`;
+    if (genreFocusPanel) {
+      genreFocusPanel.classList.remove('hidden');
+      updateGenreFocusStatsDisplay(genre);
+    }
   } else {
-    if (badge) badge.innerHTML = `<span class="text-white font-bold">🎵 Modo: Lista Única</span>`;
-    if (crossoverPanel) crossoverPanel.classList.add('hidden');
-    if (sequentialPanel) sequentialPanel.classList.add('hidden');
+    if (badge) badge.innerHTML = `<span class="text-white font-bold">Modo: Lista Única</span>`;
   }
+}
+
+// Renderizar lista interactiva ordenable de listas para el modo consecutivo
+function renderSequentialChainList(settings) {
+  const container = document.getElementById('sequentialChainList');
+  if (!container) return;
+
+  const crossoverList = Array.isArray(settings.crossoverPlaylists) && settings.crossoverPlaylists.length > 0
+    ? settings.crossoverPlaylists
+    : (currentPlaylistsList || []).map(p => p.id);
+
+  // Filtrar solo las listas activas en rotación
+  let activePlaylists = crossoverList
+    .map(id => (currentPlaylistsList || []).find(p => p.id === id))
+    .filter(p => p && p.tracks && p.tracks.length > 0);
+
+  // Si tiene orden personalizado, ordenar según sequentialPlaylistOrder
+  if (settings.sequentialOrderType === 'custom' && Array.isArray(settings.sequentialPlaylistOrder) && settings.sequentialPlaylistOrder.length > 0) {
+    const orderMap = new Map();
+    settings.sequentialPlaylistOrder.forEach((id, idx) => orderMap.set(id, idx));
+    activePlaylists.sort((a, b) => {
+      const idxA = orderMap.has(a.id) ? orderMap.get(a.id) : 999;
+      const idxB = orderMap.has(b.id) ? orderMap.get(b.id) : 999;
+      return idxA - idxB;
+    });
+  }
+
+  if (activePlaylists.length === 0) {
+    container.innerHTML = `<p class="text-gray-400 py-2 text-center text-xs">No hay listas con canciones en rotación.</p>`;
+    return;
+  }
+
+  container.innerHTML = activePlaylists.map((p, idx) => `
+    <div class="flex items-center justify-between p-2 rounded-xl bg-black/50 border border-white/5 hover:border-sky-500/30 transition">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        <span class="font-bold text-sky-400 text-xs w-5 font-mono">#${idx + 1}</span>
+        <div class="min-w-0 flex-1">
+          <p class="font-bold text-white text-xs truncate">${escapeHtml(p.name)}</p>
+          <p class="text-[10px] text-gray-400 truncate">${p.tracks ? p.tracks.length : 0} canciones</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1 shrink-0 ml-2">
+        <button onclick="moveSequentialPlaylistItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-2.5 py-1 rounded bg-white/10 hover:bg-sky-500/20 text-white disabled:opacity-30 text-xs font-bold" title="Mover hacia arriba en la cadena">
+          ▲
+        </button>
+        <button onclick="moveSequentialPlaylistItem(${idx}, 1)" ${idx === activePlaylists.length - 1 ? 'disabled' : ''} class="px-2.5 py-1 rounded bg-white/10 hover:bg-sky-500/20 text-white disabled:opacity-30 text-xs font-bold" title="Mover hacia abajo en la cadena">
+          ▼
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Mover lista en la secuencia del modo Consecutivo
+async function moveSequentialPlaylistItem(index, direction) {
+  try {
+    const statusRes = await fetch('/api/status');
+    const statusData = await statusRes.json();
+    const settings = statusData.settings || {};
+
+    const crossoverList = Array.isArray(settings.crossoverPlaylists) && settings.crossoverPlaylists.length > 0
+      ? settings.crossoverPlaylists
+      : (currentPlaylistsList || []).map(p => p.id);
+
+    let activePlaylists = crossoverList
+      .map(id => (currentPlaylistsList || []).find(p => p.id === id))
+      .filter(p => p && p.tracks && p.tracks.length > 0);
+
+    let currentOrder = [];
+    if (settings.sequentialOrderType === 'custom' && Array.isArray(settings.sequentialPlaylistOrder) && settings.sequentialPlaylistOrder.length > 0) {
+      const orderMap = new Map();
+      settings.sequentialPlaylistOrder.forEach((id, idx) => orderMap.set(id, idx));
+      activePlaylists.sort((a, b) => {
+        const idxA = orderMap.has(a.id) ? orderMap.get(a.id) : 999;
+        const idxB = orderMap.has(b.id) ? orderMap.get(b.id) : 999;
+        return idxA - idxB;
+      });
+      currentOrder = activePlaylists.map(p => p.id);
+    } else {
+      currentOrder = activePlaylists.map(p => p.id);
+    }
+
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= currentOrder.length) return;
+
+    // Intercambiar
+    const temp = currentOrder[index];
+    currentOrder[index] = currentOrder[newIndex];
+    currentOrder[newIndex] = temp;
+
+    await saveSettingsPartial({
+      sequentialOrderType: 'custom',
+      sequentialPlaylistOrder: currentOrder
+    });
+
+    loadPlaylists();
+  } catch (err) {
+    console.error('Error moviendo orden de lista:', err);
+  }
+}
+
+// Restablecer orden natural para el modo Consecutivo
+async function resetSequentialToNaturalOrder() {
+  await saveSettingsPartial({
+    sequentialOrderType: 'natural',
+    sequentialPlaylistOrder: []
+  });
+  loadPlaylists();
+}
+
+async function updateSequentialOrderType(type) {
+  await saveSettingsPartial({ sequentialOrderType: type });
+  loadPlaylists();
+}
+
+async function updateFocusGenre(genre) {
+  await saveSettingsPartial({ focusGenre: genre });
+  loadPlaylists();
+}
+
+async function updateGenrePlaybackStyle(style) {
+  await saveSettingsPartial({ genrePlaybackStyle: style });
+  loadPlaylists();
+}
+
+// Calcular y mostrar cuántas canciones hay disponibles del género seleccionado
+function updateGenreFocusStatsDisplay(genre) {
+  const statsEl = document.getElementById('genreFocusStats');
+  if (!statsEl) return;
+
+  let count = 0;
+  let listsCount = 0;
+
+  for (const pl of (currentPlaylistsList || [])) {
+    let hasFromPl = false;
+    if (Array.isArray(pl.tracks)) {
+      for (const t of pl.tracks) {
+        if (t.genre && t.genre.toLowerCase() === genre.toLowerCase()) {
+          count++;
+          hasFromPl = true;
+        }
+      }
+    }
+    if (hasFromPl) listsCount++;
+  }
+
+  statsEl.innerHTML = `<strong>${count} canciones</strong> de ${genre} encontradas en <strong>${listsCount} listas</strong>`;
 }
 
 async function changeBasePlaybackMode(newMode) {
@@ -481,7 +652,7 @@ async function executeImportMultiple() {
     alert(err.message || 'Error al importar.');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<span>🚀</span> Importar Todas las Listas Ahora`;
+    btn.innerHTML = 'Importar Todas las Listas Ahora';
   }
 }
 
@@ -541,7 +712,7 @@ async function importFoundPlaylist(url, btnElement) {
     alert(`¡Lista "${data.playlist.name}" importada con éxito (${data.playlist.tracks.length} temas)!`);
     loadPlaylists();
     if (btnElement) {
-      btnElement.textContent = '✓ Importada';
+      btnElement.textContent = 'Importada';
       btnElement.className = 'btn-secondary text-xs py-1.5 px-3 opacity-60';
     }
   } catch (err) {
@@ -592,7 +763,7 @@ async function generatePlaylistAI() {
     alert(err.message || 'Error generando lista');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<span>✨</span> Generar Lista Automática con IA`;
+    btn.innerHTML = 'Generar Lista Automática con IA';
   }
 }
 
@@ -767,11 +938,11 @@ function renderMicModeState(active) {
 
   if (isMicModeActive) {
     btn.className = 'bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl flex items-center gap-1.5 animate-pulse shadow-lg shadow-red-500/30';
-    if (icon) icon.textContent = '🔴';
+    if (icon) icon.className = 'w-2 h-2 rounded-full bg-white inline-block';
     if (text) text.textContent = 'MIC ACTIVO (15% Vol)';
   } else {
     btn.className = 'btn-secondary text-xs flex items-center gap-1.5 transition-all duration-300';
-    if (icon) icon.textContent = '🎙️';
+    if (icon) icon.className = 'w-2 h-2 rounded-full bg-gray-400 inline-block';
     if (text) text.textContent = 'Modo Micrófono';
   }
 }
@@ -805,7 +976,7 @@ function renderBannedTables(banned) {
         <span class="text-gray-400 text-[11px]">(${mins} min restantes)</span>
       </div>
       <button onclick="unbanTable('${escapeHtml(table)}')" class="btn-primary text-[10px] py-1 px-2.5 bg-green-600 hover:bg-green-700">
-        🟢 Desbloquear
+        Desbloquear
       </button>
     </div>
   `).join('');
@@ -1094,11 +1265,20 @@ function addTrackToModalList(index) {
   const track = tempSearchResultsForPlaylist[index];
   if (!track) return;
 
+  const plName = document.getElementById('newPlaylistName')?.value || '';
+  let detectedGenre = 'Crossover';
+  const fullText = `${track.title} ${track.artist} ${plName}`.toLowerCase();
+  if (/salsa|son|guaguanco/i.test(fullText)) detectedGenre = 'Salsa';
+  else if (/cantina|despecho|popular|ranchera|guaro/i.test(fullText)) detectedGenre = 'Popular';
+  else if (/vallenato|acordeon|parranda/i.test(fullText)) detectedGenre = 'Vallenato';
+  else if (/reggae|perreo|urbano|dembow|blessd|feid|bad bunny|baile/i.test(fullText)) detectedGenre = 'Reggaetón';
+  else if (/rock|pop|metal|indie/i.test(fullText)) detectedGenre = 'Rock / Pop';
+
   newCustomPlaylistTracks.push({
     videoId: track.videoId,
     title: track.title,
     artist: track.artist,
-    genre: 'Crossover',
+    genre: detectedGenre,
     duration: track.duration,
     thumbnail: track.thumbnail
   });
@@ -1206,26 +1386,88 @@ function renderPlaylistTracksInModal(playlist) {
     return;
   }
 
-  listEl.innerHTML = playlist.tracks.map((t, idx) => `
-    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition gap-2">
-      <div class="flex items-center gap-2.5 min-w-0 flex-1">
-        <span class="font-bold text-amber-400 text-xs w-5">#${idx + 1}</span>
-        <img src="${t.thumbnail}" class="w-12 h-9 rounded-lg object-cover">
-        <div class="min-w-0 flex-1">
-          <p class="font-bold text-white text-xs truncate">${escapeHtml(t.title)}</p>
-          <p class="text-[10px] text-gray-400 truncate">${escapeHtml(t.artist)} • <span class="text-amber-400">${t.genre || 'Crossover'}</span></p>
+  const genres = ['Salsa', 'Popular', 'Vallenato', 'Reggaetón', 'Merengue / Bachata', 'Rock / Pop', 'Crossover'];
+
+  listEl.innerHTML = playlist.tracks.map((t, idx) => {
+    const currentGenre = t.genre || 'Crossover';
+    const genreOptions = genres.map(g => `<option value="${g}" ${g === currentGenre ? 'selected' : ''}>${g}</option>`).join('');
+
+    return `
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition gap-2">
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <span class="font-bold text-amber-400 text-xs w-5">#${idx + 1}</span>
+          <img src="${t.thumbnail}" class="w-12 h-9 rounded-lg object-cover">
+          <div class="min-w-0 flex-1">
+            <p class="font-bold text-white text-xs truncate">${escapeHtml(t.title)}</p>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span class="text-[10px] text-gray-400 truncate max-w-[130px] sm:max-w-[180px]">${escapeHtml(t.artist)}</span>
+              <select onchange="changeTrackGenre(${idx}, this.value)" class="bg-black/70 border border-white/20 rounded px-1.5 py-0.5 text-[10px] text-amber-400 font-semibold outline-none cursor-pointer hover:border-amber-400/50" title="Cambiar género de esta canción">
+                ${genreOptions}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="playNowDirect('${t.videoId}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${currentGenre}'); closeViewPlaylistModal();" class="btn-primary text-[11px] py-1.5 px-2.5">
+            Sonar Ya
+          </button>
+          <button onclick="removeTrackFromPlaylist(${idx})" class="btn-secondary text-[11px] py-1.5 px-2 text-red-400 hover:text-red-300 border-red-500/20" title="Quitar de esta lista">
+            Quitar
+          </button>
         </div>
       </div>
-      <div class="flex items-center gap-1.5 shrink-0">
-        <button onclick="playNowDirect('${t.videoId}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${t.genre || 'Crossover'}'); closeViewPlaylistModal();" class="btn-primary text-[11px] py-1.5 px-2.5">
-          Sonar Ya
-        </button>
-        <button onclick="removeTrackFromPlaylist(${idx})" class="btn-secondary text-[11px] py-1.5 px-2 text-red-400 hover:text-red-300 border-red-500/20" title="Quitar de esta lista">
-          🗑️ Quitar
-        </button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+}
+
+// Cambiar género de una canción en la lista abierta actualmente
+async function changeTrackGenre(trackIndex, newGenre) {
+  if (!currentViewingPlaylistId) return;
+  try {
+    const res = await fetch(`/api/playlists/${currentViewingPlaylistId}/tracks/${trackIndex}/genre`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ genre: newGenre })
+    });
+    if (!res.ok) throw new Error('Error al actualizar género');
+    loadPlaylists();
+  } catch (err) {
+    console.error('Error cambiando género:', err);
+  }
+}
+
+// Auto-clasificar todos los temas de la lista abierta
+async function autoClassifyCurrentPlaylist() {
+  if (!currentViewingPlaylistId) return;
+  try {
+    const res = await fetch(`/api/playlists/${currentViewingPlaylistId}/auto-classify`, {
+      method: 'POST'
+    });
+    const data = await res.json();
+    if (data.success && data.playlist) {
+      renderPlaylistTracksInModal(data.playlist);
+      loadPlaylists();
+      alert(`¡Listo! Se actualizaron ${data.updatedCount} canciones con su género detectado.`);
+    }
+  } catch (err) {
+    alert('Error al auto-clasificar lista');
+  }
+}
+
+// Auto-clasificar todas las listas del bar
+async function autoClassifyAllPlaylists() {
+  try {
+    const res = await fetch('/api/playlists/auto-classify-all', {
+      method: 'POST'
+    });
+    const data = await res.json();
+    if (data.success) {
+      loadPlaylists();
+      alert(`¡Listo! Se auto-detectaron y actualizaron los géneros de ${data.updatedCount} canciones en todas tus listas.`);
+    }
+  } catch (err) {
+    alert('Error al auto-clasificar todas las listas');
+  }
 }
 
 // Buscar canción para agregar a la lista abierta actualmente
