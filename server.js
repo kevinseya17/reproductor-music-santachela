@@ -274,19 +274,35 @@ app.get('/api/playlists', (req, res) => {
 
 // Guardar / Crear lista
 app.post('/api/playlists', (req, res) => {
-  const { name, description, tracks } = req.body;
+  const { name, description, tracks, id: customId } = req.body;
   if (!name) return res.status(400).json({ error: 'El nombre es obligatorio' });
 
-  const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30);
+  const cleanSlug = name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 25);
+
+  const id = customId || `${cleanSlug || 'lista'}-${Date.now().toString(36)}`;
   const newPlaylist = {
     id,
     name,
     description: description || '',
-    tracks: tracks || []
+    tracks: Array.isArray(tracks) ? tracks : []
   };
 
   db.addPlaylist(newPlaylist);
   res.json({ success: true, playlist: newPlaylist });
+});
+
+// Restaurar listas desde copia de seguridad
+app.post('/api/playlists/restore', (req, res) => {
+  const { playlists } = req.body;
+  if (!Array.isArray(playlists)) return res.status(400).json({ error: 'Formato no válido' });
+  const updated = db.restorePlaylists(playlists);
+  res.json({ success: true, total: updated.length, playlists: updated });
 });
 
 // Importar lista completa pegando enlace de YouTube

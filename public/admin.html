@@ -126,9 +126,16 @@
           <h2 class="text-lg font-bold text-white">Listas Base del Bar</h2>
           <p class="text-xs text-gray-400">Estas listas son el "hilo conductor" para que el bar nunca pare de sonar cuando nadie pide canciones.</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
+          <button onclick="exportPlaylistsBackup()" class="btn-secondary text-xs flex items-center gap-1.5" title="Descargar copia de seguridad de tus listas">
+            <span>💾</span> Respaldar Listas
+          </button>
+          <button onclick="triggerImportBackup()" class="btn-secondary text-xs flex items-center gap-1.5" title="Restaurar listas desde archivo de copia">
+            <span>📂</span> Restaurar
+          </button>
+          <input type="file" id="importBackupFileInput" accept=".json" class="hidden" onchange="handleBackupFileSelected(event)">
           <button onclick="openImportModal()" class="btn-secondary text-xs flex items-center gap-1.5">
-            <span>📥</span> Importar Playlists de YouTube
+            <span>📥</span> Importar de YouTube
           </button>
           <button onclick="openNewPlaylistModal()" class="btn-primary text-xs flex items-center gap-1.5">
             <span>➕</span> Nueva Lista

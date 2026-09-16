@@ -217,7 +217,37 @@ async function loadPlaylists() {
   try {
     const res = await fetch('/api/playlists');
     const data = await res.json();
-    currentPlaylistsList = data.playlists || [];
+    let playlists = data.playlists || [];
+
+    // Sincronización automática de respaldo con LocalStorage (protección contra reinicios de Render)
+    try {
+      const localBackupRaw = localStorage.getItem('santachela_playlists_backup');
+      if (localBackupRaw) {
+        const localBackup = JSON.parse(localBackupRaw);
+        if (Array.isArray(localBackup) && localBackup.length > 0) {
+          const missingOnServer = localBackup.filter(l => 
+            !playlists.some(s => s.id === l.id || s.name.trim().toLowerCase() === l.name.trim().toLowerCase())
+          );
+
+          if (missingOnServer.length > 0) {
+            console.log(`Restaurando ${missingOnServer.length} lista(s) guardadas en este navegador...`);
+            await fetch('/api/playlists/restore', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ playlists: missingOnServer })
+            });
+            const refreshed = await fetch('/api/playlists');
+            const refData = await refreshed.json();
+            playlists = refData.playlists || [];
+          }
+        }
+      }
+      localStorage.setItem('santachela_playlists_backup', JSON.stringify(playlists));
+    } catch (storageErr) {
+      console.warn('LocalStorage sync warning:', storageErr);
+    }
+
+    currentPlaylistsList = playlists;
     populateSchedulePlaylistsDropdown();
 
     const statusRes = await fetch('/api/status');
@@ -225,7 +255,7 @@ async function loadPlaylists() {
     const activeId = statusData.settings.activePlaylistId;
 
     const grid = document.getElementById('playlistsGrid');
-    grid.innerHTML = (data.playlists || []).map(p => {
+    grid.innerHTML = playlists.map(p => {
       const isActive = p.id === activeId;
       return `
         <div class="glass-card p-5 space-y-3 ${isActive ? 'border-amber-400/50 bg-amber-500/5' : ''}">
@@ -977,7 +1007,6 @@ async function saveCustomNewPlaylist() {
   const description = document.getElementById('newPlaylistDesc').value.trim();
 
   if (!name) return alert('Por favor ingresa un nombre para la lista.');
-  if (newCustomPlaylistTracks.length === 0) return alert('Agrega al menos una canción a la lista.');
 
   try {
     const res = await fetch('/api/playlists', {
@@ -986,17 +1015,23 @@ async function saveCustomNewPlaylist() {
       body: JSON.stringify({
         name,
         description,
-        tracks: newCustomPlaylistTracks
+        tracks: newCustomPlaylistTracks || []
       })
     });
 
-    if (!res.ok) throw new Error('Error al guardar');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al guardar');
 
     closeNewPlaylistModal();
-    loadPlaylists();
+    await loadPlaylists();
     alert('¡Lista creada y guardada con éxito!');
+
+    // Si la lista se creó sin canciones, abrir de una vez el editor para agregar canciones
+    if (newCustomPlaylistTracks.length === 0 && data.playlist && data.playlist.id) {
+      viewPlaylistTracks(data.playlist.id);
+    }
   } catch (err) {
-    alert('No se pudo guardar la lista.');
+    alert(err.message || 'No se pudo guardar la lista.');
   }
 }
 
@@ -1153,12 +1188,22 @@ async function removeTrackFromPlaylist(index) {
 // Eliminar lista abierta actualmente desde el modal
 async function deleteCurrentOpenedPlaylist() {
   if (!currentViewingPlaylistId) return;
+  const targetId = currentViewingPlaylistId;
   const title = document.getElementById('viewPlaylistTitle').textContent;
   if (!confirm(`¿Estás seguro de eliminar la lista "${title}" por completo?`)) return;
 
   try {
-    const res = await fetch(`/api/playlists/${currentViewingPlaylistId}`, { method: 'DELETE' });
+    const res = await fetch(`/api/playlists/${targetId}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Error al eliminar');
+
+    // Remover del respaldo local para que no reaparezca
+    try {
+      const localBackupRaw = localStorage.getItem('santachela_playlists_backup');
+      if (localBackupRaw) {
+        const list = JSON.parse(localBackupRaw).filter(p => p.id !== targetId);
+        localStorage.setItem('santachela_playlists_backup', JSON.stringify(list));
+      }
+    } catch (e) {}
 
     closeViewPlaylistModal();
     loadPlaylists();
@@ -1176,10 +1221,69 @@ async function deletePlaylistDirect(playlistId, playlistName) {
     const res = await fetch(`/api/playlists/${playlistId}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Error al eliminar');
 
+    // Remover del respaldo local
+    try {
+      const localBackupRaw = localStorage.getItem('santachela_playlists_backup');
+      if (localBackupRaw) {
+        const list = JSON.parse(localBackupRaw).filter(p => p.id !== playlistId);
+        localStorage.setItem('santachela_playlists_backup', JSON.stringify(list));
+      }
+    } catch (e) {}
+
     loadPlaylists();
   } catch (err) {
     alert('No se pudo eliminar la lista.');
   }
+}
+
+// Exportar respaldo de listas a un archivo JSON
+function exportPlaylistsBackup() {
+  if (!currentPlaylistsList || currentPlaylistsList.length === 0) {
+    return alert('No hay listas para respaldar.');
+  }
+
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentPlaylistsList, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `santachela_listas_backup_${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
+
+// Disparar selector de archivo para restaurar
+function triggerImportBackup() {
+  document.getElementById('importBackupFileInput').click();
+}
+
+// Leer archivo de respaldo y restaurarlo en el servidor
+async function handleBackupFileSelected(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (!Array.isArray(parsed)) throw new Error('El archivo no tiene formato válido de listas.');
+
+      const res = await fetch('/api/playlists/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playlists: parsed })
+      });
+
+      if (!res.ok) throw new Error('Error al enviar listas al servidor');
+
+      localStorage.setItem('santachela_playlists_backup', JSON.stringify(parsed));
+      alert(`¡Se restauraron ${parsed.length} lista(s) exitosamente!`);
+      loadPlaylists();
+    } catch (err) {
+      alert('Error al restaurar archivo: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
 }
 
 function closeViewPlaylistModal() {
