@@ -45,7 +45,9 @@
         "name": "Cantina y Despecho a Grito Herido"
       }
     ],
-    "scheduleEnabled": true
+    "scheduleEnabled": true,
+    "basePlaybackMode": "crossover",
+    "crossoverBatchSize": 2
   },
   "playlists": [
     {

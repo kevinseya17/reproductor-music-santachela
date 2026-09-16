@@ -272,12 +272,37 @@ async function loadPlaylists() {
     currentPlaylistsList = playlists;
     populateSchedulePlaylistsDropdown();
 
-    const statusRes = await fetch('/api/status');
-    const statusData = await statusRes.json();
-    const currentMode = statusData.settings.basePlaybackMode || 'single';
-    const crossoverList = statusData.settings.crossoverPlaylists || [];
+    let activeId = '';
+    let currentMode = 'single';
+    let crossoverList = [];
+    try {
+      const statusRes = await fetch('/api/status');
+      if (statusRes.ok) {
+        const statusData = await statusRes.json();
+        const settings = statusData.settings || {};
+        activeId = settings.activePlaylistId || '';
+        currentMode = settings.basePlaybackMode || 'single';
+        crossoverList = Array.isArray(settings.crossoverPlaylists) ? settings.crossoverPlaylists : [];
+        renderBasePlaybackModeControls(settings);
+      }
+    } catch (statusErr) {
+      console.warn('Error obteniendo status para listas:', statusErr);
+    }
 
     const grid = document.getElementById('playlistsGrid');
+    if (!grid) return;
+
+    if (!playlists || playlists.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-10 bg-white/5 border border-white/10 rounded-2xl p-6">
+          <p class="text-3xl mb-2">📂</p>
+          <h4 class="text-white font-bold text-base">No hay listas de reproducción aún</h4>
+          <p class="text-xs text-gray-400 mt-1 max-w-sm mx-auto">Crea tu primera lista con el botón "+ Nueva Lista" de arriba o importa canciones para comenzar.</p>
+        </div>
+      `;
+      return;
+    }
+
     grid.innerHTML = playlists.map(p => {
       const isActive = p.id === activeId;
       const isIncludedInRotation = crossoverList.includes(p.id) || (crossoverList.length === 0);
