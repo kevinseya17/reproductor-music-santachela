@@ -330,7 +330,6 @@ app.post('/api/request', async (req, res) => {
     };
 
     const currentQueue = db.getQueue();
-    const settings = db.getSettings();
 
     // 3. Si no hay nada sonando actualmente, reproducir de inmediato
     if (!currentlyPlaying) {
