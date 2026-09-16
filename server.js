@@ -455,12 +455,8 @@ app.post('/api/request', async (req, res) => {
 
     const currentQueue = db.getQueue();
 
-    // 3. Si no hay nada sonando o lo que suena es música de fondo de la lista base (isBaseTrack),
-    // darle paso inmediato al pedido del cliente para que suene de una vez
-    if (!currentlyPlaying || currentlyPlaying.isBaseTrack) {
-      if (currentlyPlaying) {
-        db.addToHistory(currentlyPlaying);
-      }
+    // 3. Si no hay absolutamente nada sonando, reproducir de inmediato
+    if (!currentlyPlaying) {
       currentlyPlaying = { ...song, startedAt: Date.now() };
       db.recordTableRequest(tableClean);
       io.emit('state-changed', {
@@ -480,7 +476,8 @@ app.post('/api/request', async (req, res) => {
       });
     }
 
-    // 4. Inserción Inteligente por Bloques de Género (Smart Slotting)
+    // 4. Si ya hay una canción sonando (de fondo o de otro cliente),
+    // la canción actual sigue sonando sin cortarse y la nueva entra a la cola para sonar a continuación
     let slotIndex = currentQueue.length;
     if (settings.autoDJEnabled) {
       slotIndex = aiDj.calculateSmartSlot(currentQueue, genre, currentlyPlaying);
@@ -507,9 +504,14 @@ app.post('/api/request', async (req, res) => {
       position: displayPosition
     });
 
+    const isNext = displayPosition === 1;
+    const msg = isNext
+      ? '¡Canción agregada! Sonará justo al terminar la canción actual.'
+      : `¡Canción agregada con éxito! Está en el turno #${displayPosition} dentro de la tanda de ${genre}.`;
+
     res.json({
       success: true,
-      message: `¡Canción agregada con éxito! Está en el turno #${displayPosition} dentro de la tanda de ${genre}.`,
+      message: msg,
       position: displayPosition,
       genre,
       song

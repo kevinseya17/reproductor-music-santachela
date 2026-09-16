@@ -251,9 +251,47 @@
       "addedAt": 1789597100155,
       "startedAt": 1789597107947,
       "playedAt": "2026-09-16T22:18:27.958Z"
+    },
+    {
+      "id": "base_1789597254547_kqdsv",
+      "videoId": "fIPOjkmMpKk",
+      "title": "El Día de Mi Suerte",
+      "artist": "Héctor Lavoe & Willie Colón",
+      "genre": "Salsa",
+      "duration": "5:28",
+      "thumbnail": "https://i.ytimg.com/vi/fIPOjkmMpKk/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789597254547,
+      "startedAt": 1789597254547,
+      "playedAt": "2026-09-16T22:21:16.272Z"
+    },
+    {
+      "id": "req_1789597276246_ep0ep",
+      "videoId": "57kP_j7z9e0",
+      "title": "La Bilirrubina",
+      "artist": "Juan Luis Guerra",
+      "genre": "Merengue / Bachata",
+      "duration": "4:05",
+      "thumbnail": "https://i.ytimg.com/vi/57kP_j7z9e0/hqdefault.jpg",
+      "requestedBy": {
+        "table": "1",
+        "name": "Mesa 1",
+        "dedication": ""
+      },
+      "isBaseTrack": false,
+      "addedAt": 1789597276246,
+      "startedAt": 1789597276281,
+      "playedAt": "2026-09-16T22:21:16.284Z"
     }
   ],
   "tableRequests": {
+    "1": [
+      1789597276251
+    ],
     "2": [
       1789597100161
     ],
