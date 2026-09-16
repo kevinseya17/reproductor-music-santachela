@@ -5,6 +5,10 @@ const socket = io();
 let currentTable = '1';
 let selectedSongForModal = null;
 let searchDebounceTimer = null;
+let currentRequestMode = 'open';
+let clientPlaylists = [];
+let currentSelectedPlaylistId = null;
+let currentPlaylistFilteredTracks = [];
 
 // Inicialización al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
@@ -70,6 +74,15 @@ function renderStatus(data) {
   if (settings && settings.barName) {
     const barTitle = document.getElementById('barName');
     if (barTitle) barTitle.textContent = settings.barName;
+  }
+
+  // Aplicar modo de pedidos (abierto vs solo listas)
+  if (settings) {
+    const newMode = settings.requestMode || 'open';
+    if (newMode !== currentRequestMode || !window.hasInitRequestMode) {
+      window.hasInitRequestMode = true;
+      applyRequestMode(newMode);
+    }
   }
 
   // Sonando Ahora
@@ -367,4 +380,140 @@ function escapeHtml(text) {
              .replace(/>/g, "&gt;")
              .replace(/"/g, "&quot;")
              .replace(/'/g, "&#039;");
+}
+
+// ==========================================
+// 8. CONTROL DE MODO DE PEDIDOS (ABIERTO vs SOLO PLAYLISTS)
+// ==========================================
+function applyRequestMode(mode) {
+  currentRequestMode = mode;
+  const openContainer = document.getElementById('openModeContainer');
+  const playlistContainer = document.getElementById('playlistModeContainer');
+
+  if (mode === 'playlist') {
+    if (openContainer) openContainer.classList.add('hidden');
+    if (playlistContainer) playlistContainer.classList.remove('hidden');
+    loadClientPlaylists();
+  } else {
+    if (openContainer) openContainer.classList.remove('hidden');
+    if (playlistContainer) playlistContainer.classList.add('hidden');
+  }
+}
+
+async function loadClientPlaylists() {
+  try {
+    const res = await fetch('/api/playlists');
+    const data = await res.json();
+    clientPlaylists = data.playlists || [];
+
+    const select = document.getElementById('clientPlaylistSelector');
+    if (!select) return;
+
+    if (clientPlaylists.length === 0) {
+      select.innerHTML = '<option value="">No hay listas disponibles en este momento</option>';
+      renderClientPlaylistTracks([]);
+      return;
+    }
+
+    const previousSelected = currentSelectedPlaylistId;
+    select.innerHTML = clientPlaylists.map(pl => `
+      <option value="${escapeHtml(pl.id)}">${escapeHtml(pl.name)} (${pl.tracks ? pl.tracks.length : 0} temas)</option>
+    `).join('');
+
+    if (previousSelected && clientPlaylists.some(pl => pl.id === previousSelected)) {
+      select.value = previousSelected;
+    } else {
+      currentSelectedPlaylistId = clientPlaylists[0].id;
+      select.value = currentSelectedPlaylistId;
+    }
+
+    onClientPlaylistChange();
+  } catch (err) {
+    console.error('Error cargando listas para cliente:', err);
+  }
+}
+
+function onClientPlaylistChange() {
+  const select = document.getElementById('clientPlaylistSelector');
+  if (!select) return;
+  currentSelectedPlaylistId = select.value;
+  const pl = clientPlaylists.find(p => p.id === currentSelectedPlaylistId);
+  const searchInput = document.getElementById('playlistSongSearchInput');
+  if (searchInput) searchInput.value = '';
+
+  const header = document.getElementById('playlistTracksHeader');
+  if (header && pl) {
+    header.textContent = `Temas de "${pl.name}"`;
+  }
+
+  if (pl && pl.tracks) {
+    currentPlaylistFilteredTracks = [...pl.tracks];
+    renderClientPlaylistTracks(currentPlaylistFilteredTracks);
+  } else {
+    currentPlaylistFilteredTracks = [];
+    renderClientPlaylistTracks([]);
+  }
+}
+
+function filterClientPlaylistSongs() {
+  const query = (document.getElementById('playlistSongSearchInput')?.value || '').trim().toLowerCase();
+  const pl = clientPlaylists.find(p => p.id === currentSelectedPlaylistId);
+  if (!pl || !pl.tracks) return;
+
+  if (!query) {
+    currentPlaylistFilteredTracks = [...pl.tracks];
+  } else {
+    currentPlaylistFilteredTracks = pl.tracks.filter(t => 
+      (t.title && t.title.toLowerCase().includes(query)) ||
+      (t.artist && t.artist.toLowerCase().includes(query)) ||
+      (t.genre && t.genre.toLowerCase().includes(query))
+    );
+  }
+  renderClientPlaylistTracks(currentPlaylistFilteredTracks);
+}
+
+function renderClientPlaylistTracks(tracks) {
+  const listEl = document.getElementById('playlistTracksList');
+  const countEl = document.getElementById('playlistTracksCount');
+  if (!listEl) return;
+
+  if (countEl) {
+    countEl.textContent = `${tracks.length} tema${tracks.length === 1 ? '' : 's'}`;
+  }
+
+  if (!tracks || tracks.length === 0) {
+    listEl.innerHTML = `<p class="text-xs text-gray-500 text-center py-6">No se encontraron canciones en esta lista.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = tracks.map((song, i) => `
+    <div class="glass-card p-2.5 flex items-center gap-3 hover:border-amber-500/40 transition">
+      <div class="relative">
+        <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-14 h-11 rounded-lg object-cover">
+        <span class="absolute bottom-0.5 right-0.5 bg-black/80 text-[9px] px-1 rounded text-white font-mono">${song.duration || '3:30'}</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h4 class="text-xs font-bold text-white truncate leading-tight">${escapeHtml(song.title)}</h4>
+        <p class="text-[11px] text-gray-400 truncate">${escapeHtml(song.artist || 'Artista')}</p>
+        <span class="genre-badge genre-${song.genre || 'Crossover'} text-[9px] py-0 px-1.5">${song.genre || 'Música'}</span>
+      </div>
+      <button onclick="requestPlaylistTrack(${i})" class="btn-primary text-xs py-1.5 px-3 whitespace-nowrap">
+        Pedir 🎵
+      </button>
+    </div>
+  `).join('');
+}
+
+function requestPlaylistTrack(index) {
+  const song = currentPlaylistFilteredTracks[index];
+  if (!song) return;
+
+  selectedSongForModal = song;
+
+  document.getElementById('modalThumb').src = song.thumbnail || `https://i.ytimg.com/vi/${song.videoId}/hqdefault.jpg`;
+  document.getElementById('modalTitle').textContent = song.title;
+  document.getElementById('modalArtist').textContent = song.artist || 'Artista';
+  document.getElementById('modalTable').textContent = `Mesa ${currentTable}`;
+
+  document.getElementById('confirmModal').classList.remove('hidden');
 }

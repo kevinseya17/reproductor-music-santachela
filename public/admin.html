@@ -377,6 +377,24 @@
           <input type="checkbox" id="settingAutoDJ" class="w-5 h-5 accent-amber-500">
         </div>
 
+        <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-bold text-white">Modo de Pedidos para Clientes</p>
+              <p class="text-xs text-gray-400">Define cómo piden música los clientes desde sus mesas</p>
+            </div>
+            <span class="text-lg">📱</span>
+          </div>
+          <select id="settingRequestMode" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+            <option value="open">🌐 Modo Abierto (Búsqueda libre en YouTube)</option>
+            <option value="playlist">📑 Modo Cerrado (Solo canciones de las Listas del Bar)</option>
+          </select>
+          <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 text-[11px] text-gray-300 space-y-1">
+            <p><span class="text-amber-400 font-semibold">• Modo Abierto:</span> Los clientes tienen barra de búsqueda libre en YouTube y pueden pedir cualquier tema.</p>
+            <p><span class="text-amber-400 font-semibold">• Modo Cerrado:</span> Los clientes ven el catálogo de tus Listas Maestras y solo pueden elegir entre esas canciones.</p>
+          </div>
+        </div>
+
         <div>
           <label class="block text-xs text-gray-400 mb-1">Clave de API de Gemini (Opcional, para funciones avanzadas de IA):</label>
           <input type="password" id="settingApiKey" placeholder="AIzaSy..." class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-amber-400">

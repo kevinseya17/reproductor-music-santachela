@@ -49,6 +49,9 @@ function renderAdminState(data) {
     document.getElementById('settingTotalTables').value = settings.totalTables || 20;
     document.getElementById('settingAutoDJ').checked = settings.autoDJEnabled !== false;
     document.getElementById('settingApiKey').value = settings.geminiApiKey || '';
+    if (document.getElementById('settingRequestMode')) {
+      document.getElementById('settingRequestMode').value = settings.requestMode || 'open';
+    }
 
     // Renderizar ajustes de control, filtro y promociones
     renderBlacklistWords(settings.blacklistWords);
@@ -558,6 +561,7 @@ async function saveSettings() {
   const totalTables = parseInt(document.getElementById('settingTotalTables').value) || 20;
   const autoDJEnabled = document.getElementById('settingAutoDJ').checked;
   const geminiApiKey = document.getElementById('settingApiKey').value.trim();
+  const requestMode = document.getElementById('settingRequestMode')?.value || 'open';
 
   await fetch('/api/settings', {
     method: 'POST',
@@ -568,7 +572,8 @@ async function saveSettings() {
       smartSlottingWindow,
       totalTables,
       autoDJEnabled,
-      geminiApiKey
+      geminiApiKey,
+      requestMode
     })
   });
 

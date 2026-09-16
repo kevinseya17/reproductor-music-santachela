@@ -187,7 +187,21 @@ app.post('/api/request', async (req, res) => {
       });
     }
 
-    // 3. Clasificar género con el DJ Inteligente
+    // 3. Validar modo de solicitud (abierto vs. solo listas)
+    const settings = db.getSettings();
+    if (settings.requestMode === 'playlist') {
+      const allPlaylists = db.getPlaylists();
+      const isInPlaylist = allPlaylists.some(pl =>
+        pl.tracks && pl.tracks.some(t => t.videoId === videoId)
+      );
+      if (!isInPlaylist) {
+        return res.status(403).json({
+          error: 'El bar solo acepta pedidos de canciones que están en las listas disponibles. ¡Elige una de ellas!'
+        });
+      }
+    }
+
+    // 4. Clasificar género con el DJ Inteligente
     const genre = await aiDj.classifyGenre(title, artist);
 
     const song = {

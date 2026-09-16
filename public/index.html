@@ -53,53 +53,99 @@
       </div>
     </section>
 
-    <!-- Buscador de Canciones -->
-    <section class="space-y-2">
-      <div class="relative">
-        <input 
-          type="text" 
-          id="searchInput" 
-          placeholder="🔍 ¿Qué quieres escuchar? (canción, artista o letra)..." 
-          class="w-full bg-[#161b26] border border-white/15 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 text-white placeholder-gray-400 text-sm rounded-2xl px-4 py-3.5 pl-11 outline-none transition"
-        >
-        <span class="absolute left-4 top-3.5 text-gray-400 text-base">🎵</span>
-        <button id="clearSearchBtn" class="hidden absolute right-3.5 top-3.5 text-gray-400 hover:text-white text-sm bg-white/10 rounded-full w-5 h-5 flex items-center justify-center">✕</button>
+    <!-- === MODO ABIERTO: Buscador de Canciones en YouTube === -->
+    <div id="openModeContainer" class="space-y-4">
+      <section class="space-y-2">
+        <div class="relative">
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="🔍 ¿Qué quieres escuchar? (canción, artista o letra)..." 
+            class="w-full bg-[#161b26] border border-white/15 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 text-white placeholder-gray-400 text-sm rounded-2xl px-4 py-3.5 pl-11 outline-none transition"
+          >
+          <span class="absolute left-4 top-3.5 text-gray-400 text-base">🎵</span>
+          <button id="clearSearchBtn" class="hidden absolute right-3.5 top-3.5 text-gray-400 hover:text-white text-sm bg-white/10 rounded-full w-5 h-5 flex items-center justify-center">✕</button>
+        </div>
+
+        <!-- Filtros rápidos de género -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
+          <button onclick="quickSearch('Salsa exitos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🎺 Salsa</button>
+          <button onclick="quickSearch('Musica popular despecho canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🥃 Popular / Despecho</button>
+          <button onclick="quickSearch('Vallenato exitos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🪗 Vallenato</button>
+          <button onclick="quickSearch('Reggaeton exitos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🔥 Reggaetón</button>
+          <button onclick="quickSearch('Rock en español clasicos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🎸 Rock</button>
+        </div>
+      </section>
+
+      <!-- Sección: Éxitos Populares para pedir de una vez (visible si no hay búsqueda activa) -->
+      <section id="suggestionsSection" class="glass-card p-4 space-y-3">
+        <div class="flex items-center justify-between border-b border-white/5 pb-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+            <span>🔥</span> Temas clásicos para pedir
+          </h3>
+          <span class="text-[11px] text-gray-400">1 clic</span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2 text-xs" id="popularHitsList">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </section>
+
+      <!-- Resultados de Búsqueda -->
+      <section id="searchResultsSection" class="hidden space-y-2">
+        <div class="flex items-center justify-between px-1">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Canciones individuales encontradas</h3>
+          <span id="resultsCount" class="text-xs text-amber-400 font-medium"></span>
+        </div>
+        <div id="searchResultsList" class="space-y-2">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </section>
+    </div>
+
+    <!-- === MODO PLAYLIST: Selector exclusivo de canciones de listas del bar === -->
+    <div id="playlistModeContainer" class="hidden space-y-4">
+      <div class="glass-card p-3 border-amber-500/30 flex items-center gap-3">
+        <span class="text-2xl">📑</span>
+        <div class="flex-1 min-w-0">
+          <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Catálogo del Bar</h3>
+          <p class="text-[11px] text-gray-300">Elige únicamente entre las canciones de nuestras listas seleccionadas</p>
+        </div>
       </div>
 
-      <!-- Filtros rápidos de género -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
-        <button onclick="quickSearch('Salsa exitos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🎺 Salsa</button>
-        <button onclick="quickSearch('Musica popular despecho canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🥃 Popular / Despecho</button>
-        <button onclick="quickSearch('Vallenato exitos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🪗 Vallenato</button>
-        <button onclick="quickSearch('Reggaeton exitos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🔥 Reggaetón</button>
-        <button onclick="quickSearch('Rock en español clasicos canciones')" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400 text-gray-300 whitespace-nowrap active:scale-95 transition">🎸 Rock</button>
-      </div>
-    </section>
+      <!-- Selector de Playlist -->
+      <section class="space-y-2">
+        <label class="block text-xs font-semibold text-gray-300">Selecciona una Lista de Música:</label>
+        <select id="clientPlaylistSelector" onchange="onClientPlaylistChange()" class="w-full bg-[#161b26] border border-white/15 focus:border-amber-400 text-white text-xs rounded-2xl px-4 py-3 outline-none transition">
+          <option value="">Cargando listas...</option>
+        </select>
+      </section>
 
-    <!-- Sección: Éxitos Populares para pedir de una vez (visible si no hay búsqueda activa) -->
-    <section id="suggestionsSection" class="glass-card p-4 space-y-3">
-      <div class="flex items-center justify-between border-b border-white/5 pb-2">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-          <span>🔥</span> Temas clásicos para pedir
-        </h3>
-        <span class="text-[11px] text-gray-400">1 clic</span>
-      </div>
+      <!-- Buscador interno en la lista -->
+      <section class="space-y-2">
+        <div class="relative">
+          <input 
+            type="text" 
+            id="playlistSongSearchInput" 
+            placeholder="🔍 Filtrar canciones de esta lista..." 
+            oninput="filterClientPlaylistSongs()"
+            class="w-full bg-[#161b26] border border-white/15 focus:border-amber-400 text-white placeholder-gray-400 text-xs rounded-2xl px-4 py-2.5 pl-10 outline-none transition"
+          >
+          <span class="absolute left-3.5 top-2.5 text-gray-400 text-xs">🎵</span>
+        </div>
+      </section>
 
-      <div class="grid grid-cols-1 gap-2 text-xs" id="popularHitsList">
-        <!-- Inyectado dinámicamente -->
-      </div>
-    </section>
-
-    <!-- Resultados de Búsqueda -->
-    <section id="searchResultsSection" class="hidden space-y-2">
-      <div class="flex items-center justify-between px-1">
-        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Canciones individuales encontradas</h3>
-        <span id="resultsCount" class="text-xs text-amber-400 font-medium"></span>
-      </div>
-      <div id="searchResultsList" class="space-y-2">
-        <!-- Inyectado dinámicamente -->
-      </div>
-    </section>
+      <!-- Lista de canciones disponibles -->
+      <section class="glass-card p-3 space-y-2">
+        <div class="flex items-center justify-between border-b border-white/5 pb-2">
+          <h4 id="playlistTracksHeader" class="text-xs font-bold text-gray-300 uppercase tracking-wider">Canciones Disponibles</h4>
+          <span id="playlistTracksCount" class="text-[11px] text-amber-400 font-medium">0 temas</span>
+        </div>
+        <div id="playlistTracksList" class="space-y-2 max-h-96 overflow-y-auto">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </section>
+    </div>
 
     <!-- Próximas Canciones en Cola -->
     <section class="glass-card p-4 space-y-3">
