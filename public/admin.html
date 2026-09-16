@@ -142,6 +142,77 @@
           </button>
         </div>
       </div>
+ 
+      <!-- Panel de Control de Modo de Reproducción de Listas Base -->
+      <div class="glass-card p-4 sm:p-5 space-y-3.5 border-amber-500/30 bg-amber-500/5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+          <div>
+            <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+              <span>🎛️</span> Modo de Reproducción Base (Cuando no hay pedidos)
+            </h3>
+            <p class="text-[11px] sm:text-xs text-gray-300">Elige cómo rota la música de fondo entre tus listas.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="basePlaybackModeBadge" class="text-xs px-2.5 py-1 rounded-lg bg-black/40 border border-white/15 text-white font-mono font-bold">
+              Modo: Lista Única
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <!-- Opción 1: Lista Única -->
+          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-amber-400/50 transition flex items-start gap-3">
+            <input type="radio" name="basePlaybackModeRadio" value="single" class="mt-0.5 accent-amber-500" onchange="changeBasePlaybackMode('single')">
+            <div class="text-xs">
+              <p class="font-bold text-white">🎵 Lista Única</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">Suena únicamente la lista que tengas marcada como activa.</p>
+            </div>
+          </label>
+
+          <!-- Opción 2: Crossover Multilistas -->
+          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-amber-400/50 transition flex items-start gap-3">
+            <input type="radio" name="basePlaybackModeRadio" value="crossover" class="mt-0.5 accent-amber-500" onchange="changeBasePlaybackMode('crossover')">
+            <div class="text-xs">
+              <p class="font-bold text-amber-400">🔀 Crossover Multilistas</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">Mezcla tandas automáticas (ej: 3 de salsa, 3 de reggaetón, 3 de rock).</p>
+            </div>
+          </label>
+
+          <!-- Opción 3: Secuencial / Consecutivo -->
+          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-amber-400/50 transition flex items-start gap-3">
+            <input type="radio" name="basePlaybackModeRadio" value="sequential" class="mt-0.5 accent-amber-500" onchange="changeBasePlaybackMode('sequential')">
+            <div class="text-xs">
+              <p class="font-bold text-sky-400">📋 Consecutivo en Cadena</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">Suena toda la Lista 1, al terminar pasa a la Lista 2, y así sucesivamente.</p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Opciones avanzadas de Crossover (Visibles solo si está seleccionado Crossover) -->
+        <div id="crossoverSettingsPanel" class="hidden p-3 rounded-xl bg-black/40 border border-white/10 space-y-2.5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <p class="text-xs font-bold text-white">Temas por tanda antes de saltar a la siguiente lista:</p>
+              <p class="text-[11px] text-gray-400">Ejemplo: Con 3 temas, sonarán 3 de Salsa, luego 3 de Reggaetón y luego 3 de Rock.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="crossoverBatchSizeSelect" onchange="updateCrossoverBatchSize(this.value)" class="bg-black/60 border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-amber-400">
+                <option value="1">1 canción por lista</option>
+                <option value="2">2 canciones por lista</option>
+                <option value="3">3 canciones por lista (Recomendado)</option>
+                <option value="4">4 canciones por lista</option>
+                <option value="5">5 canciones por lista</option>
+              </select>
+            </div>
+          </div>
+          <p class="text-[11px] text-amber-300">💡 Marca abajo con el botón <strong>"Incluir en Rotación"</strong> las listas que quieres que participen.</p>
+        </div>
+
+        <!-- Info para Consecutivo -->
+        <div id="sequentialSettingsPanel" class="hidden p-3 rounded-xl bg-black/40 border border-white/10">
+          <p class="text-xs text-sky-300">📋 En modo Consecutivo, el reproductor tocará todas las canciones de cada lista seleccionada en orden antes de pasar a la siguiente.</p>
+        </div>
+      </div>
 
       <div id="playlistsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <!-- Inyectado dinámicamente -->
@@ -375,6 +446,25 @@
             <p class="text-xs text-gray-400">Agrupa por tandas de género automáticamente</p>
           </div>
           <input type="checkbox" id="settingAutoDJ" class="w-5 h-5 accent-amber-500">
+        </div>
+
+        <!-- Tamaño de Tanda de Género -->
+        <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-bold text-white">Canciones por Tanda de Género</p>
+              <p class="text-xs text-gray-400">Cuántos temas del mismo ritmo suenan seguidos antes de pasar a otro</p>
+            </div>
+            <span class="text-base">🎚️</span>
+          </div>
+          <select id="settingGenreBatchSize" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+            <option value="1">1 canción (Rotación inmediata / Cambio continuo)</option>
+            <option value="2">2 canciones (Tandas dinámicas y ágiles)</option>
+            <option value="3">3 canciones (Estándar DJ de bar - Recomendado)</option>
+            <option value="4">4 canciones (Tandas extendidas para prender el ritmo)</option>
+            <option value="5">5 canciones (Bloque largo del mismo género)</option>
+          </select>
+          <p class="text-[11px] text-gray-400">Controla cómo el DJ inteligente agrupa los pedidos de los clientes en la cola.</p>
         </div>
 
         <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-2">

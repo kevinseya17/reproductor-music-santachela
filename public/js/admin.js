@@ -58,9 +58,15 @@ function renderAdminState(data) {
     if (document.getElementById('settingMaxSongDuration')) {
       document.getElementById('settingMaxSongDuration').value = settings.maxSongDuration !== undefined ? settings.maxSongDuration : 210;
     }
+    if (document.getElementById('settingGenreBatchSize')) {
+      document.getElementById('settingGenreBatchSize').value = settings.genreBatchSize || 3;
+    }
     if (document.getElementById('settingDynamicDuration')) {
       document.getElementById('settingDynamicDuration').checked = settings.dynamicDurationOnQueue !== false;
     }
+
+    // Actualizar controles de Modo de Reproducción Base
+    renderBasePlaybackModeControls(settings);
 
     // Renderizar ajustes de control, filtro y promociones
     renderBlacklistWords(settings.blacklistWords);
@@ -268,11 +274,14 @@ async function loadPlaylists() {
 
     const statusRes = await fetch('/api/status');
     const statusData = await statusRes.json();
-    const activeId = statusData.settings.activePlaylistId;
+    const currentMode = statusData.settings.basePlaybackMode || 'single';
+    const crossoverList = statusData.settings.crossoverPlaylists || [];
 
     const grid = document.getElementById('playlistsGrid');
     grid.innerHTML = playlists.map(p => {
       const isActive = p.id === activeId;
+      const isIncludedInRotation = crossoverList.includes(p.id) || (crossoverList.length === 0);
+
       return `
         <div class="glass-card p-5 space-y-3 ${isActive ? 'border-amber-400/50 bg-amber-500/5' : ''}">
           <div class="flex items-start justify-between">
@@ -280,7 +289,14 @@ async function loadPlaylists() {
               <h3 class="font-bold text-base text-white">${escapeHtml(p.name)}</h3>
               <p class="text-xs text-gray-400 mt-1">${escapeHtml(p.description || '')}</p>
             </div>
-            ${isActive ? '<span class="genre-badge genre-Popular">Activa Ahora</span>' : ''}
+            <div class="flex flex-col items-end gap-1">
+              ${isActive ? '<span class="genre-badge genre-Popular">Activa Ahora</span>' : ''}
+              ${(currentMode === 'crossover' || currentMode === 'sequential') ? `
+                <button onclick="togglePlaylistInRotation('${p.id}')" class="text-[10px] px-2 py-0.5 rounded-full font-bold transition ${isIncludedInRotation ? 'bg-green-500/20 text-green-300 border border-green-500/30' : 'bg-white/10 text-gray-400 border border-white/10'}" title="Activar/Desactivar de la rotación automática">
+                  ${isIncludedInRotation ? '✓ En Rotación' : '＋ No incluida'}
+                </button>
+              ` : ''}
+            </div>
           </div>
 
           <div class="text-xs text-gray-400">
@@ -299,6 +315,74 @@ async function loadPlaylists() {
     }).join('');
   } catch (err) {
     console.error('Error cargando listas:', err);
+  }
+}
+
+// 4.0 Funciones de Modo de Reproducción Base (Única, Crossover, Consecutivo)
+function renderBasePlaybackModeControls(settings) {
+  const mode = settings.basePlaybackMode || 'single';
+  const badge = document.getElementById('basePlaybackModeBadge');
+  const crossoverPanel = document.getElementById('crossoverSettingsPanel');
+  const sequentialPanel = document.getElementById('sequentialSettingsPanel');
+  const batchSelect = document.getElementById('crossoverBatchSizeSelect');
+
+  // Marcar radio button
+  const radios = document.getElementsByName('basePlaybackModeRadio');
+  radios.forEach(r => {
+    r.checked = (r.value === mode);
+  });
+
+  if (batchSelect && settings.crossoverBatchSize) {
+    batchSelect.value = settings.crossoverBatchSize;
+  }
+
+  if (mode === 'crossover') {
+    if (badge) badge.innerHTML = `<span class="text-amber-400 font-bold">🔀 Modo: Crossover (${settings.crossoverBatchSize || 3} temas x lista)</span>`;
+    if (crossoverPanel) crossoverPanel.classList.remove('hidden');
+    if (sequentialPanel) sequentialPanel.classList.add('hidden');
+  } else if (mode === 'sequential') {
+    if (badge) badge.innerHTML = `<span class="text-sky-400 font-bold">📋 Modo: Consecutivo en Cadena</span>`;
+    if (crossoverPanel) crossoverPanel.classList.add('hidden');
+    if (sequentialPanel) sequentialPanel.classList.remove('hidden');
+  } else {
+    if (badge) badge.innerHTML = `<span class="text-white font-bold">🎵 Modo: Lista Única</span>`;
+    if (crossoverPanel) crossoverPanel.classList.add('hidden');
+    if (sequentialPanel) sequentialPanel.classList.add('hidden');
+  }
+}
+
+async function changeBasePlaybackMode(newMode) {
+  await saveSettingsPartial({ basePlaybackMode: newMode });
+  loadPlaylists();
+}
+
+async function updateCrossoverBatchSize(newSize) {
+  const size = parseInt(newSize) || 3;
+  await saveSettingsPartial({ crossoverBatchSize: size });
+  loadPlaylists();
+}
+
+async function togglePlaylistInRotation(playlistId) {
+  try {
+    const statusRes = await fetch('/api/status');
+    const statusData = await statusRes.json();
+    let crossoverList = statusData.settings.crossoverPlaylists || [];
+
+    // Si estaba vacía, inicialmente todas las listas estaban incluidas
+    if (crossoverList.length === 0 && currentPlaylistsList.length > 0) {
+      crossoverList = currentPlaylistsList.map(p => p.id);
+    }
+
+    if (crossoverList.includes(playlistId)) {
+      crossoverList = crossoverList.filter(id => id !== playlistId);
+    } else {
+      crossoverList.push(playlistId);
+    }
+
+    await saveSettingsPartial({ crossoverPlaylists: crossoverList });
+    loadPlaylists();
+  } catch (err) {
+    console.error('Error al alternar lista en rotación:', err);
   }
 }
 
@@ -578,6 +662,7 @@ async function saveSettings() {
   const fadeTransitionEnabled = document.getElementById('settingFadeTransition')?.checked !== false;
   const maxSongDuration = parseInt(document.getElementById('settingMaxSongDuration')?.value || 210);
   const dynamicDurationOnQueue = document.getElementById('settingDynamicDuration')?.checked !== false;
+  const genreBatchSize = parseInt(document.getElementById('settingGenreBatchSize')?.value || 3);
 
   await fetch('/api/settings', {
     method: 'POST',
@@ -592,7 +677,8 @@ async function saveSettings() {
       requestMode,
       fadeTransitionEnabled,
       maxSongDuration,
-      dynamicDurationOnQueue
+      dynamicDurationOnQueue,
+      genreBatchSize
     })
   });
 

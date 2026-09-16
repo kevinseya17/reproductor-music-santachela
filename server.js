@@ -28,6 +28,12 @@ let currentlyPlaying = null;
 let currentPlaylistIndex = 0;
 let micModeActive = false;
 
+// Variables de estado para Modo Crossover y Secuencial
+let crossoverCurrentListIdx = 0;
+let crossoverSongCountInCurrentList = 0;
+let sequentialListIdx = 0;
+let sequentialSongIdx = 0;
+
 // Evaluador automático de horarios musicales (cada 60 segundos)
 function checkSchedule() {
   const settings = db.getSettings();
@@ -64,10 +70,112 @@ setInterval(checkSchedule, 60000);
 
 /**
  * Obtiene la siguiente canción de la lista base (El Norte)
+ * Soporta 3 modos:
+ * 1. 'single': Una sola lista base activa.
+ * 2. 'crossover': Mezcla automática de tandas (ej: 3 de salsa -> 3 de reggaetón -> 3 de rock).
+ * 3. 'sequential': Consecutivo (termina toda la Lista A, luego toda la Lista B, etc).
  */
 function getNextBaseSong() {
   const settings = db.getSettings();
-  const playlist = db.getPlaylist(settings.activePlaylistId) || db.getPlaylists()[0];
+  const allPlaylists = db.getPlaylists();
+  if (!allPlaylists || allPlaylists.length === 0) return null;
+
+  const mode = settings.basePlaybackMode || 'single';
+
+  // ----------------------------------------------------
+  // MODO 2: CROSSOVER MULTILISTAS (TANDAS INTERCALADAS)
+  // ----------------------------------------------------
+  if (mode === 'crossover') {
+    const selectedIds = Array.isArray(settings.crossoverPlaylists) && settings.crossoverPlaylists.length > 0
+      ? settings.crossoverPlaylists
+      : allPlaylists.map(p => p.id);
+
+    const eligiblePlaylists = selectedIds
+      .map(id => db.getPlaylist(id))
+      .filter(p => p && p.tracks && p.tracks.length > 0);
+
+    if (eligiblePlaylists.length > 0) {
+      const batchSize = Math.max(1, settings.crossoverBatchSize || 3);
+      if (crossoverCurrentListIdx >= eligiblePlaylists.length) {
+        crossoverCurrentListIdx = 0;
+      }
+
+      const activeList = eligiblePlaylists[crossoverCurrentListIdx];
+      // Tomamos la pista según el contador de esa lista
+      const trackIndex = (activeList._crossoverIndex || 0) % activeList.tracks.length;
+      activeList._crossoverIndex = trackIndex + 1;
+      const track = activeList.tracks[trackIndex];
+
+      crossoverSongCountInCurrentList++;
+      // Si ya completó la tanda de esta lista, rotar a la siguiente lista del ciclo
+      if (crossoverSongCountInCurrentList >= batchSize) {
+        crossoverCurrentListIdx = (crossoverCurrentListIdx + 1) % eligiblePlaylists.length;
+        crossoverSongCountInCurrentList = 0;
+      }
+
+      return {
+        id: `base_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        videoId: track.videoId,
+        title: track.title,
+        artist: track.artist,
+        genre: track.genre || 'Crossover',
+        duration: track.duration || '3:30',
+        thumbnail: track.thumbnail || `https://i.ytimg.com/vi/${track.videoId}/hqdefault.jpg`,
+        requestedBy: { table: null, name: `DJ Crossover (${activeList.name})` },
+        isBaseTrack: true,
+        addedAt: Date.now()
+      };
+    }
+  }
+
+  // ----------------------------------------------------
+  // MODO 3: SECUENCIAL / CONSECUTIVO EN CADENA
+  // ----------------------------------------------------
+  if (mode === 'sequential') {
+    const selectedIds = Array.isArray(settings.crossoverPlaylists) && settings.crossoverPlaylists.length > 0
+      ? settings.crossoverPlaylists
+      : allPlaylists.map(p => p.id);
+
+    const eligiblePlaylists = selectedIds
+      .map(id => db.getPlaylist(id))
+      .filter(p => p && p.tracks && p.tracks.length > 0);
+
+    if (eligiblePlaylists.length > 0) {
+      if (sequentialListIdx >= eligiblePlaylists.length) {
+        sequentialListIdx = 0;
+        sequentialSongIdx = 0;
+      }
+
+      let currentList = eligiblePlaylists[sequentialListIdx];
+      if (sequentialSongIdx >= currentList.tracks.length) {
+        // Terminó esta lista completa, pasar a la siguiente
+        sequentialListIdx = (sequentialListIdx + 1) % eligiblePlaylists.length;
+        sequentialSongIdx = 0;
+        currentList = eligiblePlaylists[sequentialListIdx];
+      }
+
+      const track = currentList.tracks[sequentialSongIdx];
+      sequentialSongIdx++;
+
+      return {
+        id: `base_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        videoId: track.videoId,
+        title: track.title,
+        artist: track.artist,
+        genre: track.genre || 'Crossover',
+        duration: track.duration || '3:30',
+        thumbnail: track.thumbnail || `https://i.ytimg.com/vi/${track.videoId}/hqdefault.jpg`,
+        requestedBy: { table: null, name: `Secuencia DJ (${currentList.name})` },
+        isBaseTrack: true,
+        addedAt: Date.now()
+      };
+    }
+  }
+
+  // ----------------------------------------------------
+  // MODO 1: LISTA ÚNICA (PREDETERMINADO)
+  // ----------------------------------------------------
+  const playlist = db.getPlaylist(settings.activePlaylistId) || allPlaylists[0];
   if (!playlist || !playlist.tracks || playlist.tracks.length === 0) {
     return null;
   }
