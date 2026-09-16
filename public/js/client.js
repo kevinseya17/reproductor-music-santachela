@@ -289,6 +289,8 @@ async function confirmAndSendRequest() {
 
   const btn = document.getElementById('sendRequestBtn');
   const customerName = document.getElementById('customerNameInput').value.trim();
+  const dedicationInput = document.getElementById('customerDedicationInput');
+  const dedication = dedicationInput ? dedicationInput.value.trim() : '';
 
   btn.disabled = true;
   btn.textContent = 'Enviando...';
@@ -304,7 +306,8 @@ async function confirmAndSendRequest() {
         duration: selectedSongForModal.duration,
         thumbnail: selectedSongForModal.thumbnail,
         table: currentTable,
-        customerName: customerName || `Mesa ${currentTable}`
+        customerName: customerName || `Mesa ${currentTable}`,
+        dedication
       })
     });
 
@@ -319,6 +322,7 @@ async function confirmAndSendRequest() {
       document.getElementById('clearSearchBtn').classList.add('hidden');
       hideSearchResults();
       document.getElementById('customerNameInput').value = '';
+      if (dedicationInput) dedicationInput.value = '';
     }
   } catch (err) {
     console.error('Error enviando pedido:', err);

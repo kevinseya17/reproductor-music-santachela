@@ -26,6 +26,41 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Estado de reproducción en memoria
 let currentlyPlaying = null;
 let currentPlaylistIndex = 0;
+let micModeActive = false;
+
+// Evaluador automático de horarios musicales (cada 60 segundos)
+function checkSchedule() {
+  const settings = db.getSettings();
+  if (!settings.scheduleEnabled || !settings.schedule || settings.schedule.length === 0) return;
+
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const currentTime = `${hours}:${minutes}`;
+
+  for (const block of settings.schedule) {
+    let match = false;
+    if (block.start <= block.end) {
+      match = (currentTime >= block.start && currentTime < block.end);
+    } else {
+      // Bloque que cruza la medianoche (ej: 23:30 a 04:00)
+      match = (currentTime >= block.start || currentTime < block.end);
+    }
+
+    if (match && block.playlistId && settings.activePlaylistId !== block.playlistId) {
+      console.log(`🕒 Cambio de horario automático: Activando lista "${block.name}" (${block.playlistId})`);
+      db.updateSettings({ activePlaylistId: block.playlistId });
+      io.emit('state-changed', {
+        currentlyPlaying,
+        queue: db.getQueue(),
+        settings: db.getSettings()
+      });
+      break;
+    }
+  }
+}
+
+setInterval(checkSchedule, 60000);
 
 /**
  * Obtiene la siguiente canción de la lista base (El Norte)
@@ -112,7 +147,9 @@ app.get('/api/status', (req, res) => {
   res.json({
     currentlyPlaying,
     queue: db.getQueue(),
-    settings: db.getSettings()
+    settings: db.getSettings(),
+    micModeActive,
+    bannedTables: db.getBannedTables()
   });
 });
 
@@ -128,20 +165,29 @@ app.get('/api/search', async (req, res) => {
 // Pedir canción (Cliente desde la mesa)
 app.post('/api/request', async (req, res) => {
   try {
-    const { videoId, title, artist, duration, thumbnail, table, customerName } = req.body;
+    const { videoId, title, artist, duration, thumbnail, table, customerName, dedication } = req.body;
     const tableClean = table ? String(table).trim() : 'Mesa';
 
     if (!videoId || !title) {
       return res.status(400).json({ error: 'Faltan datos de la canción' });
     }
 
-    // 1. Validar reglas de la mesa (anti-spam / límites)
+    // 1. Validar reglas de la mesa (anti-spam / límites / baneos)
     const check = db.canTableRequest(tableClean);
     if (!check.allowed) {
       return res.status(429).json({ error: check.reason });
     }
 
-    // 2. Clasificar género con el DJ Inteligente
+    // 2. Filtro Anti-Trolls y Lista Negra
+    const blSong = db.isBlacklisted(title, artist);
+    const blDed = dedication ? db.isBlacklisted(dedication, '') : { blacklisted: false };
+    if (blSong.blacklisted || blDed.blacklisted) {
+      return res.status(400).json({
+        error: 'Esta canción o mensaje contiene términos o audios no permitidos en el bar.'
+      });
+    }
+
+    // 3. Clasificar género con el DJ Inteligente
     const genre = await aiDj.classifyGenre(title, artist);
 
     const song = {
@@ -154,7 +200,8 @@ app.post('/api/request', async (req, res) => {
       thumbnail: thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
       requestedBy: {
         table: tableClean,
-        name: customerName ? customerName.trim() : `Mesa ${tableClean}`
+        name: customerName ? customerName.trim() : `Mesa ${tableClean}`,
+        dedication: (dedication || '').trim().slice(0, 120)
       },
       isBaseTrack: false,
       addedAt: Date.now()
@@ -428,6 +475,34 @@ app.post('/api/admin/play-now', async (req, res) => {
   });
 
   res.json({ success: true, currentlyPlaying });
+});
+
+// Modo Micrófono / Anuncio (baja volumen suavemente en la TV)
+app.post('/api/admin/mic-mode', (req, res) => {
+  micModeActive = !micModeActive;
+  io.emit('mic-mode', { active: micModeActive });
+  res.json({ success: true, micModeActive });
+});
+
+// Baneo y desbaneo de mesas problemáticas
+app.post('/api/admin/ban-table', (req, res) => {
+  const { table, minutes } = req.body;
+  db.banTable(table, minutes || 30);
+  const banned = db.getBannedTables();
+  io.emit('banned-tables-updated', banned);
+  res.json({ success: true, bannedTables: banned });
+});
+
+app.post('/api/admin/unban-table', (req, res) => {
+  const { table } = req.body;
+  db.unbanTable(table);
+  const banned = db.getBannedTables();
+  io.emit('banned-tables-updated', banned);
+  res.json({ success: true, bannedTables: banned });
+});
+
+app.get('/api/admin/banned-tables', (req, res) => {
+  res.json({ bannedTables: db.getBannedTables() });
 });
 
 // Códigos QR

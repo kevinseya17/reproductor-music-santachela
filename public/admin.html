@@ -24,6 +24,9 @@
     </div>
 
     <div class="flex items-center gap-3">
+      <button id="btnMicMode" onclick="toggleMicMode()" class="btn-secondary text-xs flex items-center gap-1.5 transition-all duration-300">
+        <span id="micModeIcon">🎙️</span> <span id="micModeText">Modo Micrófono</span>
+      </button>
       <a href="/player.html" target="_blank" class="btn-secondary text-xs flex items-center gap-1.5">
         <span>📺</span> Abrir Pantalla TV
       </a>
@@ -36,20 +39,23 @@
   <div class="max-w-7xl mx-auto p-6 space-y-6">
 
     <!-- Navegación de Pestañas -->
-    <nav class="flex border-b border-white/10 gap-6 text-sm font-semibold">
-      <button onclick="switchTab('queue')" id="tabBtnQueue" class="pb-3 border-b-2 border-amber-400 text-amber-400 flex items-center gap-2">
+    <nav class="flex border-b border-white/10 gap-6 text-sm font-semibold overflow-x-auto pb-1">
+      <button onclick="switchTab('queue')" id="tabBtnQueue" class="pb-3 border-b-2 border-amber-400 text-amber-400 flex items-center gap-2 whitespace-nowrap">
         <span>📋</span> Cola En Vivo (<span id="queueCounter">0</span>)
       </button>
-      <button onclick="switchTab('playlists')" id="tabBtnPlaylists" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2">
+      <button onclick="switchTab('playlists')" id="tabBtnPlaylists" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
         <span>🎵</span> Listas Maestras (El Norte)
       </button>
-      <button onclick="switchTab('ai')" id="tabBtnAI" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2">
+      <button onclick="switchTab('control')" id="tabBtnControl" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
+        <span>🛡️</span> Mesas, Horarios & TV
+      </button>
+      <button onclick="switchTab('ai')" id="tabBtnAI" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
         <span>🤖</span> DJ Inteligente con IA
       </button>
-      <button onclick="switchTab('stats')" id="tabBtnStats" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2">
+      <button onclick="switchTab('stats')" id="tabBtnStats" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
         <span>📈</span> Tendencias & Historial
       </button>
-      <button onclick="switchTab('settings')" id="tabBtnSettings" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2">
+      <button onclick="switchTab('settings')" id="tabBtnSettings" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
         <span>⚙️</span> Ajustes del Bar
       </button>
     </nav>
@@ -195,6 +201,137 @@
     </div>
 
     <!-- ============================================== -->
+    <!-- PESTAÑA: CONTROL DE MESAS, HORARIOS & TV -->
+    <!-- ============================================== -->
+    <div id="tabContentControl" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- 1. Control de Mesas & Anti-Spam -->
+        <div class="glass-card p-6 space-y-4">
+          <div class="border-b border-white/10 pb-3">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span>🛑</span> Control de Mesas (Pausar / Bloquear)
+            </h3>
+            <p class="text-xs text-gray-400">Pausa los pedidos de mesas problemáticas o que hagan spam de canciones.</p>
+          </div>
+
+          <!-- Formulario para pausar mesa -->
+          <div class="flex flex-wrap gap-2">
+            <input type="text" id="banTableInput" placeholder="N° de mesa (ej: 4)" class="w-32 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+            <select id="banTableMinutes" class="bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+              <option value="15">15 minutos</option>
+              <option value="30" selected>30 minutos</option>
+              <option value="60">1 hora</option>
+              <option value="120">2 horas</option>
+              <option value="480">Toda la noche</option>
+            </select>
+            <button onclick="executeBanTable()" class="btn-primary text-xs px-4 py-2 font-bold whitespace-nowrap">
+              Pausar Mesa
+            </button>
+          </div>
+
+          <!-- Mesas actualmente pausadas -->
+          <div class="space-y-2 pt-2">
+            <h4 class="text-xs font-bold text-gray-300">Mesas pausadas actualmente:</h4>
+            <div id="bannedTablesList" class="space-y-1.5 text-xs max-h-40 overflow-y-auto pr-1">
+              <p class="text-xs text-gray-500 py-2">No hay ninguna mesa pausada.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Filtro Anti-Trolls / Palabras Prohibidas -->
+        <div class="glass-card p-6 space-y-4">
+          <div class="border-b border-white/10 pb-3">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span>🚫</span> Filtro de Palabras Prohibidas (Anti-Trolls)
+            </h3>
+            <p class="text-xs text-gray-400">Bloquea canciones y dedicatorias con gemidos, bromas virales o groserías.</p>
+          </div>
+
+          <div class="flex gap-2">
+            <input type="text" id="newBlacklistWordInput" placeholder="Nueva palabra o término prohibido..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+            <button onclick="addBlacklistWord()" class="btn-secondary text-xs px-4">Agregar</button>
+          </div>
+
+          <div>
+            <div id="blacklistWordsTags" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto pr-1">
+              <!-- Inyectado dinámicamente -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Cinta de Promociones en Pantalla TV -->
+        <div class="glass-card p-6 space-y-4">
+          <div class="border-b border-white/10 pb-3">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span>📺</span> Cinta de Promociones en Pantalla TV
+            </h3>
+            <p class="text-xs text-gray-400">Mensajes de promociones que van rotando en la barra inferior del televisor.</p>
+          </div>
+
+          <div class="flex gap-2">
+            <input type="text" id="newPromoInput" placeholder="Ej: 🍻 Hoy 2x1 en Cócteles hasta las 10 PM..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+            <button onclick="addPromoMessage()" class="btn-primary text-xs px-4">Agregar</button>
+          </div>
+
+          <div id="promosAdminList" class="space-y-1.5 text-xs max-h-48 overflow-y-auto pr-1">
+            <!-- Inyectado dinámicamente -->
+          </div>
+        </div>
+
+        <!-- 4. Reloj de Horarios Musicales Automáticos -->
+        <div class="glass-card p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div>
+              <h3 class="text-base font-bold text-white flex items-center gap-2">
+                <span>🕒</span> Reloj de Horarios de la Noche
+              </h3>
+              <p class="text-xs text-gray-400">Cambia la lista base automáticamente según la hora de la noche.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-gray-400">Activo:</span>
+              <input type="checkbox" id="settingScheduleEnabled" onchange="toggleScheduleEnabled(this.checked)" class="w-4 h-4 accent-amber-500">
+            </div>
+          </div>
+
+          <!-- Lista de bloques de horarios -->
+          <div id="scheduleBlocksList" class="space-y-2 text-xs">
+            <!-- Inyectado dinámicamente -->
+          </div>
+
+          <!-- Formulario para agregar bloque de horario -->
+          <div class="bg-black/30 p-3.5 rounded-2xl border border-white/10 space-y-2">
+            <p class="text-xs font-bold text-amber-400">Agregar nuevo bloque de horario:</p>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[10px] text-gray-400 block mb-0.5">Desde (Hora):</label>
+                <input type="time" id="newScheduleStart" value="20:00" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-amber-400">
+              </div>
+              <div>
+                <label class="text-[10px] text-gray-400 block mb-0.5">Hasta (Hora):</label>
+                <input type="time" id="newScheduleEnd" value="23:30" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-amber-400">
+              </div>
+            </div>
+            <div>
+              <label class="text-[10px] text-gray-400 block mb-0.5">Nombre de la tanda:</label>
+              <input type="text" id="newScheduleName" placeholder="Ej: Previa y Rumba" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-amber-400">
+            </div>
+            <div>
+              <label class="text-[10px] text-gray-400 block mb-0.5">Lista Base a reproducir:</label>
+              <select id="newSchedulePlaylistSelect" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-amber-400">
+                <!-- Inyectado dinámicamente con las listas disponibles -->
+              </select>
+            </div>
+            <button onclick="addScheduleBlock()" class="btn-primary w-full text-xs py-2 mt-1 font-bold">
+              + Agregar a la Programación
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================== -->
     <!-- PESTAÑA 5: AJUSTES DEL BAR -->
     <!-- ============================================== -->
     <div id="tabContentSettings" class="hidden space-y-6 max-w-xl">
@@ -236,6 +373,10 @@
           <label class="block text-xs text-gray-400 mb-1">Clave de API de Gemini (Opcional, para funciones avanzadas de IA):</label>
           <input type="password" id="settingApiKey" placeholder="AIzaSy..." class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
         </div>
+
+        <button onclick="saveSettings()" class="btn-primary w-full py-3 text-xs font-bold mt-2">
+          💾 Guardar Cambios de Configuración
+        </button>
 
       </div>
     </div>

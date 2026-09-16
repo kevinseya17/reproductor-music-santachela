@@ -64,14 +64,30 @@
       </div>
     </header>
 
+    <!-- Centro: Dedicatoria Animada Especial -->
+    <div id="dedicationBanner" class="self-center hidden max-w-2xl text-center bg-gradient-to-r from-amber-500 via-pink-500 to-amber-500 p-0.5 rounded-3xl shadow-2xl animate-in fade-in zoom-in duration-300 interactive">
+      <div class="bg-black/90 backdrop-blur-xl px-8 py-4 rounded-3xl space-y-1">
+        <p id="dedicationFrom" class="text-xs font-black uppercase tracking-widest text-amber-400 flex items-center justify-center gap-1.5">
+          <span>🎉</span> <span id="dedicationFromText">DEDICATORIA DE LA MESA 4</span>
+        </p>
+        <p id="dedicationText" class="text-lg md:text-xl font-extrabold text-white leading-snug">"¡Feliz cumpleaños Laura!"</p>
+      </div>
+    </div>
+
     <!-- Centro: Alerta cuando entra nuevo pedido -->
     <div id="newRequestNotification" class="self-center hidden animate-bounce bg-amber-500 text-black px-6 py-3 rounded-full font-bold text-sm shadow-2xl flex items-center gap-2">
       <span>🎉</span>
       <span id="newRequestText">¡Nuevo pedido de la Mesa 4!</span>
     </div>
 
+    <!-- Indicador de Modo Micrófono Activo -->
+    <div id="micModeIndicator" class="self-center hidden bg-red-600 text-white font-extrabold px-6 py-2.5 rounded-full text-xs shadow-2xl flex items-center gap-2 animate-pulse">
+      <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+      <span>🎙️ MODO MICRÓFONO ACTIVO (Música atenuada)</span>
+    </div>
+
     <!-- Footer Inferior: Información del tema sonando y siguiente -->
-    <footer class="space-y-4">
+    <footer class="space-y-3">
       <div class="flex items-end justify-between gap-6">
 
         <!-- Info de la Canción Actual -->
@@ -101,8 +117,16 @@
 
       </div>
 
+      <!-- Cinta de Promociones de Santa Chela -->
+      <div id="promoBar" class="bg-black/70 backdrop-blur-md border border-amber-500/30 rounded-2xl px-5 py-2.5 flex items-center gap-3 text-xs text-amber-300 font-bold overflow-hidden interactive shadow-lg">
+        <span class="text-base animate-pulse">🔥</span>
+        <div class="flex-1 truncate">
+          <span id="promoText">🍻 ¡Pregunta por nuestras promociones de cerveza en la barra!</span>
+        </div>
+      </div>
+
       <!-- Barra de Controles Rápidos para el Barman / Encargado -->
-      <div class="flex items-center justify-between pt-2 border-t border-white/10 text-xs text-gray-400 interactive">
+      <div class="flex items-center justify-between pt-1 text-xs text-gray-400 interactive">
         <div class="flex items-center gap-4">
           <button id="playPauseBtn" onclick="togglePlayPause()" class="hover:text-amber-400 flex items-center gap-1.5 font-bold">
             <span id="playPauseIcon">⏸️</span> Pausar

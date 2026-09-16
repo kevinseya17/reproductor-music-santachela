@@ -136,6 +136,30 @@ socket.on('state-changed', (data) => {
       reqBadge.textContent = `✨ Lista Base del Bar`;
       reqBadge.className = 'bg-white/10 text-gray-300 font-medium text-xs px-3 py-1 rounded-full';
     }
+
+    // Dedicatoria especial en TV
+    const dedBanner = document.getElementById('dedicationBanner');
+    const dedText = document.getElementById('dedicationText');
+    const dedFromText = document.getElementById('dedicationFromText');
+
+    if (currentlyPlaying.requestedBy && currentlyPlaying.requestedBy.dedication) {
+      dedFromText.textContent = `MENSAJE ESPECIAL DE ${currentlyPlaying.requestedBy.name.toUpperCase()}`;
+      dedText.textContent = `"${currentlyPlaying.requestedBy.dedication}"`;
+      dedBanner.classList.remove('hidden');
+
+      // Ocultar después de 25 segundos
+      clearTimeout(window.dedicationTimer);
+      window.dedicationTimer = setTimeout(() => {
+        dedBanner.classList.add('hidden');
+      }, 25000);
+    } else {
+      dedBanner.classList.add('hidden');
+    }
+  }
+
+  // Actualizar lista de promociones si vienen en settings
+  if (settings && settings.promos && Array.isArray(settings.promos)) {
+    activePromos = settings.promos;
   }
 
   // Siguiente canción
@@ -148,6 +172,61 @@ socket.on('state-changed', (data) => {
     document.getElementById('nextGenre').textContent = 'DJ Inteligente';
   }
 });
+
+// Promociones de Santa Chela en Pantalla
+let activePromos = [
+  '🍻 ¡Pregunta por nuestras promociones de cerveza en la barra!',
+  '🍔 Prueba nuestras picadas y alitas Santa Chela',
+  '🥃 Pide tu botella favorita para compartir con tu parche'
+];
+let currentPromoIdx = 0;
+
+function startPromoRotation() {
+  const promoTextEl = document.getElementById('promoText');
+  if (!promoTextEl) return;
+
+  setInterval(() => {
+    if (!activePromos || activePromos.length === 0) return;
+    currentPromoIdx = (currentPromoIdx + 1) % activePromos.length;
+    promoTextEl.textContent = activePromos[currentPromoIdx];
+  }, 12000);
+}
+
+// Modo Micrófono / Anuncio con Fade Suave de Volumen
+let savedVolumeBeforeMic = 100;
+
+socket.on('mic-mode', ({ active }) => {
+  const indicator = document.getElementById('micModeIndicator');
+  if (!ytPlayer || !isPlayerReady) return;
+
+  if (active) {
+    if (indicator) indicator.classList.remove('hidden');
+    savedVolumeBeforeMic = ytPlayer.getVolume() || 100;
+    fadeVolume(15, 1200);
+  } else {
+    if (indicator) indicator.classList.add('hidden');
+    fadeVolume(savedVolumeBeforeMic, 1200);
+  }
+});
+
+function fadeVolume(targetVol, durationMs = 1200) {
+  if (!ytPlayer || !isPlayerReady) return;
+  const startVol = ytPlayer.getVolume();
+  const steps = 20;
+  const stepTime = durationMs / steps;
+  const volStep = (targetVol - startVol) / steps;
+  let currentStep = 0;
+
+  const interval = setInterval(() => {
+    currentStep++;
+    const newVol = Math.round(startVol + (volStep * currentStep));
+    ytPlayer.setVolume(Math.max(0, Math.min(100, newVol)));
+    if (currentStep >= steps) {
+      clearInterval(interval);
+      ytPlayer.setVolume(targetVol);
+    }
+  }, stepTime);
+}
 
 // Alerta animada en pantalla cuando entra una petición
 socket.on('new-request-alert', (data) => {

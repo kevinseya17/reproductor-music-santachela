@@ -140,9 +140,19 @@
         </div>
       </div>
 
-      <div>
-        <label class="block text-xs text-gray-400 mb-1">Tu nombre o dedicatoria (opcional):</label>
-        <input type="text" id="customerNameInput" placeholder="Ej: Carlos / Para los de la esquina" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+      <div class="space-y-2.5">
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Tu nombre (opcional):</label>
+          <input type="text" id="customerNameInput" placeholder="Ej: Carlos" class="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-semibold text-amber-400">🎂 Mensaje para la Pantalla TV (opcional):</label>
+            <span class="text-[10px] text-gray-400">Máx 100 caracteres</span>
+          </div>
+          <input type="text" id="customerDedicationInput" maxlength="100" placeholder="Ej: ¡Feliz cumpleaños Laura! 🎉 / Saludos de la Mesa 4" class="w-full bg-black/40 border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400 placeholder-gray-500">
+          <p class="text-[10px] text-gray-400 mt-1">✨ Este mensaje saldrá animado en el televisor del bar cuando empiece tu canción.</p>
+        </div>
       </div>
 
       <div class="flex gap-2">

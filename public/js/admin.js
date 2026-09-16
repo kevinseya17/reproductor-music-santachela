@@ -12,6 +12,12 @@ function setupSocket() {
   socket.on('state-changed', (data) => {
     renderAdminState(data);
   });
+  socket.on('mic-mode', ({ active }) => {
+    renderMicModeState(active);
+  });
+  socket.on('banned-tables-updated', (banned) => {
+    renderBannedTables(banned);
+  });
 }
 
 async function loadInitialData() {
@@ -19,6 +25,8 @@ async function loadInitialData() {
     const res = await fetch('/api/status');
     const data = await res.json();
     renderAdminState(data);
+    if (data.micModeActive !== undefined) renderMicModeState(data.micModeActive);
+    if (data.bannedTables) renderBannedTables(data.bannedTables);
     loadPlaylists();
     loadTrends();
   } catch (err) {
@@ -41,6 +49,11 @@ function renderAdminState(data) {
     document.getElementById('settingTotalTables').value = settings.totalTables || 20;
     document.getElementById('settingAutoDJ').checked = settings.autoDJEnabled !== false;
     document.getElementById('settingApiKey').value = settings.geminiApiKey || '';
+
+    // Renderizar ajustes de control, filtro y promociones
+    renderBlacklistWords(settings.blacklistWords);
+    renderPromosList(settings.promos);
+    renderSchedule(settings.schedule, settings.scheduleEnabled);
   }
 
   // Sonando Ahora
@@ -55,7 +68,8 @@ function renderAdminState(data) {
 
     const reqEl = document.getElementById('adminNowRequested');
     if (currentlyPlaying.requestedBy && currentlyPlaying.requestedBy.table) {
-      reqEl.textContent = `• Pedida por: Mesa ${currentlyPlaying.requestedBy.table}`;
+      const ded = currentlyPlaying.requestedBy.dedication ? ` | 🎂 "${escapeHtml(currentlyPlaying.requestedBy.dedication)}"` : '';
+      reqEl.innerHTML = `• Pedida por: Mesa ${currentlyPlaying.requestedBy.table}${ded}`;
     } else {
       reqEl.textContent = `• Lista Base`;
     }
@@ -85,10 +99,16 @@ function renderQueueList(queue) {
             <span class="genre-badge genre-${song.genre || 'Crossover'} text-[10px] py-0.2 px-2">${song.genre}</span>
             <span class="text-[11px] text-amber-400/90 font-medium">📍 ${song.requestedBy?.name || 'Mesa'}</span>
           </div>
+          ${song.requestedBy?.dedication ? `<p class="text-[11px] text-pink-300 font-medium italic mt-1 truncate">🎂 "${escapeHtml(song.requestedBy.dedication)}"</p>` : ''}
         </div>
       </div>
 
       <div class="flex items-center gap-1.5 shrink-0">
+        ${song.requestedBy?.table && song.requestedBy.table !== 'DJ' ? `
+          <button onclick="banTableDirect('${escapeHtml(song.requestedBy.table)}')" class="btn-secondary text-xs px-2 py-1.5 text-amber-300 hover:text-amber-200 border-amber-500/30" title="Pausar pedidos de esta mesa">
+            ⏸️ Mesa ${escapeHtml(song.requestedBy.table)}
+          </button>
+        ` : ''}
         <button onclick="moveQueueItem(${i}, -1)" ${i === 0 ? 'disabled class="opacity-30"' : 'class="btn-secondary text-xs px-2.5 py-1.5"'} title="Subir">↑</button>
         <button onclick="moveQueueItem(${i}, 1)" ${i === queue.length - 1 ? 'disabled class="opacity-30"' : 'class="btn-secondary text-xs px-2.5 py-1.5"'} title="Bajar">↓</button>
         <button onclick="playNowDirect('${song.videoId}', '${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.genre}')" class="btn-primary text-xs py-1.5 px-3">Sonar Ya</button>
@@ -197,6 +217,9 @@ async function loadPlaylists() {
   try {
     const res = await fetch('/api/playlists');
     const data = await res.json();
+    currentPlaylistsList = data.playlists || [];
+    populateSchedulePlaylistsDropdown();
+
     const statusRes = await fetch('/api/status');
     const statusData = await statusRes.json();
     const activeId = statusData.settings.activePlaylistId;
@@ -524,6 +547,7 @@ function switchTab(tabId) {
   const tabs = {
     queue: { btn: 'tabBtnQueue', content: 'tabContentQueue' },
     playlists: { btn: 'tabBtnPlaylists', content: 'tabContentPlaylists' },
+    control: { btn: 'tabBtnControl', content: 'tabContentControl' },
     ai: { btn: 'tabBtnAI', content: 'tabContentAI' },
     stats: { btn: 'tabBtnStats', content: 'tabContentStats' },
     settings: { btn: 'tabBtnSettings', content: 'tabContentSettings' }
@@ -535,16 +559,309 @@ function switchTab(tabId) {
     if (!btn || !content) return;
 
     if (id === tabId) {
-      btn.className = 'pb-3 border-b-2 border-amber-400 text-amber-400 flex items-center gap-2 font-bold';
+      btn.className = 'pb-3 border-b-2 border-amber-400 text-amber-400 flex items-center gap-2 font-bold whitespace-nowrap';
       content.classList.remove('hidden');
     } else {
-      btn.className = 'pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 font-normal';
+      btn.className = 'pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 font-normal whitespace-nowrap';
       content.classList.add('hidden');
     }
   });
 
   if (tabId === 'playlists') loadPlaylists();
   if (tabId === 'stats') loadTrends();
+  if (tabId === 'control') {
+    loadBannedTables();
+    loadPlaylists();
+  }
+}
+
+// ==============================================
+// 8.1 CONTROL DE MODO MICRÓFONO / ANUNCIO
+// ==============================================
+let isMicModeActive = false;
+
+async function toggleMicMode() {
+  try {
+    const res = await fetch('/api/admin/mic-mode', { method: 'POST' });
+    const data = await res.json();
+    renderMicModeState(data.micModeActive);
+  } catch (err) {
+    console.error('Error al alternar modo micrófono:', err);
+  }
+}
+
+function renderMicModeState(active) {
+  isMicModeActive = !!active;
+  const btn = document.getElementById('btnMicMode');
+  const icon = document.getElementById('micModeIcon');
+  const text = document.getElementById('micModeText');
+  if (!btn) return;
+
+  if (isMicModeActive) {
+    btn.className = 'bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl flex items-center gap-1.5 animate-pulse shadow-lg shadow-red-500/30';
+    if (icon) icon.textContent = '🔴';
+    if (text) text.textContent = 'MIC ACTIVO (15% Vol)';
+  } else {
+    btn.className = 'btn-secondary text-xs flex items-center gap-1.5 transition-all duration-300';
+    if (icon) icon.textContent = '🎙️';
+    if (text) text.textContent = 'Modo Micrófono';
+  }
+}
+
+// ==============================================
+// 8.2 CONTROL DE MESAS (BANEO / PAUSA)
+// ==============================================
+async function loadBannedTables() {
+  try {
+    const res = await fetch('/api/admin/banned-tables');
+    const data = await res.json();
+    renderBannedTables(data.bannedTables || {});
+  } catch (err) {
+    console.error('Error cargando mesas pausadas:', err);
+  }
+}
+
+function renderBannedTables(banned) {
+  const listEl = document.getElementById('bannedTablesList');
+  if (!listEl) return;
+  const entries = Object.entries(banned || {});
+  if (entries.length === 0) {
+    listEl.innerHTML = '<p class="text-xs text-gray-500 py-2">No hay ninguna mesa pausada actualmente.</p>';
+    return;
+  }
+
+  listEl.innerHTML = entries.map(([table, mins]) => `
+    <div class="flex items-center justify-between p-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-red-400">Mesa ${escapeHtml(table)}</span>
+        <span class="text-gray-400 text-[11px]">(${mins} min restantes)</span>
+      </div>
+      <button onclick="unbanTable('${escapeHtml(table)}')" class="btn-primary text-[10px] py-1 px-2.5 bg-green-600 hover:bg-green-700">
+        🟢 Desbloquear
+      </button>
+    </div>
+  `).join('');
+}
+
+async function executeBanTable() {
+  const tableInput = document.getElementById('banTableInput');
+  const minsSelect = document.getElementById('banTableMinutes');
+  const table = tableInput.value.trim();
+  const minutes = parseInt(minsSelect.value) || 30;
+
+  if (!table) return alert('Por favor escribe el número de la mesa.');
+
+  try {
+    const res = await fetch('/api/admin/ban-table', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table, minutes })
+    });
+    const data = await res.json();
+    renderBannedTables(data.bannedTables);
+    tableInput.value = '';
+    alert(`Mesa ${table} pausada por ${minutes} minutos.`);
+  } catch (err) {
+    alert('Error al pausar mesa');
+  }
+}
+
+async function banTableDirect(table) {
+  if (!confirm(`¿Deseas pausar temporalmente los pedidos de la Mesa ${table} por 30 minutos?`)) return;
+  try {
+    const res = await fetch('/api/admin/ban-table', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table, minutes: 30 })
+    });
+    const data = await res.json();
+    renderBannedTables(data.bannedTables);
+    alert(`Mesa ${table} pausada por 30 minutos.`);
+  } catch (err) {
+    alert('Error al pausar mesa');
+  }
+}
+
+async function unbanTable(table) {
+  try {
+    const res = await fetch('/api/admin/unban-table', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table })
+    });
+    const data = await res.json();
+    renderBannedTables(data.bannedTables);
+  } catch (err) {
+    alert('Error al desbloquear mesa');
+  }
+}
+
+// ==============================================
+// 8.3 FILTRO ANTI-TROLLS / PALABRAS PROHIBIDAS
+// ==============================================
+let currentBlacklistWords = [];
+
+function renderBlacklistWords(words) {
+  currentBlacklistWords = words || [];
+  const container = document.getElementById('blacklistWordsTags');
+  if (!container) return;
+  if (currentBlacklistWords.length === 0) {
+    container.innerHTML = '<p class="text-xs text-gray-500 py-2">No hay términos prohibidos.</p>';
+    return;
+  }
+
+  container.innerHTML = currentBlacklistWords.map(w => `
+    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-red-300 text-xs">
+      <span>${escapeHtml(w)}</span>
+      <button onclick="removeBlacklistWord('${escapeHtml(w)}')" class="text-red-400 hover:text-white font-bold ml-1">✕</button>
+    </span>
+  `).join('');
+}
+
+async function addBlacklistWord() {
+  const input = document.getElementById('newBlacklistWordInput');
+  const word = input.value.trim().toLowerCase();
+  if (!word) return;
+  if (currentBlacklistWords.includes(word)) return alert('Esta palabra ya se encuentra en la lista.');
+
+  const updated = [...currentBlacklistWords, word];
+  await saveSettingsPartial({ blacklistWords: updated });
+  input.value = '';
+  renderBlacklistWords(updated);
+}
+
+async function removeBlacklistWord(word) {
+  const updated = currentBlacklistWords.filter(w => w !== word);
+  await saveSettingsPartial({ blacklistWords: updated });
+  renderBlacklistWords(updated);
+}
+
+// ==============================================
+// 8.4 CINTA DE PROMOCIONES EN TV
+// ==============================================
+let currentPromos = [];
+
+function renderPromosList(promos) {
+  currentPromos = promos || [];
+  const container = document.getElementById('promosAdminList');
+  if (!container) return;
+  if (currentPromos.length === 0) {
+    container.innerHTML = '<p class="text-xs text-gray-500 py-2">No hay mensajes de promoción configurados.</p>';
+    return;
+  }
+
+  container.innerHTML = currentPromos.map((p, idx) => `
+    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+      <span class="text-xs text-white truncate flex-1">${escapeHtml(p)}</span>
+      <button onclick="removePromoMessage(${idx})" class="text-red-400 hover:text-red-300 ml-2 text-xs font-bold px-2 py-1">✕</button>
+    </div>
+  `).join('');
+}
+
+async function addPromoMessage() {
+  const input = document.getElementById('newPromoInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const updated = [...currentPromos, text];
+  await saveSettingsPartial({ promos: updated });
+  input.value = '';
+  renderPromosList(updated);
+}
+
+async function removePromoMessage(idx) {
+  const updated = currentPromos.filter((_, i) => i !== idx);
+  await saveSettingsPartial({ promos: updated });
+  renderPromosList(updated);
+}
+
+// ==============================================
+// 8.5 RELOJ DE HORARIOS MUSICALES AUTOMÁTICOS
+// ==============================================
+let currentSchedule = [];
+let currentPlaylistsList = [];
+
+function renderSchedule(schedule, scheduleEnabled) {
+  currentSchedule = schedule || [];
+  const checkEl = document.getElementById('settingScheduleEnabled');
+  if (checkEl) checkEl.checked = !!scheduleEnabled;
+
+  const listEl = document.getElementById('scheduleBlocksList');
+  if (!listEl) return;
+
+  if (currentSchedule.length === 0) {
+    listEl.innerHTML = '<p class="text-xs text-gray-500 py-2">No hay bloques de horario configurados.</p>';
+    return;
+  }
+
+  listEl.innerHTML = currentSchedule.map((b, idx) => {
+    const pl = currentPlaylistsList.find(p => p.id === b.playlistId);
+    const plName = pl ? pl.name : b.playlistId;
+    return `
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-amber-400 font-mono">${escapeHtml(b.start)} - ${escapeHtml(b.end)}</span>
+            <span class="font-semibold text-white">${escapeHtml(b.name || 'Tanda')}</span>
+          </div>
+          <p class="text-[11px] text-gray-400 mt-0.5">Lista: <span class="text-gray-300 font-medium">${escapeHtml(plName)}</span></p>
+        </div>
+        <button onclick="removeScheduleBlock(${idx})" class="btn-secondary text-xs py-1 px-2.5 text-red-400 hover:text-red-300">
+          Eliminar
+        </button>
+      </div>
+    `;
+  }).join('');
+
+  populateSchedulePlaylistsDropdown();
+}
+
+function populateSchedulePlaylistsDropdown() {
+  const sel = document.getElementById('newSchedulePlaylistSelect');
+  if (!sel) return;
+  sel.innerHTML = currentPlaylistsList.map(p => `
+    <option value="${p.id}">${escapeHtml(p.name)} (${p.tracks?.length || 0} canciones)</option>
+  `).join('');
+}
+
+async function toggleScheduleEnabled(checked) {
+  await saveSettingsPartial({ scheduleEnabled: checked });
+}
+
+async function addScheduleBlock() {
+  const start = document.getElementById('newScheduleStart').value.trim();
+  const end = document.getElementById('newScheduleEnd').value.trim();
+  const name = document.getElementById('newScheduleName').value.trim();
+  const playlistId = document.getElementById('newSchedulePlaylistSelect').value;
+
+  if (!start || !end) return alert('Ingresa horario de inicio y fin.');
+  if (!name) return alert('Ingresa un nombre para la tanda.');
+  if (!playlistId) return alert('Selecciona una lista base.');
+
+  const newBlock = { start, end, name, playlistId };
+  const updated = [...currentSchedule, newBlock];
+  await saveSettingsPartial({ schedule: updated });
+  document.getElementById('newScheduleName').value = '';
+  renderSchedule(updated, document.getElementById('settingScheduleEnabled').checked);
+}
+
+async function removeScheduleBlock(idx) {
+  const updated = currentSchedule.filter((_, i) => i !== idx);
+  await saveSettingsPartial({ schedule: updated });
+  renderSchedule(updated, document.getElementById('settingScheduleEnabled').checked);
+}
+
+async function saveSettingsPartial(partial) {
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(partial)
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('Error guardando configuración parcial:', err);
+  }
 }
 
 // 9. Modales de Creación y Edición de Listas
