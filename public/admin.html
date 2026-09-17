@@ -91,12 +91,22 @@
 
       <!-- Buscador Manual para el DJ / Barman -->
       <div class="glass-card p-4 space-y-3">
-        <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-          Agregar canción rápida a la cola (como DJ)
-        </h3>
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+            Agregar canción rápida a la cola (como DJ)
+          </h3>
+          <button id="adminClearSearchBtn" onclick="clearAdminSearch()" class="text-xs text-gray-400 hover:text-white hidden">
+            Limpiar búsqueda
+          </button>
+        </div>
         <div class="flex flex-col sm:flex-row gap-2">
-          <input type="text" id="adminSearchInput" placeholder="Buscar canción o pegar link de YouTube..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white outline-none focus:border-amber-400">
-          <button onclick="adminSearchSong()" class="btn-secondary text-xs sm:text-sm px-4 py-2.5">Buscar</button>
+          <div class="relative flex-1">
+            <input type="text" id="adminSearchInput" onkeydown="handleAdminSearchKey(event)" placeholder="Buscar canción o pegar link de YouTube..." class="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white outline-none focus:border-amber-400 pr-9">
+            <button id="adminSearchInputClear" onclick="clearAdminSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs hidden" title="Limpiar">✕</button>
+          </div>
+          <button id="adminSearchBtn" onclick="adminSearchSong()" class="btn-secondary text-xs sm:text-sm px-4 py-2.5 flex items-center justify-center gap-1.5 font-bold">
+            <span id="adminSearchBtnLabel">Buscar</span>
+          </button>
         </div>
         <div id="adminSearchResults" class="hidden space-y-2 pt-2">
           <!-- Inyectado dinámicamente -->

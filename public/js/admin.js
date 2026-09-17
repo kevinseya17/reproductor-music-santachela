@@ -6,6 +6,7 @@ let generatedTracksFromAI = [];
 document.addEventListener('DOMContentLoaded', () => {
   setupSocket();
   loadInitialData();
+  setupAdminSearchInput();
 });
 
 function setupSocket() {
@@ -176,62 +177,148 @@ async function playNowDirect(videoId, title, artist, genre) {
   });
 }
 
-// 3. Búsqueda rápida de DJ
+// 3. Búsqueda rápida de DJ con soporte para Enter, Debounce y caché
+let adminSearchDebounce = null;
+
+function setupAdminSearchInput() {
+  const input = document.getElementById('adminSearchInput');
+  const clearBtn = document.getElementById('adminSearchInputClear');
+  const clearTopBtn = document.getElementById('adminClearSearchBtn');
+  if (!input) return;
+
+  input.addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    const hasText = query.length > 0;
+    if (clearBtn) clearBtn.classList.toggle('hidden', !hasText);
+    if (clearTopBtn) clearTopBtn.classList.toggle('hidden', !hasText);
+
+    if (!hasText) {
+      document.getElementById('adminSearchResults')?.classList.add('hidden');
+      return;
+    }
+
+    // Si el usuario escribe al menos 3 letras, buscar con debounce rápido de 450ms
+    clearTimeout(adminSearchDebounce);
+    if (query.length >= 3) {
+      adminSearchDebounce = setTimeout(() => {
+        adminSearchSong();
+      }, 450);
+    }
+  });
+}
+
+function handleAdminSearchKey(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    clearTimeout(adminSearchDebounce);
+    adminSearchSong();
+  }
+}
+
+function clearAdminSearch() {
+  const input = document.getElementById('adminSearchInput');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+  document.getElementById('adminSearchInputClear')?.classList.add('hidden');
+  document.getElementById('adminClearSearchBtn')?.classList.add('hidden');
+  document.getElementById('adminSearchResults')?.classList.add('hidden');
+}
+
 async function adminSearchSong() {
   const input = document.getElementById('adminSearchInput');
-  const query = input.value.trim();
+  const query = input ? input.value.trim() : '';
   if (!query) return;
 
   const resultsBox = document.getElementById('adminSearchResults');
-  resultsBox.classList.remove('hidden');
-  resultsBox.innerHTML = `<p class="text-xs text-gray-400 py-2">Buscando en YouTube...</p>`;
+  const searchBtnLabel = document.getElementById('adminSearchBtnLabel');
+  if (resultsBox) {
+    resultsBox.classList.remove('hidden');
+    resultsBox.innerHTML = `
+      <div class="flex items-center gap-2 text-xs text-amber-400 py-3">
+        <div class="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+        <span>Buscando en YouTube...</span>
+      </div>
+    `;
+  }
+  if (searchBtnLabel) searchBtnLabel.textContent = '...';
 
   try {
     const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
     const data = await res.json();
     const videos = data.results || [];
 
+    if (searchBtnLabel) searchBtnLabel.textContent = 'Buscar';
+
     if (videos.length === 0) {
-      resultsBox.innerHTML = `<p class="text-xs text-gray-500 py-2">No se encontraron resultados.</p>`;
+      resultsBox.innerHTML = `
+        <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-400 flex items-center justify-between">
+          <span>No se encontraron resultados para "<strong>${escapeHtml(query)}</strong>".</span>
+          <button onclick="adminSearchSong()" class="text-amber-400 hover:underline font-semibold ml-2">Reintentar</button>
+        </div>
+      `;
       return;
     }
 
-    resultsBox.innerHTML = videos.slice(0, 4).map(v => `
-      <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
-        <div class="flex items-center gap-3 min-w-0">
-          <img src="${v.thumbnail}" class="w-12 h-9 rounded object-cover">
-          <div class="min-w-0">
-            <p class="text-xs font-bold text-white truncate">${escapeHtml(v.title)}</p>
-            <p class="text-[11px] text-gray-400 truncate">${escapeHtml(v.artist)} • ${v.duration}</p>
-          </div>
-        </div>
-        <div class="flex gap-1.5 shrink-0">
-          <button onclick="adminAddSongToQueue('${v.videoId}', '${escapeHtml(v.title)}', '${escapeHtml(v.artist)}', '${v.duration}', '${v.thumbnail}')" class="btn-secondary text-xs py-1.5 px-3">Agregar a Cola</button>
-          <button onclick="playNowDirect('${v.videoId}', '${escapeHtml(v.title)}', '${escapeHtml(v.artist)}', 'Crossover')" class="btn-primary text-xs py-1.5 px-3">Sonar Ya</button>
-        </div>
+    resultsBox.innerHTML = `
+      <div class="flex items-center justify-between text-[11px] text-gray-400 px-1 pb-1">
+        <span>Resultados encontrados (${videos.length}):</span>
+        <button onclick="clearAdminSearch()" class="hover:text-white">Cerrar</button>
       </div>
-    `).join('');
+      <div class="space-y-1.5">
+        ${videos.slice(0, 6).map(v => `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 hover:border-amber-400/30 transition">
+            <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
+              <img src="${v.thumbnail}" class="w-12 h-9 rounded object-cover shrink-0">
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-white truncate" title="${escapeHtml(v.title)}">${escapeHtml(v.title)}</p>
+                <p class="text-[11px] text-gray-400 truncate">${escapeHtml(v.artist)} • ${v.duration}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="adminAddSongToQueue('${v.videoId}', '${escapeHtml(v.title)}', '${escapeHtml(v.artist)}', '${v.duration}', '${v.thumbnail}')" class="btn-secondary text-xs py-1.5 px-2.5 whitespace-nowrap" title="Agregar a la lista de espera">
+                + Cola
+              </button>
+              <button onclick="playNowDirect('${v.videoId}', '${escapeHtml(v.title)}', '${escapeHtml(v.artist)}', 'Crossover')" class="btn-primary text-xs py-1.5 px-2.5 whitespace-nowrap font-bold" title="Reproducir inmediatamente">
+                Sonar Ya
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
   } catch (err) {
-    console.error(err);
+    console.error('Error buscando canción en admin:', err);
+    if (searchBtnLabel) searchBtnLabel.textContent = 'Buscar';
+    resultsBox.innerHTML = `
+      <div class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400 flex items-center justify-between">
+        <span>Error al conectar con el servicio de búsqueda.</span>
+        <button onclick="adminSearchSong()" class="btn-secondary text-xs py-1 px-2.5">Reintentar</button>
+      </div>
+    `;
   }
 }
 
 async function adminAddSongToQueue(videoId, title, artist, duration, thumbnail) {
-  await fetch('/api/request', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      videoId,
-      title,
-      artist,
-      duration,
-      thumbnail,
-      table: 'DJ',
-      customerName: 'DJ / Bar'
-    })
-  });
-  document.getElementById('adminSearchResults').classList.add('hidden');
-  document.getElementById('adminSearchInput').value = '';
+  try {
+    await fetch('/api/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        videoId,
+        title,
+        artist,
+        duration,
+        thumbnail,
+        table: 'DJ',
+        customerName: 'DJ / Bar'
+      })
+    });
+    clearAdminSearch();
+  } catch (err) {
+    console.error('Error agregando cancion como DJ:', err);
+  }
 }
 
 // 4. Pestaña de Listas Maestras
