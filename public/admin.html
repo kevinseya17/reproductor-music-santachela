@@ -595,13 +595,13 @@
           <div class="space-y-1">
             <label class="block text-xs font-bold text-white">Tiempo Máximo por Canción:</label>
             <select id="settingMaxSongDuration" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
-              <option value="0">Canción Completa (100% del tema - Sin límite)</option>
+              <option value="0" selected>Canción Completa (100% del tema - Sin cortes)</option>
               <option value="150">2:30 minutos (Modo Ultra Dinámico / Hora Pico)</option>
               <option value="180">3:00 minutos (Modo Rumba y Rápida Rotación)</option>
-              <option value="210">3:30 minutos (Equilibrio Ideal - Recomendado)</option>
+              <option value="210">3:30 minutos (Equilibrio DJ)</option>
               <option value="240">4:00 minutos (Moderado)</option>
             </select>
-            <p class="text-[10px] text-gray-400">Si un tema dura más de este tiempo, entra en fundido suave y da paso a la siguiente mesa.</p>
+            <p class="text-[10px] text-gray-400">Por defecto suena la canción completa. Si deseas que los temas cambien más rápido, puedes elegir un tiempo aquí.</p>
           </div>
 
           <!-- Modo Inteligente Dinámico por Cola -->

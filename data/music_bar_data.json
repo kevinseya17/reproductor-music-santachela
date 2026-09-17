@@ -5,7 +5,7 @@
     "cooldownMinutes": 10,
     "autoDJEnabled": true,
     "smartSlottingWindow": 3,
-    "activePlaylistId": "rumba-cantina",
+    "activePlaylistId": "salsa-pesada",
     "geminiApiKey": "",
     "totalTables": 20,
     "blacklistWords": [
@@ -52,7 +52,10 @@
     "sequentialOrderType": "custom",
     "sequentialPlaylistOrder": [],
     "focusGenre": "Salsa",
-    "genrePlaybackStyle": "shuffle"
+    "genrePlaybackStyle": "shuffle",
+    "maxSongDuration": 0,
+    "dynamicDurationOnQueue": false,
+    "fadeTransitionEnabled": true
   },
   "playlists": [
     {

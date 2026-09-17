@@ -8,8 +8,8 @@ let pendingVideoId = null;
 // Configuración y estado de reproducción / DJ
 let currentSettings = {
   fadeTransitionEnabled: true,
-  maxSongDuration: 210, // 3:30 min por defecto
-  dynamicDurationOnQueue: true
+  maxSongDuration: 0, // 0 = canción completa por defecto (sin cortes)
+  dynamicDurationOnQueue: false
 };
 let currentQueue = [];
 let currentlyPlayingSong = null;

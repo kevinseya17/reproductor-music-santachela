@@ -56,13 +56,13 @@ function renderAdminState(data) {
       document.getElementById('settingFadeTransition').checked = settings.fadeTransitionEnabled !== false;
     }
     if (document.getElementById('settingMaxSongDuration')) {
-      document.getElementById('settingMaxSongDuration').value = settings.maxSongDuration !== undefined ? settings.maxSongDuration : 210;
+      document.getElementById('settingMaxSongDuration').value = settings.maxSongDuration !== undefined ? settings.maxSongDuration : 0;
     }
     if (document.getElementById('settingGenreBatchSize')) {
       document.getElementById('settingGenreBatchSize').value = settings.genreBatchSize || 3;
     }
     if (document.getElementById('settingDynamicDuration')) {
-      document.getElementById('settingDynamicDuration').checked = settings.dynamicDurationOnQueue !== false;
+      document.getElementById('settingDynamicDuration').checked = settings.dynamicDurationOnQueue === true;
     }
 
     // Actualizar controles de Modo de Reproducción Base
@@ -856,8 +856,9 @@ async function saveSettings() {
   const geminiApiKey = document.getElementById('settingApiKey').value.trim();
   const requestMode = document.getElementById('settingRequestMode')?.value || 'open';
   const fadeTransitionEnabled = document.getElementById('settingFadeTransition')?.checked !== false;
-  const maxSongDuration = parseInt(document.getElementById('settingMaxSongDuration')?.value || 210);
-  const dynamicDurationOnQueue = document.getElementById('settingDynamicDuration')?.checked !== false;
+  const maxSongDurationVal = document.getElementById('settingMaxSongDuration')?.value;
+  const maxSongDuration = maxSongDurationVal !== undefined && !isNaN(parseInt(maxSongDurationVal, 10)) ? parseInt(maxSongDurationVal, 10) : 0;
+  const dynamicDurationOnQueue = document.getElementById('settingDynamicDuration')?.checked === true;
   const genreBatchSize = parseInt(document.getElementById('settingGenreBatchSize')?.value || 3);
 
   await fetch('/api/settings', {
