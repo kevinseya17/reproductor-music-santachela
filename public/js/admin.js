@@ -280,7 +280,85 @@ function toggleSidebarMobile() {
   }
 }
 
-// Renderizado de Lista UP NEXT / QUEUE (Estilo Referencia Pro)
+// ============================================================
+// DRAG & DROP REORDENAMIENTO DE COLA EN VIVO
+// ============================================================
+let draggedQueueIndex = null;
+
+function handleQueueDragStart(e, index) {
+  draggedQueueIndex = index;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', String(index));
+  const row = document.getElementById(`queue-row-${index}`);
+  if (row) {
+    row.classList.add('opacity-50', 'scale-[0.99]', 'border-amber-400', 'bg-amber-500/10');
+  }
+}
+
+function handleQueueDragOver(e, index) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+}
+
+function handleQueueDragEnter(e, index) {
+  e.preventDefault();
+  if (draggedQueueIndex === null || draggedQueueIndex === index) return;
+  const row = document.getElementById(`queue-row-${index}`);
+  if (row) {
+    row.classList.add('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+  }
+}
+
+function handleQueueDragLeave(e, index) {
+  const row = document.getElementById(`queue-row-${index}`);
+  if (row) {
+    row.classList.remove('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+  }
+}
+
+function handleQueueDrop(e, targetIndex) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const targetRow = document.getElementById(`queue-row-${targetIndex}`);
+  if (targetRow) {
+    targetRow.classList.remove('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+  }
+
+  if (draggedQueueIndex === null || draggedQueueIndex === targetIndex) {
+    draggedQueueIndex = null;
+    return;
+  }
+
+  const fromIndex = draggedQueueIndex;
+  draggedQueueIndex = null;
+
+  // Reordenar localmente de inmediato (0ms de latencia visual)
+  const newQueue = [...currentQueueState];
+  const [movedSong] = newQueue.splice(fromIndex, 1);
+  newQueue.splice(targetIndex, 0, movedSong);
+  currentQueueState = newQueue;
+  renderQueueList(currentQueueState);
+
+  // Persistir en el servidor
+  fetch('/api/admin/reorder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ queue: newQueue })
+  }).catch(err => {
+    console.error('Error guardando reorden de cola:', err);
+  });
+}
+
+function handleQueueDragEnd(e) {
+  draggedQueueIndex = null;
+  const rows = document.querySelectorAll('.queue-row');
+  rows.forEach(r => {
+    r.classList.remove('opacity-50', 'scale-[0.99]', 'border-amber-400', 'bg-amber-500/10', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+  });
+}
+
+// Renderizado de Lista UP NEXT / QUEUE (Estilo Referencia Pro con Arrastre)
 function renderQueueList(queue) {
   const container = document.getElementById('adminQueueList');
   if (!container) return;
@@ -291,7 +369,7 @@ function renderQueueList(queue) {
         <div class="text-2xl text-amber-400">✨</div>
         <p class="text-xs sm:text-sm font-bold text-white">No hay canciones pedidas en espera</p>
         <p class="text-[11px] text-gray-400 max-w-sm mx-auto">
-          Los pedidos de las mesas aparecerán aquí con botones para subir o bajar prioridad. La música continuará sonando automáticamente con la Lista Base.
+          Los pedidos de las mesas aparecerán aquí. Puedes arrastrarlas o usar las flechas ▲ ▼ para cambiar su orden de reproducción.
         </p>
       </div>
     `;
@@ -306,20 +384,29 @@ function renderQueueList(queue) {
       : `<span class="px-2 py-0.5 rounded-md bg-white/10 text-gray-300 text-[10px]">DJ / Bar</span>`;
 
     return `
-      <div class="queue-row flex items-center justify-between p-2.5 sm:p-3 rounded-2xl bg-[#141720] border border-white/5 hover:border-amber-500/30 gap-2 sm:gap-3 group">
+      <div id="queue-row-${i}"
+           draggable="true"
+           ondragstart="handleQueueDragStart(event, ${i})"
+           ondragover="handleQueueDragOver(event, ${i})"
+           ondragenter="handleQueueDragEnter(event, ${i})"
+           ondragleave="handleQueueDragLeave(event, ${i})"
+           ondrop="handleQueueDrop(event, ${i})"
+           ondragend="handleQueueDragEnd(event)"
+           class="queue-row flex items-center justify-between p-2.5 sm:p-3 rounded-2xl bg-[#141720] border border-white/5 hover:border-amber-500/40 gap-2 sm:gap-3 group select-none cursor-grab active:cursor-grabbing transition-all">
         
-        <!-- Izquierda: Botones de Reordenar ▲ ▼ y Número 1., 2., 3. -->
+        <!-- Izquierda: Agarre (Grip Handle), Botones de Reordenar ▲ ▼ y Número 1., 2., 3. -->
         <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+          <span class="text-gray-500 group-hover:text-amber-400 text-xs px-1 cursor-grab" title="Arrastra para cambiar de posición">⋮⋮</span>
           <div class="flex flex-col items-center">
-            <button onclick="reorderQueueItem(${i}, 'up')" class="text-[11px] px-1 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isFirst ? 'opacity-20 cursor-not-allowed' : ''}" title="Subir prioridad" ${isFirst ? 'disabled' : ''}>▲</button>
-            <button onclick="reorderQueueItem(${i}, 'down')" class="text-[11px] px-1 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isLast ? 'opacity-20 cursor-not-allowed' : ''}" title="Bajar prioridad" ${isLast ? 'disabled' : ''}>▼</button>
+            <button onclick="reorderQueueItem(${i}, 'up')" class="text-[11px] px-1 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isFirst ? 'opacity-20 cursor-not-allowed' : ''}" title="Subir turno" ${isFirst ? 'disabled' : ''}>▲</button>
+            <button onclick="reorderQueueItem(${i}, 'down')" class="text-[11px] px-1 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isLast ? 'opacity-20 cursor-not-allowed' : ''}" title="Bajar turno" ${isLast ? 'disabled' : ''}>▼</button>
           </div>
           <span class="font-mono font-black text-amber-400 text-xs sm:text-sm w-5 text-center">${i + 1}.</span>
         </div>
 
         <!-- Carátula + Info de la canción -->
-        <div class="flex items-center gap-3 min-w-0 flex-1">
-          <img src="${song.thumbnail}" class="w-11 h-9 sm:w-12 sm:h-9 rounded-xl object-cover border border-white/10 shrink-0">
+        <div class="flex items-center gap-3 min-w-0 flex-1 pointer-events-none">
+          <img src="${song.thumbnail}" class="w-11 h-9 sm:w-12 sm:h-9 rounded-xl object-cover border border-white/10 shrink-0 shadow-md">
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
               <p class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-amber-300 transition" title="${escapeHtml(song.title)}">
@@ -328,7 +415,7 @@ function renderQueueList(queue) {
               <span class="genre-badge genre-${song.genre || 'Crossover'} text-[9px] py-0.2 px-2 hidden sm:inline-flex">${escapeHtml(song.genre || 'Crossover')}</span>
             </div>
             <div class="flex items-center gap-2 text-[11px] text-gray-400 truncate mt-0.5">
-              <span class="truncate">${escapeHtml(song.artist)}</span>
+              <span class="truncate font-semibold text-gray-300">${escapeHtml(song.artist)}</span>
               <span>•</span>
               ${tableBadge}
               ${song.requestedBy?.dedication ? `<span class="text-pink-400 italic truncate hidden md:inline">"${escapeHtml(song.requestedBy.dedication)}"</span>` : ''}

@@ -232,12 +232,19 @@ h1, h2, h3, h4, .brand-font {
   transform: scale(1.35);
 }
 
-/* Fila de Up Next interactiva */
+/* Fila de Up Next interactiva (con soporte Drag & Drop) */
 .queue-row {
-  transition: all 0.2s ease;
+  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  user-select: none;
+}
+.queue-row[draggable="true"] {
+  cursor: grab;
+}
+.queue-row[draggable="true"]:active {
+  cursor: grabbing;
 }
 .queue-row:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   border-color: rgba(245, 158, 11, 0.35);
 }
 

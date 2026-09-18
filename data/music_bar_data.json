@@ -5,7 +5,7 @@
     "cooldownMinutes": 10,
     "autoDJEnabled": true,
     "smartSlottingWindow": 3,
-    "activePlaylistId": "salsa-pesada",
+    "activePlaylistId": "rumba-cantina",
     "geminiApiKey": "",
     "totalTables": 20,
     "blacklistWords": [
@@ -289,6 +289,91 @@
       "addedAt": 1789597276246,
       "startedAt": 1789597276281,
       "playedAt": "2026-09-16T22:21:16.284Z"
+    },
+    {
+      "id": "base_1789768427312_dt6fq",
+      "videoId": "gxlB1B9emDc",
+      "title": "Llorarás",
+      "artist": "Oscar D'León",
+      "genre": "Salsa",
+      "duration": "3:50",
+      "thumbnail": "https://i.ytimg.com/vi/gxlB1B9emDc/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789768427312,
+      "startedAt": 1789768427312,
+      "playedAt": "2026-09-18T21:58:54.048Z"
+    },
+    {
+      "id": "base_1789768734054_i4xxt",
+      "videoId": "JLwmBfrbYR4",
+      "title": "Sobredosis",
+      "artist": "Los Titanes",
+      "genre": "Salsa",
+      "duration": "3:12",
+      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789768734054,
+      "startedAt": 1789768734054,
+      "playedAt": "2026-09-18T21:59:41.283Z"
+    },
+    {
+      "id": "base_1789768781290_i557n",
+      "videoId": "fIPOjkmMpKk",
+      "title": "El Día de Mi Suerte",
+      "artist": "Héctor Lavoe & Willie Colón",
+      "genre": "Salsa",
+      "duration": "5:28",
+      "thumbnail": "https://i.ytimg.com/vi/fIPOjkmMpKk/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789768781290,
+      "startedAt": 1789768781290,
+      "playedAt": "2026-09-18T21:59:48.855Z"
+    },
+    {
+      "id": "base_1789768788860_kt0f8",
+      "videoId": "7KxkMLAZlzw",
+      "title": "Cali Pachanguero",
+      "artist": "Grupo Niche",
+      "genre": "Salsa",
+      "duration": "5:10",
+      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789768788860,
+      "startedAt": 1789768788860,
+      "playedAt": "2026-09-18T21:59:52.938Z"
+    },
+    {
+      "id": "base_1789768792943_rs9aq",
+      "videoId": "oWBf9hfW_4Y",
+      "title": "Rebelión",
+      "artist": "Joe Arroyo",
+      "genre": "Salsa",
+      "duration": "4:45",
+      "thumbnail": "https://i.ytimg.com/vi/oWBf9hfW_4Y/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1789768792943,
+      "startedAt": 1789768792943,
+      "playedAt": "2026-09-18T22:04:38.092Z"
     }
   ],
   "tableRequests": {
