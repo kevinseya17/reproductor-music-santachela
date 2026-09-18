@@ -156,3 +156,88 @@ h1, h2, h3, h4, .brand-font {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
 }
+
+/* ==========================================================
+   CONSOLA DJ PRO TÁCTIL (ESTILO HARDWARE / DARK GOLD)
+   ========================================================== */
+.tactile-btn-gold {
+  background: linear-gradient(180deg, #facc15 0%, #ca8a04 100%);
+  color: #000;
+  border-radius: 12px;
+  border: 1px solid #fde047;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 0 15px rgba(234, 179, 8, 0.35);
+  font-weight: 800;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.tactile-btn-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.6), 0 0 22px rgba(234, 179, 8, 0.55);
+}
+.tactile-btn-gold:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6), inset 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+.tactile-btn-dark {
+  background: linear-gradient(180deg, #242936 0%, #151821 100%);
+  color: #e5e7eb;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  font-weight: 700;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.tactile-btn-dark:hover {
+  background: linear-gradient(180deg, #2c3242 0%, #1c202c 100%);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #facc15;
+  transform: translateY(-1px);
+}
+.tactile-btn-dark:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.scrubber-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #272a34;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.scrubber-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #facc15;
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.9), 0 2px 5px rgba(0,0,0,0.6);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.scrubber-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.35);
+}
+
+/* Fila de Up Next interactiva */
+.queue-row {
+  transition: all 0.2s ease;
+}
+.queue-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+

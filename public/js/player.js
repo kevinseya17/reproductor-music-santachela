@@ -181,6 +181,14 @@ function startProgressMonitor() {
       const duration = ytPlayer.getDuration();
       if (!duration || duration <= 0) return;
 
+      // Emitir telemetría de progreso hacia la consola del DJ (segundo a segundo)
+      socket.emit('player-progress', {
+        currentTime,
+        duration,
+        isPlaying: state === YT.PlayerState.PLAYING,
+        volume: ytPlayer.getVolume ? ytPlayer.getVolume() : masterVolume
+      });
+
       // Calcular límite de duración configurado
       let targetMaxDuration = duration;
       const configuredMax = currentSettings.maxSongDuration || 0; // 0 = sin límite
@@ -228,6 +236,41 @@ function startProgressMonitor() {
     }
   }, 400);
 }
+
+// 4. Control Remoto desde la Consola de DJ (Comandos en vivo)
+socket.on('player-control', (data) => {
+  if (!ytPlayer || !isPlayerReady) return;
+  const { command, value } = data || {};
+
+  try {
+    if (command === 'play') {
+      ytPlayer.playVideo();
+    } else if (command === 'pause') {
+      ytPlayer.pauseVideo();
+    } else if (command === 'toggle') {
+      const state = ytPlayer.getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    } else if (command === 'seek') {
+      const seekTime = Math.max(0, Math.min(Number(value) || 0, ytPlayer.getDuration() || 0));
+      ytPlayer.seekTo(seekTime, true);
+    } else if (command === 'seekRelative') {
+      const current = ytPlayer.getCurrentTime() || 0;
+      const target = Math.max(0, Math.min(current + (Number(value) || 0), ytPlayer.getDuration() || 0));
+      ytPlayer.seekTo(target, true);
+    } else if (command === 'skip') {
+      skipCurrentSong();
+    } else if (command === 'volume') {
+      masterVolume = Math.max(0, Math.min(100, parseInt(value, 10)));
+      ytPlayer.setVolume(masterVolume);
+    }
+  } catch (err) {
+    console.warn('Error ejecutando player-control:', err);
+  }
+});
 
 // 4. Fundido de Volumen (Fade Suave)
 function fadeVolume(fromVol, targetVol, durationMs = 1500, onComplete = null) {

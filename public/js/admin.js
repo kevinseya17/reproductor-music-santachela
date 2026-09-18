@@ -2,6 +2,13 @@ const socket = io();
 
 let currentQueueState = [];
 let generatedTracksFromAI = [];
+let playerTelemetry = {
+  currentTime: 0,
+  duration: 0,
+  isPlaying: false,
+  volume: 100
+};
+let isUserDraggingScrubber = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   setupSocket();
@@ -18,6 +25,9 @@ function setupSocket() {
   });
   socket.on('banned-tables-updated', (banned) => {
     renderBannedTables(banned);
+  });
+  socket.on('player-telemetry', (data) => {
+    updatePlayerTelemetry(data);
   });
 }
 
@@ -75,70 +85,270 @@ function renderAdminState(data) {
     renderSchedule(settings.schedule, settings.scheduleEnabled);
   }
 
-  // Sonando Ahora
+  // Sonando Ahora (Deck Principal y Mini Player de Barra Lateral)
   if (currentlyPlaying) {
-    document.getElementById('adminNowTitle').textContent = currentlyPlaying.title;
-    document.getElementById('adminNowArtist').textContent = currentlyPlaying.artist;
-    document.getElementById('adminNowThumb').src = currentlyPlaying.thumbnail;
+    const titleEl = document.getElementById('adminNowTitle');
+    const artistEl = document.getElementById('adminNowArtist');
+    const thumbEl = document.getElementById('adminNowThumb');
+    const originTextEl = document.getElementById('adminNowOriginText');
+
+    if (titleEl) titleEl.textContent = currentlyPlaying.title;
+    if (artistEl) artistEl.textContent = currentlyPlaying.artist;
+    if (thumbEl) thumbEl.src = currentlyPlaying.thumbnail;
     
+    const miniThumb = document.getElementById('adminSidebarMiniThumb');
+    const miniTitle = document.getElementById('adminSidebarMiniTitle');
+    const miniArtist = document.getElementById('adminSidebarMiniArtist');
+    if (miniThumb) miniThumb.src = currentlyPlaying.thumbnail;
+    if (miniTitle) miniTitle.textContent = currentlyPlaying.title;
+    if (miniArtist) miniArtist.textContent = currentlyPlaying.artist;
+
     const genreEl = document.getElementById('adminNowGenre');
-    genreEl.textContent = currentlyPlaying.genre;
-    genreEl.className = `genre-badge genre-${currentlyPlaying.genre || 'Crossover'}`;
+    if (genreEl) {
+      genreEl.textContent = currentlyPlaying.genre || 'Crossover';
+      genreEl.className = `genre-badge genre-${currentlyPlaying.genre || 'Crossover'}`;
+    }
 
     const reqEl = document.getElementById('adminNowRequested');
-    if (currentlyPlaying.requestedBy && currentlyPlaying.requestedBy.table) {
-      const ded = currentlyPlaying.requestedBy.dedication ? ` | "${escapeHtml(currentlyPlaying.requestedBy.dedication)}"` : '';
-      reqEl.innerHTML = `• Pedida por: Mesa ${currentlyPlaying.requestedBy.table}${ded}`;
-    } else {
-      reqEl.textContent = `• Lista Base`;
+    if (reqEl) {
+      if (currentlyPlaying.requestedBy && currentlyPlaying.requestedBy.table) {
+        const ded = currentlyPlaying.requestedBy.dedication ? ` | "${escapeHtml(currentlyPlaying.requestedBy.dedication)}"` : '';
+        reqEl.innerHTML = `• Pedida por: Mesa ${escapeHtml(currentlyPlaying.requestedBy.table)}${ded}`;
+        if (originTextEl) originTextEl.textContent = `Pedido Mesa ${currentlyPlaying.requestedBy.table}`;
+      } else {
+        reqEl.textContent = `• Lista Base`;
+        if (originTextEl) originTextEl.textContent = `Lista Base del Bar`;
+      }
     }
   }
 
-  // Cola
-  document.getElementById('queueCounter').textContent = currentQueueState.length;
+  // Cola de espera
+  const counterEl = document.getElementById('queueCounter');
+  const badgeEl = document.getElementById('queueCounterBadge');
+  if (counterEl) counterEl.textContent = currentQueueState.length;
+  if (badgeEl) badgeEl.textContent = currentQueueState.length;
+
   renderQueueList(currentQueueState);
 }
 
+// Formateador de segundos a mm:ss
+function formatTime(seconds) {
+  if (isNaN(seconds) || seconds < 0) return '00:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
+// Telemetría de progreso y estado en tiempo real (proveniente de player.html vía WebSocket)
+function updatePlayerTelemetry(data) {
+  if (!data) return;
+  playerTelemetry = { ...playerTelemetry, ...data };
+
+  const currentFormatted = formatTime(playerTelemetry.currentTime);
+  const totalFormatted = formatTime(playerTelemetry.duration);
+
+  const currentEl = document.getElementById('adminCurrentTime');
+  const totalEl = document.getElementById('adminTotalDuration');
+  const elapsedLabel = document.getElementById('scrubberElapsedLabel');
+  const totalLabel = document.getElementById('scrubberTotalLabel');
+  const miniTime = document.getElementById('adminSidebarMiniTime');
+
+  if (currentEl) currentEl.textContent = currentFormatted;
+  if (totalEl) totalEl.textContent = totalFormatted;
+  if (elapsedLabel) elapsedLabel.textContent = currentFormatted;
+  if (totalLabel) totalLabel.textContent = totalFormatted;
+  if (miniTime) miniTime.textContent = currentFormatted;
+
+  // Actualizar la barra de progreso únicamente si el usuario no la está arrastrando en este instante
+  if (!isUserDraggingScrubber && playerTelemetry.duration > 0) {
+    const scrubber = document.getElementById('adminPlayerScrubber');
+    if (scrubber) {
+      const pct = (playerTelemetry.currentTime / playerTelemetry.duration) * 100;
+      scrubber.value = Math.min(100, Math.max(0, pct));
+    }
+  }
+
+  // Botón Play / Pause en vivo
+  const playPauseBtn = document.getElementById('btnPlayPause');
+  const playPauseIcon = document.getElementById('btnPlayPauseIcon');
+  const playPauseText = document.getElementById('btnPlayPauseText');
+
+  if (playPauseBtn && playPauseIcon && playPauseText) {
+    if (playerTelemetry.isPlaying) {
+      playPauseIcon.textContent = '⏸️';
+      playPauseText.textContent = 'PAUSAR';
+      playPauseBtn.className = 'tactile-btn-gold px-7 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg flex items-center gap-2';
+    } else {
+      playPauseIcon.textContent = '▶️';
+      playPauseText.textContent = 'REANUDAR';
+      playPauseBtn.className = 'tactile-btn-dark px-7 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg flex items-center gap-2 border-amber-400 text-amber-400';
+    }
+  }
+
+  // Deslizador de volumen
+  if (data.volume !== undefined) {
+    const volSlider = document.getElementById('adminVolumeSlider');
+    const volDisplay = document.getElementById('adminVolumeDisplay');
+    if (volSlider && document.activeElement !== volSlider) {
+      volSlider.value = data.volume;
+    }
+    if (volDisplay) {
+      volDisplay.textContent = `${Math.round(data.volume)}%`;
+    }
+  }
+}
+
+// Interacción con Scrubber / Barra de Progreso
+function onScrubberInput(val) {
+  isUserDraggingScrubber = true;
+  if (playerTelemetry.duration > 0) {
+    const seconds = (val / 100) * playerTelemetry.duration;
+    const label = document.getElementById('scrubberElapsedLabel');
+    if (label) label.textContent = formatTime(seconds);
+  }
+}
+
+function onScrubberChange(val) {
+  isUserDraggingScrubber = false;
+  if (playerTelemetry.duration > 0) {
+    const seekTime = (val / 100) * playerTelemetry.duration;
+    socket.emit('player-command', { command: 'seek', value: seekTime });
+  }
+}
+
+// Controles Remotos de Transporte
+function togglePlayPauseRemote() {
+  socket.emit('player-command', { command: 'toggle' });
+}
+
+function remoteSeek(deltaSeconds) {
+  socket.emit('player-command', { command: 'seekRelative', value: deltaSeconds });
+}
+
+function onVolumeChange(val) {
+  const vol = parseInt(val, 10);
+  const volDisplay = document.getElementById('adminVolumeDisplay');
+  if (volDisplay) volDisplay.textContent = `${vol}%`;
+  socket.emit('player-command', { command: 'volume', value: vol });
+}
+
+// Modo Micrófono / Ducking
+async function toggleMicMode() {
+  try {
+    const res = await fetch('/api/admin/mic-mode', { method: 'POST' });
+    const data = await res.json();
+    renderMicModeState(data.micModeActive);
+  } catch (err) {
+    console.error('Error alternando modo micrófono:', err);
+  }
+}
+
+function renderMicModeState(active) {
+  const icon = document.getElementById('micModeIcon');
+  const text = document.getElementById('micModeText');
+  const deckLabel = document.getElementById('deckMicLabel');
+  const deckBtn = document.getElementById('btnDeckMic');
+  const topBtn = document.getElementById('btnMicMode');
+
+  if (active) {
+    if (icon) icon.className = 'w-2 h-2 rounded-full bg-red-500 animate-ping inline-block';
+    if (text) text.textContent = 'Mic ACTIVO';
+    if (topBtn) topBtn.className = 'btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3 bg-red-500/20 text-red-400 border-red-500/40 font-bold';
+    if (deckLabel) deckLabel.textContent = 'Mic ON';
+    if (deckBtn) deckBtn.className = 'tactile-btn-gold px-3.5 py-2 text-xs flex items-center gap-1.5 border-red-400 bg-red-500 text-white';
+  } else {
+    if (icon) icon.className = 'w-2 h-2 rounded-full bg-gray-400 inline-block';
+    if (text) text.textContent = 'Modo Micrófono';
+    if (topBtn) topBtn.className = 'btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3 transition';
+    if (deckLabel) deckLabel.textContent = 'Mic';
+    if (deckBtn) deckBtn.className = 'tactile-btn-dark px-3.5 py-2 text-xs flex items-center gap-1.5';
+  }
+}
+
+// Alternar menú lateral en pantallas móviles
+function toggleSidebarMobile() {
+  const sidebar = document.getElementById('adminSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (!sidebar) return;
+  const isClosed = sidebar.classList.contains('-translate-x-full');
+  if (isClosed) {
+    sidebar.classList.remove('-translate-x-full');
+    backdrop?.classList.remove('hidden');
+  } else {
+    sidebar.classList.add('-translate-x-full');
+    backdrop?.classList.add('hidden');
+  }
+}
+
+// Renderizado de Lista UP NEXT / QUEUE (Estilo Referencia Pro)
 function renderQueueList(queue) {
   const container = document.getElementById('adminQueueList');
+  if (!container) return;
+
   if (!queue || queue.length === 0) {
-    container.innerHTML = `<p class="text-xs text-gray-500 py-6 text-center">La cola de pedidos está vacía. El reproductor está usando la Lista Base activa.</p>`;
+    container.innerHTML = `
+      <div class="p-8 rounded-2xl bg-black/20 border border-white/5 text-center space-y-2">
+        <div class="text-2xl text-amber-400">✨</div>
+        <p class="text-xs sm:text-sm font-bold text-white">No hay canciones pedidas en espera</p>
+        <p class="text-[11px] text-gray-400 max-w-sm mx-auto">
+          Los pedidos de las mesas aparecerán aquí con botones para subir o bajar prioridad. La música continuará sonando automáticamente con la Lista Base.
+        </p>
+      </div>
+    `;
     return;
   }
 
-  container.innerHTML = queue.map((song, i) => `
-    <div class="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition space-y-2.5">
-      <div class="flex items-start gap-3 min-w-0">
-        <span class="text-xs font-bold text-amber-400 w-5 pt-0.5">#${i + 1}</span>
-        <img src="${song.thumbnail}" class="w-14 h-11 rounded-xl object-cover flex-shrink-0 border border-white/10">
-        <div class="min-w-0 flex-1">
-          <p class="text-xs sm:text-sm font-bold text-white truncate leading-tight">${escapeHtml(song.title)}</p>
-          <div class="flex flex-wrap items-center gap-1.5 mt-1">
-            <span class="text-[11px] sm:text-xs text-gray-400 truncate">${escapeHtml(song.artist)}</span>
-            <span class="genre-badge genre-${song.genre || 'Crossover'} text-[9px] sm:text-[10px] py-0.2 px-2">${song.genre}</span>
-            <span class="text-[10px] sm:text-[11px] text-amber-400/90 font-medium">${song.requestedBy?.name || 'Mesa'}</span>
-          </div>
-          ${song.requestedBy?.dedication ? `<p class="text-[11px] text-pink-300 font-medium italic mt-1 truncate">"${escapeHtml(song.requestedBy.dedication)}"</p>` : ''}
-        </div>
-      </div>
+  container.innerHTML = queue.map((song, i) => {
+    const isFirst = i === 0;
+    const isLast = i === queue.length - 1;
+    const tableBadge = song.requestedBy?.table
+      ? `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">Mesa ${escapeHtml(song.requestedBy.table)}</span>`
+      : `<span class="px-2 py-0.5 rounded-md bg-white/10 text-gray-300 text-[10px]">DJ / Bar</span>`;
 
-      <div class="flex flex-wrap items-center justify-between gap-1.5 pt-2 border-t border-white/5">
-        <div class="flex items-center gap-1">
-          <button onclick="moveQueueItem(${i}, -1)" ${i === 0 ? 'disabled class="opacity-30"' : 'class="btn-secondary text-xs px-2.5 py-1.5"'} title="Subir">↑</button>
-          <button onclick="moveQueueItem(${i}, 1)" ${i === queue.length - 1 ? 'disabled class="opacity-30"' : 'class="btn-secondary text-xs px-2.5 py-1.5"'} title="Bajar">↓</button>
-          ${song.requestedBy?.table && song.requestedBy.table !== 'DJ' ? `
-            <button onclick="banTableDirect('${escapeHtml(song.requestedBy.table)}')" class="btn-secondary text-[11px] px-2 py-1.5 text-amber-300 hover:text-amber-200 border-amber-500/30" title="Pausar pedidos de esta mesa">
-              Pausar Mesa ${escapeHtml(song.requestedBy.table)}
-            </button>
-          ` : ''}
+    return `
+      <div class="queue-row flex items-center justify-between p-2.5 sm:p-3 rounded-2xl bg-[#141720] border border-white/5 hover:border-amber-500/30 gap-2 sm:gap-3 group">
+        
+        <!-- Izquierda: Botones de Reordenar ▲ ▼ y Número 1., 2., 3. -->
+        <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div class="flex flex-col items-center">
+            <button onclick="reorderQueueItem(${i}, 'up')" class="text-[11px] px-1 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isFirst ? 'opacity-20 cursor-not-allowed' : ''}" title="Subir prioridad" ${isFirst ? 'disabled' : ''}>▲</button>
+            <button onclick="reorderQueueItem(${i}, 'down')" class="text-[11px] px-1 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isLast ? 'opacity-20 cursor-not-allowed' : ''}" title="Bajar prioridad" ${isLast ? 'disabled' : ''}>▼</button>
+          </div>
+          <span class="font-mono font-black text-amber-400 text-xs sm:text-sm w-5 text-center">${i + 1}.</span>
         </div>
-        <div class="flex items-center gap-1.5">
-          <button onclick="playNowDirect('${song.videoId}', '${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.genre}')" class="btn-primary text-xs py-1.5 px-3 font-bold">Sonar Ya</button>
-          <button onclick="removeQueueItem('${song.id}')" class="btn-secondary text-xs py-1.5 px-2.5 text-red-400 hover:text-red-300" title="Eliminar">✕</button>
+
+        <!-- Carátula + Info de la canción -->
+        <div class="flex items-center gap-3 min-w-0 flex-1">
+          <img src="${song.thumbnail}" class="w-11 h-9 sm:w-12 sm:h-9 rounded-xl object-cover border border-white/10 shrink-0">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <p class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-amber-300 transition" title="${escapeHtml(song.title)}">
+                ${escapeHtml(song.title)}
+              </p>
+              <span class="genre-badge genre-${song.genre || 'Crossover'} text-[9px] py-0.2 px-2 hidden sm:inline-flex">${escapeHtml(song.genre || 'Crossover')}</span>
+            </div>
+            <div class="flex items-center gap-2 text-[11px] text-gray-400 truncate mt-0.5">
+              <span class="truncate">${escapeHtml(song.artist)}</span>
+              <span>•</span>
+              ${tableBadge}
+              ${song.requestedBy?.dedication ? `<span class="text-pink-400 italic truncate hidden md:inline">"${escapeHtml(song.requestedBy.dedication)}"</span>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <!-- Duración + Acciones -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <span class="font-mono text-xs text-gray-300 font-bold hidden sm:inline">${song.duration || '3:30'}</span>
+          <button onclick="playNowDirect('${song.videoId}', '${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.genre}')" class="tactile-btn-gold text-xs py-1.5 px-3 font-bold" title="Reproducir ahora mismo">
+            Sonar Ya
+          </button>
+          <button onclick="removeQueueItem('${song.id}')" class="text-gray-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-white/10 transition" title="Eliminar de la cola">
+            ✕
+          </button>
         </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // 2. Control de la Cola
@@ -154,19 +364,16 @@ async function removeQueueItem(songId) {
   });
 }
 
-async function moveQueueItem(index, direction) {
-  const newIndex = index + direction;
-  if (newIndex < 0 || newIndex >= currentQueueState.length) return;
-
-  const newQueue = [...currentQueueState];
-  const item = newQueue.splice(index, 1)[0];
-  newQueue.splice(newIndex, 0, item);
-
-  await fetch('/api/admin/reorder', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ queue: newQueue })
-  });
+async function reorderQueueItem(index, direction) {
+  try {
+    await fetch('/api/queue/reorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ index, direction })
+    });
+  } catch (err) {
+    console.error('Error reordenando cola:', err);
+  }
 }
 
 async function playNowDirect(videoId, title, artist, genre) {
@@ -969,7 +1176,7 @@ async function saveSettings() {
   alert('¡Ajustes guardados correctamente!');
 }
 
-// 8. Navegación de Pestañas (Corrección de IDs de botones y contenido)
+// 8. Navegación de Pestañas de la Barra Lateral
 function switchTab(tabId) {
   const tabs = {
     queue: { btn: 'tabBtnQueue', content: 'tabContentQueue' },
@@ -986,52 +1193,27 @@ function switchTab(tabId) {
     if (!btn || !content) return;
 
     if (id === tabId) {
-      btn.className = 'pb-3 border-b-2 border-amber-400 text-amber-400 flex items-center gap-2 font-bold whitespace-nowrap';
+      btn.className = 'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]';
       content.classList.remove('hidden');
     } else {
-      btn.className = 'pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 font-normal whitespace-nowrap';
+      btn.className = 'w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-transparent transition';
       content.classList.add('hidden');
     }
   });
+
+  // Cerrar sidebar en dispositivos móviles si estaba abierta
+  const sidebar = document.getElementById('adminSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+    sidebar.classList.add('-translate-x-full');
+    backdrop?.classList.add('hidden');
+  }
 
   if (tabId === 'playlists') loadPlaylists();
   if (tabId === 'stats') loadTrends();
   if (tabId === 'control') {
     loadBannedTables();
     loadPlaylists();
-  }
-}
-
-// ==============================================
-// 8.1 CONTROL DE MODO MICRÓFONO / ANUNCIO
-// ==============================================
-let isMicModeActive = false;
-
-async function toggleMicMode() {
-  try {
-    const res = await fetch('/api/admin/mic-mode', { method: 'POST' });
-    const data = await res.json();
-    renderMicModeState(data.micModeActive);
-  } catch (err) {
-    console.error('Error al alternar modo micrófono:', err);
-  }
-}
-
-function renderMicModeState(active) {
-  isMicModeActive = !!active;
-  const btn = document.getElementById('btnMicMode');
-  const icon = document.getElementById('micModeIcon');
-  const text = document.getElementById('micModeText');
-  if (!btn) return;
-
-  if (isMicModeActive) {
-    btn.className = 'bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl flex items-center gap-1.5 animate-pulse shadow-lg shadow-red-500/30';
-    if (icon) icon.className = 'w-2 h-2 rounded-full bg-white inline-block';
-    if (text) text.textContent = 'MIC ACTIVO (15% Vol)';
-  } else {
-    btn.className = 'btn-secondary text-xs flex items-center gap-1.5 transition-all duration-300';
-    if (icon) icon.className = 'w-2 h-2 rounded-full bg-gray-400 inline-block';
-    if (text) text.textContent = 'Modo Micrófono';
   }
 }
 

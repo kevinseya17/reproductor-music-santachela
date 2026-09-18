@@ -997,6 +997,55 @@ app.get('/api/trends', (req, res) => {
   res.json({ topSongs, topGenres });
 });
 
+// Reordenar canciones en la cola (subir o bajar prioridad con flechas ▲ ▼)
+app.post('/api/queue/reorder', (req, res) => {
+  const { index, direction } = req.body;
+  const queue = [...db.getQueue()];
+  const idx = parseInt(index, 10);
+
+  if (isNaN(idx) || idx < 0 || idx >= queue.length) {
+    return res.status(400).json({ error: 'Índice no válido' });
+  }
+
+  if (direction === 'up' && idx > 0) {
+    const temp = queue[idx];
+    queue[idx] = queue[idx - 1];
+    queue[idx - 1] = temp;
+  } else if (direction === 'down' && idx < queue.length - 1) {
+    const temp = queue[idx];
+    queue[idx] = queue[idx + 1];
+    queue[idx + 1] = temp;
+  } else {
+    return res.json({ success: true, queue });
+  }
+
+  db.setQueue(queue);
+  io.emit('state-changed', {
+    currentlyPlaying,
+    queue: db.getQueue(),
+    settings: db.getSettings()
+  });
+
+  res.json({ success: true, queue });
+});
+
+// Eliminar canción específica de la cola
+app.delete('/api/queue/:index', (req, res) => {
+  const queue = [...db.getQueue()];
+  const idx = parseInt(req.params.index, 10);
+  if (isNaN(idx) || idx < 0 || idx >= queue.length) {
+    return res.status(400).json({ error: 'Índice no válido' });
+  }
+  const removed = queue.splice(idx, 1);
+  db.setQueue(queue);
+  io.emit('state-changed', {
+    currentlyPlaying,
+    queue: db.getQueue(),
+    settings: db.getSettings()
+  });
+  res.json({ success: true, removed: removed[0], queue });
+});
+
 // ==========================================
 // SOCKET.IO (Sincronización en tiempo real)
 // ==========================================
@@ -1016,6 +1065,16 @@ io.on('connection', (socket) => {
   // El reproductor reporta cambios de estado
   socket.on('player-status', (data) => {
     io.emit('player-broadcast', data);
+  });
+
+  // Comandos remotos desde la consola de DJ hacia la pantalla de TV
+  socket.on('player-command', (data) => {
+    io.emit('player-control', data);
+  });
+
+  // Progreso en tiempo real desde el reproductor TV hacia la consola DJ
+  socket.on('player-progress', (data) => {
+    io.emit('player-telemetry', data);
   });
 });
 

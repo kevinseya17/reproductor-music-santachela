@@ -8,126 +8,289 @@
   <link rel="stylesheet" href="/css/style.css">
   <script src="/socket.io/socket.io.js"></script>
 </head>
-<body class="bg-[#0a0c10] text-gray-100 min-h-screen">
+<body class="bg-[#0c0e12] text-gray-100 min-h-screen flex flex-col font-sans">
 
-  <!-- Header Admin -->
-  <header class="glass-header px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+  <!-- Topbar Minimalista -->
+  <header class="glass-header px-4 lg:px-6 py-2.5 flex items-center justify-between border-b border-white/10 z-30 shrink-0">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold shrink-0">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
-      </div>
-      <div>
-        <h1 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-          <span id="adminBarName">Music Bar</span> 
-          <span class="text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">Panel DJ</span>
-        </h1>
-        <p class="text-[11px] sm:text-xs text-gray-400">Control de cola, listas maestras e Inteligencia Artificial</p>
+      <!-- Botón móvil para abrir sidebar -->
+      <button onclick="toggleSidebarMobile()" class="lg:hidden text-gray-300 hover:text-white p-1.5 rounded-xl bg-white/5 border border-white/10" aria-label="Abrir Menú">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-extrabold text-sm shadow-[0_0_12px_rgba(245,158,11,0.3)]">
+          ⚡
+        </div>
+        <div>
+          <h1 class="text-sm sm:text-base font-extrabold text-white tracking-wider flex items-center gap-2">
+            <span id="adminBarName">Santa Chela Music Bar</span>
+            <span class="text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse">
+              EN VIVO
+            </span>
+          </h1>
+        </div>
       </div>
     </div>
 
-    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
-      <button id="btnMicMode" onclick="toggleMicMode()" class="btn-secondary text-xs flex items-center gap-1.5 transition-all duration-300 py-1.5 px-3">
-        <span id="micModeIcon" class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span> <span id="micModeText">Modo Micrófono</span>
+    <!-- Accesos Rápidos Header -->
+    <div class="flex items-center gap-2">
+      <button id="btnMicMode" onclick="toggleMicMode()" class="btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3 transition" title="Atenuar música para hablar">
+        <span id="micModeIcon" class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>
+        <span id="micModeText" class="hidden sm:inline">Modo Micrófono</span>
       </button>
-      <a href="/player.html" target="_blank" class="btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3">
-        Pantalla TV
+      <a href="/player.html" target="_blank" class="tactile-btn-dark text-xs py-1.5 px-3 flex items-center gap-1.5" title="Abrir pantalla para la TV">
+        <span>📺</span> <span class="hidden sm:inline">Pantalla TV</span>
       </a>
-      <a href="/qrs.html" target="_blank" class="btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3">
-        Imprimir QRs
+      <a href="/qrs.html" target="_blank" class="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5" title="Ver e imprimir códigos QR">
+        <span>🖨️</span> <span class="hidden sm:inline">QRs</span>
       </a>
     </div>
   </header>
 
-  <div class="max-w-7xl mx-auto p-3.5 sm:p-6 space-y-6">
-
-    <!-- Navegación de Pestañas -->
-    <nav class="flex border-b border-white/10 gap-4 sm:gap-6 text-xs sm:text-sm font-semibold overflow-x-auto pb-1 no-scrollbar">
-      <button onclick="switchTab('queue')" id="tabBtnQueue" class="pb-3 border-b-2 border-amber-400 text-amber-400 flex items-center gap-2 whitespace-nowrap">
-        Cola En Vivo (<span id="queueCounter">0</span>)
-      </button>
-      <button onclick="switchTab('playlists')" id="tabBtnPlaylists" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
-        Listas Maestras
-      </button>
-      <button onclick="switchTab('control')" id="tabBtnControl" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
-        Mesas, Horarios & TV
-      </button>
-      <button onclick="switchTab('ai')" id="tabBtnAI" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
-        DJ Inteligente
-      </button>
-      <button onclick="switchTab('stats')" id="tabBtnStats" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
-        Tendencias & Historial
-      </button>
-      <button onclick="switchTab('settings')" id="tabBtnSettings" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center gap-2 whitespace-nowrap">
-        Ajustes del Bar
-      </button>
-    </nav>
-
-    <!-- ============================================== -->
-    <!-- PESTAÑA 1: COLA EN VIVO -->
-    <!-- ============================================== -->
-    <div id="tabContentQueue" class="space-y-4 sm:space-y-6">
+  <!-- Layout Principal: Sidebar Izquierda + Área de Trabajo -->
+  <div class="flex-1 flex overflow-hidden relative">
+    
+    <!-- Sidebar de Navegación Estilo Pro -->
+    <aside id="adminSidebar" class="w-64 bg-[#11141b] border-r border-white/10 flex flex-col justify-between shrink-0 transition-transform duration-300 -translate-x-full lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 lg:z-auto pt-14 lg:pt-0">
       
-      <!-- Sonando Ahora -->
-      <div class="glass-card p-4 sm:p-6 border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
-        <div class="flex items-center gap-3 sm:gap-5 min-w-0 flex-1 w-full">
-          <img id="adminNowThumb" src="" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-white/10 shadow-lg flex-shrink-0">
+      <!-- Menú Vertical -->
+      <div class="p-3.5 space-y-1.5 overflow-y-auto">
+        <div class="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-gray-500 flex items-center justify-between">
+          <span>CONSOLA DEL BAR</span>
+          <button onclick="toggleSidebarMobile()" class="lg:hidden text-gray-400 hover:text-white p-1">✕</button>
+        </div>
+
+        <button onclick="switchTab('queue')" id="tabBtnQueue" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+          <div class="flex items-center gap-2.5">
+            <span class="text-base">📻</span>
+            <span>En Vivo & Consola</span>
+          </div>
+          <span id="queueCounterBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-black font-extrabold">0</span>
+        </button>
+
+        <button onclick="switchTab('playlists')" id="tabBtnPlaylists" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-transparent transition">
+          <span class="text-base">📂</span>
+          <span>Listas Maestras</span>
+        </button>
+
+        <button onclick="switchTab('control')" id="tabBtnControl" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-transparent transition">
+          <span class="text-base">🎛️</span>
+          <span>Mesas, Horarios & TV</span>
+        </button>
+
+        <button onclick="switchTab('ai')" id="tabBtnAI" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-transparent transition">
+          <span class="text-base">🤖</span>
+          <span>DJ Inteligente IA</span>
+        </button>
+
+        <button onclick="switchTab('stats')" id="tabBtnStats" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-transparent transition">
+          <span class="text-base">📈</span>
+          <span>Tendencias & Historial</span>
+        </button>
+
+        <button onclick="switchTab('settings')" id="tabBtnSettings" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-transparent transition">
+          <span class="text-base">⚙️</span>
+          <span>Ajustes del Bar</span>
+        </button>
+      </div>
+
+      <!-- Mini Tarjeta Persistente al Fondo del Sidebar -->
+      <div class="p-3 border-t border-white/10 bg-black/40 m-3 rounded-2xl border border-white/5">
+        <div class="flex items-center gap-2.5 mb-2">
+          <img id="adminSidebarMiniThumb" src="" class="w-10 h-10 rounded-xl object-cover border border-amber-500/40 shrink-0">
           <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <span class="text-[10px] sm:text-xs uppercase font-bold tracking-wider text-amber-400">Sonando Ahora</span>
-              <span id="adminNowGenre" class="genre-badge genre-Salsa text-[10px] sm:text-xs">Salsa</span>
-              <span id="adminNowRequested" class="text-[10px] sm:text-xs text-gray-400"></span>
+            <p id="adminSidebarMiniTitle" class="text-xs font-bold text-white truncate">Cargando...</p>
+            <p id="adminSidebarMiniArtist" class="text-[10px] text-amber-400 truncate font-semibold">Artista</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-between text-[10px] text-gray-400 font-mono">
+          <span id="adminSidebarMiniTime">00:00</span>
+          <span class="text-emerald-400 font-bold tracking-wider text-[9px] flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> AL AIRE
+          </span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Overlay oscuro para cerrar sidebar en móviles -->
+    <div id="sidebarBackdrop" onclick="toggleSidebarMobile()" class="fixed inset-0 bg-black/70 z-30 hidden lg:hidden"></div>
+
+    <!-- Área de Trabajo Principal -->
+    <main class="flex-1 overflow-y-auto p-3.5 sm:p-6 lg:p-7 space-y-6 w-full">
+
+      <!-- ============================================== -->
+      <!-- PESTAÑA 1: COLA EN VIVO & CONSOLA DJ -->
+      <!-- ============================================== -->
+      <div id="tabContentQueue" class="space-y-6">
+
+        <!-- ============================================================ -->
+        <!-- REPRODUCTOR PRO HARDWARE DECK (ESTILO DARK GOLD TRAKTOR/DJ) -->
+        <!-- ============================================================ -->
+        <div class="relative bg-gradient-to-b from-[#181b24] via-[#12141c] to-[#0e1017] rounded-3xl p-5 sm:p-7 border border-amber-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.6),0_0_25px_rgba(245,158,11,0.08)] space-y-5">
+          
+          <!-- Header del Deck -->
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#facc15] animate-pulse"></span>
+              <span class="text-[11px] sm:text-xs font-black tracking-[0.2em] text-amber-400 uppercase">NOW PLAYING • CONSOLA DJ</span>
             </div>
-            <h2 id="adminNowTitle" class="text-base sm:text-xl font-bold text-white leading-tight truncate">Cargando...</h2>
-            <p id="adminNowArtist" class="text-xs sm:text-sm text-gray-400 truncate">Artista</p>
+            <div class="flex items-center gap-2">
+              <span id="adminNowGenre" class="genre-badge genre-Salsa text-[10px]">Salsa</span>
+              <span id="adminNowRequested" class="text-[11px] text-gray-400"></span>
+            </div>
+          </div>
+
+          <!-- Info Principal del Tema (Carátula grande con bisel dorado + Título impactante) -->
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+            <div class="flex items-center gap-4 sm:gap-6 min-w-0 flex-1">
+              <div class="relative shrink-0 group">
+                <div class="absolute -inset-1 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 opacity-40 blur-sm group-hover:opacity-75 transition"></div>
+                <img id="adminNowThumb" src="" class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-amber-400 shadow-2xl">
+              </div>
+              <div class="min-w-0 flex-1">
+                <h2 id="adminNowTitle" class="text-lg sm:text-2xl lg:text-3xl font-black text-white tracking-wide truncate leading-tight">
+                  Cargando...
+                </h2>
+                <p id="adminNowArtist" class="text-sm sm:text-base text-amber-400 font-bold truncate mt-0.5">
+                  Artista
+                </p>
+                <p class="text-xs text-gray-400 mt-1 flex items-center gap-1.5">
+                  <span>🎵</span> <span id="adminNowOriginText">Lista Base</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Tiempo Numérico Grande (Estilo Display Digital) -->
+            <div class="bg-black/60 border border-white/10 px-4 py-2.5 rounded-2xl text-right shrink-0">
+              <div class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">TIEMPO TRANSCURRIDO</div>
+              <div class="font-mono text-xl sm:text-2xl font-black tracking-wider text-amber-400">
+                <span id="adminCurrentTime">00:00</span> <span class="text-gray-500 text-base">/</span> <span id="adminTotalDuration" class="text-gray-300">00:00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de Progreso / Scrubber Interactivo -->
+          <div class="space-y-1.5 pt-1">
+            <div class="relative flex items-center">
+              <input type="range" id="adminPlayerScrubber" min="0" max="100" value="0" class="scrubber-slider" oninput="onScrubberInput(this.value)" onchange="onScrubberChange(this.value)">
+            </div>
+            <div class="flex justify-between text-[11px] font-mono text-gray-400">
+              <span id="scrubberElapsedLabel">0:00</span>
+              <span class="text-[10px] uppercase text-gray-500 tracking-wider">Haz clic o arrastra en la barra para adelantar o retroceder</span>
+              <span id="scrubberTotalLabel">0:00</span>
+            </div>
+          </div>
+
+          <!-- Botonera Táctil Neomórfica de Transporte (Estilo Hardware Físico) -->
+          <div class="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+            
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+              
+              <!-- REWIND -->
+              <div class="flex flex-col items-center gap-1">
+                <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">REWIND</span>
+                <button onclick="remoteSeek(-10)" class="tactile-btn-dark px-3.5 sm:px-4 py-2 text-xs sm:text-sm" title="Retroceder 10 segundos">
+                  ⏪ -10s
+                </button>
+              </div>
+
+              <!-- PLAY / PAUSE (GRANDE Y DORADO AL CENTRO) -->
+              <div class="flex flex-col items-center gap-1">
+                <span class="text-[9px] font-black uppercase text-amber-400 tracking-wider">PLAY / PAUSE</span>
+                <button id="btnPlayPause" onclick="togglePlayPauseRemote()" class="tactile-btn-gold px-7 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg flex items-center gap-2" title="Pausar o Reanudar">
+                  <span id="btnPlayPauseIcon">⏸️</span>
+                  <span id="btnPlayPauseText" class="text-xs sm:text-sm uppercase tracking-wider font-black">PAUSAR</span>
+                </button>
+              </div>
+
+              <!-- FAST FORWARD -->
+              <div class="flex flex-col items-center gap-1">
+                <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">FAST FORWARD</span>
+                <button onclick="remoteSeek(10)" class="tactile-btn-dark px-3.5 sm:px-4 py-2 text-xs sm:text-sm" title="Adelantar 10 segundos">
+                  +10s ⏩
+                </button>
+              </div>
+
+              <!-- NEXT / SALTAR -->
+              <div class="flex flex-col items-center gap-1">
+                <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">NEXT</span>
+                <button onclick="skipCurrentSong()" class="tactile-btn-dark px-4 sm:px-5 py-2 text-xs sm:text-sm hover:border-amber-400/60" title="Saltar a la siguiente canción">
+                  ⏭️ Saltar
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Controles Secundarios: Micrófono y Volumen TV -->
+            <div class="flex items-center gap-3 sm:gap-4 ml-auto">
+              <div class="flex flex-col items-center gap-1">
+                <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">VOZ / MIC</span>
+                <button onclick="toggleMicMode()" id="btnDeckMic" class="tactile-btn-dark px-3.5 py-2 text-xs flex items-center gap-1.5" title="Atenuar música para hablar">
+                  🎙️ <span id="deckMicLabel">Mic</span>
+                </button>
+              </div>
+
+              <div class="flex flex-col items-start gap-1 bg-black/40 px-3.5 py-1.5 rounded-xl border border-white/10">
+                <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">VOLUMEN TV</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-gray-400">🔊</span>
+                  <input type="range" id="adminVolumeSlider" min="0" max="100" value="100" oninput="onVolumeChange(this.value)" class="w-20 sm:w-28 accent-amber-500 cursor-pointer h-1.5 bg-white/20 rounded-lg">
+                  <span id="adminVolumeDisplay" class="text-[10px] font-mono text-amber-400 font-bold w-7">100%</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Buscador Manual para el DJ / Barman -->
+        <div class="glass-card p-4 sm:p-5 space-y-3 border-white/10">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+              <span>🔍</span> Agregar canción rápida a la cola (como DJ)
+            </h3>
+            <button id="adminClearSearchBtn" onclick="clearAdminSearch()" class="text-xs text-gray-400 hover:text-white hidden">
+              Limpiar búsqueda
+            </button>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <div class="relative flex-1">
+              <input type="text" id="adminSearchInput" onkeydown="handleAdminSearchKey(event)" placeholder="Buscar canción, artista o pegar enlace de YouTube..." class="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white outline-none focus:border-amber-400 pr-9">
+              <button id="adminSearchInputClear" onclick="clearAdminSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs hidden" title="Limpiar">✕</button>
+            </div>
+            <button id="adminSearchBtn" onclick="adminSearchSong()" class="btn-secondary text-xs sm:text-sm px-4 py-2.5 flex items-center justify-center gap-1.5 font-bold">
+              <span id="adminSearchBtnLabel">Buscar</span>
+            </button>
+          </div>
+          <div id="adminSearchResults" class="hidden space-y-2 pt-2">
+            <!-- Inyectado dinámicamente -->
           </div>
         </div>
 
-        <div class="flex items-center gap-3 w-full sm:w-auto">
-          <button onclick="skipCurrentSong()" class="btn-primary text-xs sm:text-sm flex items-center justify-center gap-2 py-2.5 px-5 w-full sm:w-auto font-bold">
-            Saltar Tema
-          </button>
-        </div>
-      </div>
-
-      <!-- Buscador Manual para el DJ / Barman -->
-      <div class="glass-card p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-            Agregar canción rápida a la cola (como DJ)
-          </h3>
-          <button id="adminClearSearchBtn" onclick="clearAdminSearch()" class="text-xs text-gray-400 hover:text-white hidden">
-            Limpiar búsqueda
-          </button>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-2">
-          <div class="relative flex-1">
-            <input type="text" id="adminSearchInput" onkeydown="handleAdminSearchKey(event)" placeholder="Buscar canción o pegar link de YouTube..." class="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white outline-none focus:border-amber-400 pr-9">
-            <button id="adminSearchInputClear" onclick="clearAdminSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs hidden" title="Limpiar">✕</button>
+        <!-- ============================================================ -->
+        <!-- SECCIÓN UP NEXT / QUEUE (ESTILO EXACTO DE LA REFERENCIA)     -->
+        <!-- ============================================================ -->
+        <div class="glass-card p-4 sm:p-6 space-y-4 border-white/10">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+            <div class="flex items-center gap-2.5">
+              <span class="text-amber-400 font-bold">≡</span>
+              <h3 class="font-black text-sm sm:text-base text-white tracking-wider uppercase flex items-center gap-2">
+                UP NEXT / QUEUE (<span id="queueCounter">0</span>)
+              </h3>
+            </div>
+            <span class="text-[11px] sm:text-xs text-gray-400">
+              Usa las flechas <strong class="text-amber-400">▲ ▼</strong> para cambiar el turno de los pedidos
+            </span>
           </div>
-          <button id="adminSearchBtn" onclick="adminSearchSong()" class="btn-secondary text-xs sm:text-sm px-4 py-2.5 flex items-center justify-center gap-1.5 font-bold">
-            <span id="adminSearchBtnLabel">Buscar</span>
-          </button>
+
+          <div id="adminQueueList" class="space-y-2">
+            <!-- Inyectado dinámicamente -->
+          </div>
         </div>
-        <div id="adminSearchResults" class="hidden space-y-2 pt-2">
-          <!-- Inyectado dinámicamente -->
-        </div>
+
       </div>
-
-      <!-- Lista de canciones en espera -->
-      <div class="glass-card p-4 sm:p-6 space-y-3">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-          <h3 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
-            Canciones en espera (<span id="queueCounter">0</span>)
-          </h3>
-          <span class="text-[11px] sm:text-xs text-gray-400">Organizadas por tandas armónicas de DJ</span>
-        </div>
-
-        <div id="adminQueueList" class="space-y-2.5">
-          <!-- Inyectado dinámicamente -->
-        </div>
-      </div>
-
-    </div>
 
     <!-- ============================================== -->
     <!-- PESTAÑA 2: LISTAS MAESTRAS (EL NORTE) -->
@@ -635,6 +798,7 @@
       </div>
     </div>
 
+    </main>
   </div>
 
   <!-- Modal Nueva Lista Base -->
