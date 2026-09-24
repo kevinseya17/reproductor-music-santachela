@@ -473,6 +473,7 @@ async function playNowDirect(videoId, title, artist, genre) {
 
 // 3. Búsqueda rápida de DJ con soporte para Enter, Debounce y caché
 let adminSearchDebounce = null;
+let lastAdminSearchVideos = [];
 
 function setupAdminSearchInput() {
   const input = document.getElementById('adminSearchInput');
@@ -555,13 +556,15 @@ async function adminSearchSong() {
       return;
     }
 
+    lastAdminSearchVideos = videos;
+
     resultsBox.innerHTML = `
       <div class="flex items-center justify-between text-[11px] text-gray-400 px-1 pb-1">
         <span>Resultados encontrados (${videos.length}):</span>
         <button onclick="clearAdminSearch()" class="hover:text-white">Cerrar</button>
       </div>
       <div class="space-y-1.5">
-        ${videos.slice(0, 6).map(v => `
+        ${videos.slice(0, 6).map((v, idx) => `
           <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 hover:border-amber-400/30 transition">
             <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
               <img src="${v.thumbnail}" class="w-12 h-9 rounded object-cover shrink-0">
@@ -571,10 +574,10 @@ async function adminSearchSong() {
               </div>
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
-              <button onclick="adminAddSongToQueue('${v.videoId}', '${escapeHtml(v.title)}', '${escapeHtml(v.artist)}', '${v.duration}', '${v.thumbnail}')" class="btn-secondary text-xs py-1.5 px-2.5 whitespace-nowrap" title="Agregar a la lista de espera">
+              <button onclick="adminAddSongFromSearch(${idx})" class="btn-secondary text-xs py-1.5 px-2.5 whitespace-nowrap text-amber-400 font-semibold border-amber-400/30 hover:bg-amber-400/10" title="Agregar a la cola de espera sin límite de canciones">
                 + Cola
               </button>
-              <button onclick="playNowDirect('${v.videoId}', '${escapeHtml(v.title)}', '${escapeHtml(v.artist)}', 'Crossover')" class="btn-primary text-xs py-1.5 px-2.5 whitespace-nowrap font-bold" title="Reproducir inmediatamente">
+              <button onclick="adminPlayNowFromSearch(${idx})" class="btn-primary text-xs py-1.5 px-2.5 whitespace-nowrap font-bold" title="Reproducir inmediatamente">
                 Sonar Ya
               </button>
             </div>
@@ -594,9 +597,22 @@ async function adminSearchSong() {
   }
 }
 
+function adminAddSongFromSearch(idx) {
+  const v = lastAdminSearchVideos[idx];
+  if (!v) return;
+  adminAddSongToQueue(v.videoId, v.title, v.artist, v.duration, v.thumbnail);
+}
+
+function adminPlayNowFromSearch(idx) {
+  const v = lastAdminSearchVideos[idx];
+  if (!v) return;
+  playNowDirect(v.videoId, v.title, v.artist, 'Crossover');
+  clearAdminSearch();
+}
+
 async function adminAddSongToQueue(videoId, title, artist, duration, thumbnail) {
   try {
-    await fetch('/api/request', {
+    const res = await fetch('/api/admin/add-queue', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -604,15 +620,36 @@ async function adminAddSongToQueue(videoId, title, artist, duration, thumbnail) 
         title,
         artist,
         duration,
-        thumbnail,
-        table: 'DJ',
-        customerName: 'DJ / Bar'
+        thumbnail
       })
     });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error || 'No se pudo agregar la canción');
+      return;
+    }
     clearAdminSearch();
+    showAdminToast(`✓ "${title}" agregada a la cola`);
   } catch (err) {
     console.error('Error agregando cancion como DJ:', err);
+    alert('Error al agregar canción.');
   }
+}
+
+function showAdminToast(msg, icon = '🎵') {
+  let toast = document.getElementById('adminDynamicToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'adminDynamicToast';
+    toast.className = 'fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 bg-amber-400 text-black font-bold text-xs rounded-xl shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-none';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = `<span class="text-base">${icon}</span> <span class="truncate max-w-[280px]">${escapeHtml(msg)}</span>`;
+  toast.classList.remove('translate-y-10', 'opacity-0');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => {
+    toast.classList.add('translate-y-10', 'opacity-0');
+  }, 3500);
 }
 
 // 4. Pestaña de Listas Maestras
@@ -1765,6 +1802,9 @@ function renderPlaylistTracksInModal(playlist) {
           </div>
         </div>
         <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="adminAddTrackFromPlaylistModal(${idx})" class="btn-secondary text-[11px] py-1.5 px-2 text-amber-400 font-semibold border-amber-400/30 hover:bg-amber-400/10" title="Agregar a la cola de espera">
+            + Cola
+          </button>
           <button onclick="playNowDirect('${t.videoId}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${currentGenre}'); closeViewPlaylistModal();" class="btn-primary text-[11px] py-1.5 px-2.5">
             Sonar Ya
           </button>
@@ -1775,6 +1815,14 @@ function renderPlaylistTracksInModal(playlist) {
       </div>
     `;
   }).join('');
+}
+
+function adminAddTrackFromPlaylistModal(trackIndex) {
+  if (!currentViewingPlaylistId) return;
+  const pl = currentPlaylistsList.find(p => p.id === currentViewingPlaylistId);
+  if (!pl || !pl.tracks || !pl.tracks[trackIndex]) return;
+  const t = pl.tracks[trackIndex];
+  adminAddSongToQueue(t.videoId, t.title, t.artist, t.duration || '3:30', t.thumbnail || '');
 }
 
 // Cambiar género de una canción en la lista abierta actualmente

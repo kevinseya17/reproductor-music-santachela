@@ -5,7 +5,7 @@
     "cooldownMinutes": 10,
     "autoDJEnabled": true,
     "smartSlottingWindow": 3,
-    "activePlaylistId": "rumba-cantina",
+    "activePlaylistId": "despecho-cantina",
     "geminiApiKey": "",
     "totalTables": 20,
     "blacklistWords": [
@@ -385,7 +385,8 @@
     ],
     "4": [
       1789597078446
-    ]
+    ],
+    "5": []
   },
   "bannedTables": {}
 }

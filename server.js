@@ -397,39 +397,42 @@ app.get('/api/search', async (req, res) => {
 // Pedir canción (Cliente desde la mesa)
 app.post('/api/request', async (req, res) => {
   try {
-    const { videoId, title, artist, duration, thumbnail, table, customerName, dedication } = req.body;
     const tableClean = table ? String(table).trim() : 'Mesa';
+    const isDJOrAdmin = req.body.isAdmin === true || ['dj', 'admin', 'bar', 'caja'].includes(tableClean.toLowerCase());
 
     if (!videoId || !title) {
       return res.status(400).json({ error: 'Faltan datos de la canción' });
     }
 
-    // 1. Validar reglas de la mesa (anti-spam / límites / baneos)
-    const check = db.canTableRequest(tableClean);
-    if (!check.allowed) {
-      return res.status(429).json({ error: check.reason });
-    }
+    // Las restricciones de límites, cooldown, lista negra y modo cerrado aplican SOLO a clientes QR
+    if (!isDJOrAdmin) {
+      // 1. Validar reglas de la mesa (anti-spam / límites / baneos)
+      const check = db.canTableRequest(tableClean);
+      if (!check.allowed) {
+        return res.status(429).json({ error: check.reason });
+      }
 
-    // 2. Filtro Anti-Trolls y Lista Negra
-    const blSong = db.isBlacklisted(title, artist);
-    const blDed = dedication ? db.isBlacklisted(dedication, '') : { blacklisted: false };
-    if (blSong.blacklisted || blDed.blacklisted) {
-      return res.status(400).json({
-        error: 'Esta canción o mensaje contiene términos o audios no permitidos en el bar.'
-      });
-    }
-
-    // 3. Validar modo de solicitud (abierto vs. solo listas)
-    const settings = db.getSettings();
-    if (settings.requestMode === 'playlist') {
-      const allPlaylists = db.getPlaylists();
-      const isInPlaylist = allPlaylists.some(pl =>
-        pl.tracks && pl.tracks.some(t => t.videoId === videoId)
-      );
-      if (!isInPlaylist) {
-        return res.status(403).json({
-          error: 'El bar solo acepta pedidos de canciones que están en las listas disponibles. ¡Elige una de ellas!'
+      // 2. Filtro Anti-Trolls y Lista Negra
+      const blSong = db.isBlacklisted(title, artist);
+      const blDed = dedication ? db.isBlacklisted(dedication, '') : { blacklisted: false };
+      if (blSong.blacklisted || blDed.blacklisted) {
+        return res.status(400).json({
+          error: 'Esta canción o mensaje contiene términos o audios no permitidos en el bar.'
         });
+      }
+
+      // 3. Validar modo de solicitud (abierto vs. solo listas)
+      const settings = db.getSettings();
+      if (settings.requestMode === 'playlist') {
+        const allPlaylists = db.getPlaylists();
+        const isInPlaylist = allPlaylists.some(pl =>
+          pl.tracks && pl.tracks.some(t => t.videoId === videoId)
+        );
+        if (!isInPlaylist) {
+          return res.status(403).json({
+            error: 'El bar solo acepta pedidos de canciones que están en las listas disponibles. ¡Elige una de ellas!'
+          });
+        }
       }
     }
 
@@ -437,7 +440,7 @@ app.post('/api/request', async (req, res) => {
     const genre = await aiDj.classifyGenre(title, artist);
 
     const song = {
-      id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      id: `${isDJOrAdmin ? 'admin' : 'req'}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       videoId,
       title,
       artist: artist || 'Artista',
@@ -445,8 +448,8 @@ app.post('/api/request', async (req, res) => {
       duration: duration || '3:30',
       thumbnail: thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
       requestedBy: {
-        table: tableClean,
-        name: customerName ? customerName.trim() : `Mesa ${tableClean}`,
+        table: isDJOrAdmin ? 'DJ' : tableClean,
+        name: isDJOrAdmin ? 'DJ / Bar' : (customerName ? customerName.trim() : `Mesa ${tableClean}`),
         dedication: (dedication || '').trim().slice(0, 120)
       },
       isBaseTrack: false,
@@ -455,14 +458,14 @@ app.post('/api/request', async (req, res) => {
 
     const currentQueue = db.getQueue();
 
-    // 3. Si no hay absolutamente nada sonando, reproducir de inmediato
+    // 5. Si no hay absolutamente nada sonando, reproducir de inmediato
     if (!currentlyPlaying) {
       currentlyPlaying = { ...song, startedAt: Date.now() };
-      db.recordTableRequest(tableClean);
+      if (!isDJOrAdmin) db.recordTableRequest(tableClean);
       io.emit('state-changed', {
         currentlyPlaying,
         queue: db.getQueue(),
-        settings
+        settings: db.getSettings()
       });
       io.emit('new-request-alert', {
         song,
@@ -476,18 +479,21 @@ app.post('/api/request', async (req, res) => {
       });
     }
 
-    // 4. Si ya hay una canción sonando (de fondo o de otro cliente),
+    // 6. Si ya hay una canción sonando (de fondo o de otro cliente),
     // la canción actual sigue sonando sin cortarse y la nueva entra a la cola para sonar a continuación
     let slotIndex = currentQueue.length;
-    if (settings.autoDJEnabled) {
+    const currentSettings = db.getSettings();
+    if (currentSettings.autoDJEnabled) {
       slotIndex = aiDj.calculateSmartSlot(currentQueue, genre, currentlyPlaying);
       db.insertInQueueAt(slotIndex, song);
     } else {
       db.addToQueue(song);
     }
 
-    // Registrar pedido de la mesa
-    db.recordTableRequest(tableClean);
+    // Registrar pedido de la mesa (solo para mesas de clientes, el DJ nunca acumula esperas)
+    if (!isDJOrAdmin) {
+      db.recordTableRequest(tableClean);
+    }
 
     // Calcular posición aproximada para el usuario (1-indexed)
     const displayPosition = slotIndex + 1;
@@ -882,6 +888,70 @@ app.post('/api/admin/reorder', (req, res) => {
     });
   }
   res.json({ success: true });
+});
+
+// Agregar canción a la cola de reproducción como DJ / Bar (Sin límites ni restricciones)
+app.post('/api/admin/add-queue', async (req, res) => {
+  try {
+    const { videoId, title, artist, duration, thumbnail, genre: customGenre } = req.body;
+    if (!videoId || !title) {
+      return res.status(400).json({ error: 'Faltan datos de la canción' });
+    }
+
+    const genre = customGenre || await aiDj.classifyGenre(title, artist);
+
+    const song = {
+      id: `admin_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      videoId,
+      title,
+      artist: artist || 'Artista',
+      genre,
+      duration: duration || '3:30',
+      thumbnail: thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      requestedBy: {
+        table: 'DJ',
+        name: 'DJ / Bar',
+        dedication: ''
+      },
+      isBaseTrack: false,
+      addedAt: Date.now()
+    };
+
+    const currentQueue = db.getQueue();
+    const settings = db.getSettings();
+
+    if (!currentlyPlaying) {
+      currentlyPlaying = { ...song, startedAt: Date.now() };
+    } else {
+      let slotIndex = currentQueue.length;
+      if (settings.autoDJEnabled) {
+        slotIndex = aiDj.calculateSmartSlot(currentQueue, genre, currentlyPlaying);
+        db.insertInQueueAt(slotIndex, song);
+      } else {
+        db.addToQueue(song);
+      }
+    }
+
+    io.emit('state-changed', {
+      currentlyPlaying,
+      queue: db.getQueue(),
+      settings: db.getSettings()
+    });
+
+    io.emit('new-request-alert', {
+      song,
+      position: db.getQueue().length
+    });
+
+    res.json({
+      success: true,
+      message: 'Canción agregada a la cola por el DJ (sin límites)',
+      song
+    });
+  } catch (err) {
+    console.error('Error al agregar tema desde admin:', err);
+    res.status(500).json({ error: 'Error al agregar canción' });
+  }
 });
 
 app.post('/api/admin/play-now', async (req, res) => {
