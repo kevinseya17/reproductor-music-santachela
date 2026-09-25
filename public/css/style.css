@@ -248,3 +248,55 @@ h1, h2, h3, h4, .brand-font {
   border-color: rgba(245, 158, 11, 0.35);
 }
 
+/* ============================================================ */
+/* OPTIMIZACIONES RESPONSIVE MOBILE-FIRST (iOS / Android / PWA) */
+/* ============================================================ */
+
+/* 1. Prevenir el molesto auto-zoom en iOS Safari en inputs */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="search"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* 2. Soporte para Notch y Home Bar de iPhone (Safe Area Insets) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+  }
+  .glass-header {
+    padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+  }
+}
+
+/* 3. Desactivar el retraso de 300ms en toques táctiles */
+button,
+a,
+input,
+select,
+.queue-row {
+  touch-action: manipulation;
+}
+
+/* 4. Scroll suave e inercial nativo para dispositivos táctiles */
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 5. Área táctil ampliada para botones pequeños en pantallas táctiles */
+.queue-row button {
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+

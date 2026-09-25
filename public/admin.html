@@ -127,45 +127,45 @@
         <!-- ============================================================ -->
         <!-- REPRODUCTOR PRO HARDWARE DECK (ESTILO DARK GOLD TRAKTOR/DJ) -->
         <!-- ============================================================ -->
-        <div class="relative bg-gradient-to-b from-[#181b24] via-[#12141c] to-[#0e1017] rounded-3xl p-5 sm:p-7 border border-amber-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.6),0_0_25px_rgba(245,158,11,0.08)] space-y-5">
+        <div class="relative bg-gradient-to-b from-[#181b24] via-[#12141c] to-[#0e1017] rounded-3xl p-4 sm:p-7 border border-amber-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.6),0_0_25px_rgba(245,158,11,0.08)] space-y-4 sm:space-y-5">
           
           <!-- Header del Deck -->
-          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+          <div class="flex items-center justify-between border-b border-white/10 pb-2.5 sm:pb-3">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#facc15] animate-pulse"></span>
-              <span class="text-[11px] sm:text-xs font-black tracking-[0.2em] text-amber-400 uppercase">NOW PLAYING • CONSOLA DJ</span>
+              <span class="text-[10px] sm:text-xs font-black tracking-[0.2em] text-amber-400 uppercase">NOW PLAYING • CONSOLA DJ</span>
             </div>
-            <div class="flex items-center gap-2">
-              <span id="adminNowGenre" class="genre-badge genre-Salsa text-[10px]">Salsa</span>
-              <span id="adminNowRequested" class="text-[11px] text-gray-400"></span>
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <span id="adminNowGenre" class="genre-badge genre-Salsa text-[9px] sm:text-[10px]">Salsa</span>
+              <span id="adminNowRequested" class="text-[10px] sm:text-[11px] text-gray-400"></span>
             </div>
           </div>
 
           <!-- Info Principal del Tema (Carátula grande con bisel dorado + Título impactante) -->
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
-            <div class="flex items-center gap-4 sm:gap-6 min-w-0 flex-1">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6">
+            <div class="flex items-center gap-3 sm:gap-6 min-w-0 flex-1 w-full sm:w-auto">
               <div class="relative shrink-0 group">
                 <div class="absolute -inset-1 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 opacity-40 blur-sm group-hover:opacity-75 transition"></div>
-                <img id="adminNowThumb" src="" class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-amber-400 shadow-2xl">
+                <img id="adminNowThumb" src="" class="relative w-16 h-16 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-amber-400 shadow-2xl">
               </div>
               <div class="min-w-0 flex-1">
-                <h2 id="adminNowTitle" class="text-lg sm:text-2xl lg:text-3xl font-black text-white tracking-wide truncate leading-tight">
+                <h2 id="adminNowTitle" class="text-base sm:text-2xl lg:text-3xl font-black text-white tracking-wide truncate leading-tight">
                   Cargando...
                 </h2>
-                <p id="adminNowArtist" class="text-sm sm:text-base text-amber-400 font-bold truncate mt-0.5">
+                <p id="adminNowArtist" class="text-xs sm:text-base text-amber-400 font-bold truncate mt-0.5">
                   Artista
                 </p>
-                <p class="text-xs text-gray-400 mt-1 flex items-center gap-1.5">
+                <p class="text-[11px] sm:text-xs text-gray-400 mt-1 flex items-center gap-1.5">
                   <span>🎵</span> <span id="adminNowOriginText">Lista Base</span>
                 </p>
               </div>
             </div>
 
             <!-- Tiempo Numérico Grande (Estilo Display Digital) -->
-            <div class="bg-black/60 border border-white/10 px-4 py-2.5 rounded-2xl text-right shrink-0">
-              <div class="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">TIEMPO TRANSCURRIDO</div>
-              <div class="font-mono text-xl sm:text-2xl font-black tracking-wider text-amber-400">
-                <span id="adminCurrentTime">00:00</span> <span class="text-gray-500 text-base">/</span> <span id="adminTotalDuration" class="text-gray-300">00:00</span>
+            <div class="bg-black/60 border border-white/10 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-right shrink-0 w-full sm:w-auto flex sm:flex-col items-center sm:items-end justify-between sm:justify-center">
+              <div class="text-[9px] sm:text-[10px] uppercase tracking-widest text-gray-400 font-bold sm:mb-0.5">TIEMPO TRANSCURRIDO</div>
+              <div class="font-mono text-lg sm:text-2xl font-black tracking-wider text-amber-400">
+                <span id="adminCurrentTime">00:00</span> <span class="text-gray-500 text-sm sm:text-base">/</span> <span id="adminTotalDuration" class="text-gray-300">00:00</span>
               </div>
             </div>
           </div>
@@ -177,7 +177,7 @@
             </div>
             <div class="flex justify-between text-[11px] font-mono text-gray-400">
               <span id="scrubberElapsedLabel">0:00</span>
-              <span class="text-[10px] uppercase text-gray-500 tracking-wider">Haz clic o arrastra en la barra para adelantar o retroceder</span>
+              <span class="text-[10px] uppercase text-gray-500 tracking-wider hidden md:inline">Haz clic o arrastra en la barra para adelantar o retroceder</span>
               <span id="scrubberTotalLabel">0:00</span>
             </div>
           </div>
