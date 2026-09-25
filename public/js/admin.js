@@ -403,8 +403,8 @@ function renderQueueList(queue) {
       rowBorderClass = 'border-amber-500/40 bg-amber-500/[0.05] hover:border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.06)]';
       if (!isFirst) {
         vipButtonHtml = `
-          <button onclick="setSongPriority('${song.id}')" class="btn-secondary text-xs py-1 px-2.5 text-amber-300 font-bold border-amber-500/40 hover:bg-amber-500/20 whitespace-nowrap" title="Dar Prioridad VIP para que suene a continuación">
-            ⭐ Prioridad VIP
+          <button onclick="setSongPriority('${song.id}')" class="btn-secondary text-[11px] sm:text-xs py-1 px-1.5 sm:px-2.5 text-amber-300 font-bold border-amber-500/40 hover:bg-amber-500/20 whitespace-nowrap" title="Dar Prioridad VIP para que suene a continuación">
+            <span class="sm:hidden">⭐ VIP</span><span class="hidden sm:inline">⭐ Prioridad VIP</span>
           </button>
         `;
       }
@@ -422,7 +422,7 @@ function renderQueueList(queue) {
            ondragleave="handleQueueDragLeave(event, ${i})"
            ondrop="handleQueueDrop(event, ${i})"
            ondragend="handleQueueDragEnd(event)"
-           class="queue-row flex items-center justify-between p-2.5 sm:p-3 rounded-2xl ${rowBorderClass} gap-2 sm:gap-3 group select-none cursor-grab active:cursor-grabbing transition-all">
+           class="queue-row flex items-center justify-between p-2 sm:p-3 rounded-2xl ${rowBorderClass} gap-1.5 sm:gap-3 group select-none cursor-grab active:cursor-grabbing transition-all">
         
         <!-- Izquierda: Agarre (Grip Handle), Botones de Reordenar ▲ ▼ y Número 1., 2., 3. -->
         <div class="flex items-center gap-1 sm:gap-2 shrink-0">
@@ -435,8 +435,8 @@ function renderQueueList(queue) {
         </div>
 
         <!-- Carátula + Info de la canción -->
-        <div class="flex items-center gap-3 min-w-0 flex-1 pointer-events-none">
-          <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-11 h-9 sm:w-12 sm:h-9 rounded-xl object-cover border border-white/10 shrink-0 shadow-md">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pointer-events-none">
+          <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-10 h-8 sm:w-12 sm:h-9 rounded-xl object-cover border border-white/10 shrink-0 shadow-md">
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
               <p class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-amber-300 transition" title="${escapeHtml(song.title)}">
@@ -454,13 +454,13 @@ function renderQueueList(queue) {
         </div>
 
         <!-- Duración + Acciones -->
-        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <span class="font-mono text-xs text-gray-300 font-bold hidden sm:inline">${song.duration || '3:30'}</span>
           ${vipButtonHtml}
-          <button onclick="playNowDirect('${song.videoId}', '${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.genre}')" class="tactile-btn-gold text-xs py-1.5 px-3 font-bold" title="Reproducir ahora mismo">
+          <button onclick="playNowDirect('${song.videoId}', '${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.genre}')" class="tactile-btn-gold text-[11px] sm:text-xs py-1 sm:py-1.5 px-2 sm:px-3 font-bold whitespace-nowrap" title="Reproducir ahora mismo">
             Sonar Ya
           </button>
-          <button onclick="removeQueueItem('${song.id}')" class="text-gray-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-white/10 transition" title="Eliminar de la cola">
+          <button onclick="removeQueueItem('${song.id}')" class="text-gray-400 hover:text-red-400 p-1 sm:p-1.5 rounded-lg hover:bg-white/10 transition" title="Eliminar de la cola">
             ✕
           </button>
         </div>
