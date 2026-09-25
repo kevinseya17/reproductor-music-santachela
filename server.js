@@ -496,8 +496,10 @@ app.get('/api/search', async (req, res) => {
 // Pedir canción (Cliente desde la mesa)
 app.post('/api/request', async (req, res) => {
   try {
+    const { videoId, title, artist, duration, thumbnail, table, customerName, dedication } = req.body;
     const tableClean = table ? String(table).trim() : 'Mesa';
     const isDJOrAdmin = req.body.isAdmin === true || ['dj', 'admin', 'bar', 'caja'].includes(tableClean.toLowerCase());
+    const currentSettings = db.getSettings();
 
     if (!videoId || !title) {
       return res.status(400).json({ error: 'Faltan datos de la canción' });
@@ -521,8 +523,7 @@ app.post('/api/request', async (req, res) => {
       }
 
       // 3. Validar modo de solicitud (abierto vs. solo listas)
-      const settings = db.getSettings();
-      if (settings.requestMode === 'playlist') {
+      if (currentSettings.requestMode === 'playlist') {
         const allPlaylists = db.getPlaylists();
         const isInPlaylist = allPlaylists.some(pl =>
           pl.tracks && pl.tracks.some(t => t.videoId === videoId)
