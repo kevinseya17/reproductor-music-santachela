@@ -122,11 +122,22 @@ function renderAdminState(data) {
     }
   }
 
-  // Cola de espera
+  // Cola de espera (unificada 50+ temas)
   const counterEl = document.getElementById('queueCounter');
-  const badgeEl = document.getElementById('queueCounterBadge');
+  const badgeEl = document.getElementById('queueCustomerBadge');
+  const oldBadgeEl = document.getElementById('queueCounterBadge');
+  const customerCount = currentQueueState.filter(s => s.isBaseTrack !== true).length;
+  
   if (counterEl) counterEl.textContent = currentQueueState.length;
-  if (badgeEl) badgeEl.textContent = currentQueueState.length;
+  if (oldBadgeEl) oldBadgeEl.textContent = currentQueueState.length;
+  if (badgeEl) {
+    if (customerCount > 0) {
+      badgeEl.textContent = `${customerCount} de mesas`;
+      badgeEl.classList.remove('hidden');
+    } else {
+      badgeEl.classList.add('hidden');
+    }
+  }
 
   renderQueueList(currentQueueState);
 }
@@ -358,7 +369,7 @@ function handleQueueDragEnd(e) {
   });
 }
 
-// Renderizado de Lista UP NEXT / QUEUE (Estilo Referencia Pro con Arrastre)
+// Renderizado de Lista UP NEXT / QUEUE (Estilo Referencia Pro con Arrastre y Cola Unificada 50+)
 function renderQueueList(queue) {
   const container = document.getElementById('adminQueueList');
   if (!container) return;
@@ -367,9 +378,9 @@ function renderQueueList(queue) {
     container.innerHTML = `
       <div class="p-8 rounded-2xl bg-black/20 border border-white/5 text-center space-y-2">
         <div class="text-2xl text-amber-400">✨</div>
-        <p class="text-xs sm:text-sm font-bold text-white">No hay canciones pedidas en espera</p>
+        <p class="text-xs sm:text-sm font-bold text-white">No hay canciones en la cola</p>
         <p class="text-[11px] text-gray-400 max-w-sm mx-auto">
-          Los pedidos de las mesas aparecerán aquí. Puedes arrastrarlas o usar las flechas ▲ ▼ para cambiar su orden de reproducción.
+          Las canciones de la lista base o pedidos de las mesas aparecerán aquí. Puedes arrastrarlas o usar las flechas ▲ ▼ para cambiar su orden de reproducción.
         </p>
       </div>
     `;
@@ -379,9 +390,28 @@ function renderQueueList(queue) {
   container.innerHTML = queue.map((song, i) => {
     const isFirst = i === 0;
     const isLast = i === queue.length - 1;
-    const tableBadge = song.requestedBy?.table
-      ? `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">Mesa ${escapeHtml(song.requestedBy.table)}</span>`
-      : `<span class="px-2 py-0.5 rounded-md bg-white/10 text-gray-300 text-[10px]">DJ / Bar</span>`;
+    const isClientReq = song.isBaseTrack !== true;
+
+    // Distinción clara: Pedido de Mesa (dorado/destacado) vs Canción Base (sobria con nombre de lista)
+    let badgeHtml = '';
+    let rowBorderClass = 'border-white/5 hover:border-amber-500/40 bg-[#141720]';
+    let vipButtonHtml = '';
+
+    if (isClientReq) {
+      const tableNum = song.requestedBy?.table || '?';
+      badgeHtml = `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black tracking-wide">👑 MESA ${escapeHtml(tableNum)}</span>`;
+      rowBorderClass = 'border-amber-500/40 bg-amber-500/[0.05] hover:border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.06)]';
+      if (!isFirst) {
+        vipButtonHtml = `
+          <button onclick="setSongPriority('${song.id}')" class="btn-secondary text-xs py-1 px-2.5 text-amber-300 font-bold border-amber-500/40 hover:bg-amber-500/20 whitespace-nowrap" title="Dar Prioridad VIP para que suene a continuación">
+            ⭐ Prioridad VIP
+          </button>
+        `;
+      }
+    } else {
+      const plName = song.playlistName || song.genre || 'Crossover';
+      badgeHtml = `<span class="px-2 py-0.5 rounded-md bg-white/10 text-gray-300 text-[10px] font-medium">🎵 Base: ${escapeHtml(plName)}</span>`;
+    }
 
     return `
       <div id="queue-row-${i}"
@@ -392,7 +422,7 @@ function renderQueueList(queue) {
            ondragleave="handleQueueDragLeave(event, ${i})"
            ondrop="handleQueueDrop(event, ${i})"
            ondragend="handleQueueDragEnd(event)"
-           class="queue-row flex items-center justify-between p-2.5 sm:p-3 rounded-2xl bg-[#141720] border border-white/5 hover:border-amber-500/40 gap-2 sm:gap-3 group select-none cursor-grab active:cursor-grabbing transition-all">
+           class="queue-row flex items-center justify-between p-2.5 sm:p-3 rounded-2xl ${rowBorderClass} gap-2 sm:gap-3 group select-none cursor-grab active:cursor-grabbing transition-all">
         
         <!-- Izquierda: Agarre (Grip Handle), Botones de Reordenar ▲ ▼ y Número 1., 2., 3. -->
         <div class="flex items-center gap-1 sm:gap-2 shrink-0">
@@ -406,7 +436,7 @@ function renderQueueList(queue) {
 
         <!-- Carátula + Info de la canción -->
         <div class="flex items-center gap-3 min-w-0 flex-1 pointer-events-none">
-          <img src="${song.thumbnail}" class="w-11 h-9 sm:w-12 sm:h-9 rounded-xl object-cover border border-white/10 shrink-0 shadow-md">
+          <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-11 h-9 sm:w-12 sm:h-9 rounded-xl object-cover border border-white/10 shrink-0 shadow-md">
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
               <p class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-amber-300 transition" title="${escapeHtml(song.title)}">
@@ -417,7 +447,7 @@ function renderQueueList(queue) {
             <div class="flex items-center gap-2 text-[11px] text-gray-400 truncate mt-0.5">
               <span class="truncate font-semibold text-gray-300">${escapeHtml(song.artist)}</span>
               <span>•</span>
-              ${tableBadge}
+              ${badgeHtml}
               ${song.requestedBy?.dedication ? `<span class="text-pink-400 italic truncate hidden md:inline">"${escapeHtml(song.requestedBy.dedication)}"</span>` : ''}
             </div>
           </div>
@@ -426,6 +456,7 @@ function renderQueueList(queue) {
         <!-- Duración + Acciones -->
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
           <span class="font-mono text-xs text-gray-300 font-bold hidden sm:inline">${song.duration || '3:30'}</span>
+          ${vipButtonHtml}
           <button onclick="playNowDirect('${song.videoId}', '${escapeHtml(song.title)}', '${escapeHtml(song.artist)}', '${song.genre}')" class="tactile-btn-gold text-xs py-1.5 px-3 font-bold" title="Reproducir ahora mismo">
             Sonar Ya
           </button>
@@ -436,6 +467,34 @@ function renderQueueList(queue) {
       </div>
     `;
   }).join('');
+}
+
+// Asignar Prioridad VIP a un pedido para que suene a continuación
+async function setSongPriority(songId) {
+  try {
+    const res = await fetch('/api/admin/queue/priority', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ songId })
+    });
+    if (res.ok) {
+      showAdminToast('⭐ Prioridad VIP: Canción movida al turno #1', '👑');
+    }
+  } catch (err) {
+    console.error('Error asignando prioridad VIP:', err);
+  }
+}
+
+// Regenerar manualmente la cola de 50 temas base
+async function refreshPlaybackQueue() {
+  try {
+    const res = await fetch('/api/admin/queue/refresh', { method: 'POST' });
+    if (res.ok) {
+      showAdminToast('🔄 Mezcla base regenerada (50 temas)', '🔄');
+    }
+  } catch (err) {
+    console.error('Error regenerando mezcla de cola:', err);
+  }
 }
 
 // 2. Control de la Cola
@@ -693,6 +752,8 @@ async function loadPlaylists() {
     let activeId = '';
     let currentMode = 'single';
     let crossoverList = [];
+    let crossoverDistType = 'batch';
+    let crossoverPercentages = {};
     try {
       const statusRes = await fetch('/api/status');
       if (statusRes.ok) {
@@ -701,6 +762,8 @@ async function loadPlaylists() {
         activeId = settings.activePlaylistId || '';
         currentMode = settings.basePlaybackMode || 'single';
         crossoverList = Array.isArray(settings.crossoverPlaylists) ? settings.crossoverPlaylists : [];
+        crossoverDistType = settings.crossoverDistributionType || 'batch';
+        crossoverPercentages = settings.crossoverPercentages || {};
         renderBasePlaybackModeControls(settings);
       }
     } catch (statusErr) {
@@ -723,6 +786,8 @@ async function loadPlaylists() {
     grid.innerHTML = playlists.map(p => {
       const isActive = p.id === activeId;
       const isIncludedInRotation = crossoverList.includes(p.id) || (crossoverList.length === 0);
+      const isPercentageCrossover = currentMode === 'crossover' && crossoverDistType === 'percentage' && isIncludedInRotation;
+      const currentPct = (crossoverPercentages && crossoverPercentages[p.id] !== undefined) ? crossoverPercentages[p.id] : 25;
 
       return `
         <div class="glass-card p-5 space-y-3 ${isActive ? 'border-amber-400/50 bg-amber-500/5' : ''}">
@@ -741,8 +806,15 @@ async function loadPlaylists() {
             </div>
           </div>
 
-          <div class="text-xs text-gray-400">
+          <div class="text-xs text-gray-400 flex items-center justify-between flex-wrap gap-2">
             <span>${p.tracks ? p.tracks.length : 0} temas listos</span>
+            ${isPercentageCrossover ? `
+              <div class="flex items-center gap-1.5 bg-black/50 px-2.5 py-1 rounded-xl border border-amber-500/30">
+                <label class="text-[10px] text-gray-300 font-bold">Ponderación:</label>
+                <input type="number" min="1" max="100" value="${currentPct}" onchange="updatePlaylistPercentage('${p.id}', this.value)" class="w-12 bg-black/80 border border-white/20 rounded px-1.5 py-0.5 text-xs text-amber-400 font-black text-center outline-none focus:border-amber-400">
+                <span class="text-xs text-amber-400 font-bold">%</span>
+              </div>
+            ` : ''}
           </div>
 
           <div class="pt-2 flex flex-wrap items-center gap-2">
@@ -768,6 +840,9 @@ function renderBasePlaybackModeControls(settings) {
   const sequentialPanel = document.getElementById('sequentialSettingsPanel');
   const genreFocusPanel = document.getElementById('genreFocusSettingsPanel');
   const batchSelect = document.getElementById('crossoverBatchSizeSelect');
+  const distTypeSelect = document.getElementById('crossoverDistTypeSelect');
+  const batchOption = document.getElementById('crossoverBatchOption');
+  const pctOption = document.getElementById('crossoverPercentageOption');
   const seqOrderSelect = document.getElementById('sequentialOrderTypeSelect');
   const focusGenreSelect = document.getElementById('focusGenreSelect');
   const genreStyleSelect = document.getElementById('genrePlaybackStyleSelect');
@@ -777,6 +852,18 @@ function renderBasePlaybackModeControls(settings) {
   radios.forEach(r => {
     r.checked = (r.value === mode);
   });
+
+  const distType = settings.crossoverDistributionType || 'batch';
+  if (distTypeSelect) {
+    distTypeSelect.value = distType;
+  }
+  if (distType === 'percentage') {
+    batchOption?.classList.add('hidden');
+    pctOption?.classList.remove('hidden');
+  } else {
+    batchOption?.classList.remove('hidden');
+    pctOption?.classList.add('hidden');
+  }
 
   if (batchSelect && settings.crossoverBatchSize) {
     batchSelect.value = settings.crossoverBatchSize;
@@ -797,7 +884,10 @@ function renderBasePlaybackModeControls(settings) {
   if (genreFocusPanel) genreFocusPanel.classList.add('hidden');
 
   if (mode === 'crossover') {
-    if (badge) badge.innerHTML = `<span class="text-amber-400 font-bold">Modo: Crossover (${settings.crossoverBatchSize || 2} temas x lista)</span>`;
+    const crossoverSummary = distType === 'percentage'
+      ? 'Distribución por %'
+      : `${settings.crossoverBatchSize || 2} temas x lista`;
+    if (badge) badge.innerHTML = `<span class="text-amber-400 font-bold">Modo: Crossover (${crossoverSummary})</span>`;
     if (crossoverPanel) crossoverPanel.classList.remove('hidden');
   } else if (mode === 'sequential') {
     const isCustom = settings.sequentialOrderType === 'custom';
@@ -974,6 +1064,26 @@ async function updateCrossoverBatchSize(newSize) {
   const size = parseInt(newSize) || 3;
   await saveSettingsPartial({ crossoverBatchSize: size });
   loadPlaylists();
+}
+
+async function updateCrossoverDistType(distType) {
+  await saveSettingsPartial({ crossoverDistributionType: distType });
+  loadPlaylists();
+}
+
+async function updatePlaylistPercentage(playlistId, value) {
+  const val = parseInt(value, 10);
+  if (isNaN(val) || val < 0) return;
+  try {
+    const statusRes = await fetch('/api/status');
+    const statusData = await statusRes.json();
+    const currentPercentages = statusData.settings.crossoverPercentages || {};
+    currentPercentages[playlistId] = val;
+    await saveSettingsPartial({ crossoverPercentages: currentPercentages });
+    showAdminToast(`Porcentaje guardado (${val}%)`, '📊');
+  } catch (err) {
+    console.error('Error guardando porcentaje de lista:', err);
+  }
 }
 
 async function togglePlaylistInRotation(playlistId) {

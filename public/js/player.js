@@ -349,7 +349,7 @@ socket.on('state-changed', (data) => {
       reqBadge.className = 'bg-white/10 text-gray-300 font-medium text-xs px-3 py-1 rounded-full';
     }
 
-    // Dedicatoria especial en TV
+    // Dedicatoria especial en TV (Visible 15 segundos con fade suave)
     const dedBanner = document.getElementById('dedicationBanner');
     const dedText = document.getElementById('dedicationText');
     const dedFromText = document.getElementById('dedicationFromText');
@@ -358,15 +358,24 @@ socket.on('state-changed', (data) => {
       dedFromText.textContent = `MENSAJE ESPECIAL DE ${currentlyPlaying.requestedBy.name.toUpperCase()}`;
       dedText.textContent = `"${currentlyPlaying.requestedBy.dedication}"`;
       dedBanner.classList.remove('hidden');
+      setTimeout(() => {
+        dedBanner.classList.remove('opacity-0', 'translate-y-6');
+        dedBanner.classList.add('opacity-100', 'translate-y-0');
+      }, 50);
 
-      // Ocultar después de 25 segundos
+      // Ocultar después de 15 segundos
       clearTimeout(window.dedicationTimer);
       window.dedicationTimer = setTimeout(() => {
-        dedBanner.classList.add('hidden');
-      }, 25000);
+        dedBanner.classList.remove('opacity-100', 'translate-y-0');
+        dedBanner.classList.add('opacity-0', 'translate-y-6');
+        setTimeout(() => dedBanner.classList.add('hidden'), 700);
+      }, 15000);
     } else {
       dedBanner.classList.add('hidden');
     }
+
+    // Mostrar información de canción durante 15 segundos y luego ocultar suavemente para dejar el video limpio
+    showSongOverlay(15000);
   }
 
   // Siguiente canción
@@ -380,23 +389,80 @@ socket.on('state-changed', (data) => {
   }
 });
 
-// Promociones de Santa Chela en Pantalla
+// Auto-ocultamiento de textos informativos a los 15 segundos (Punto 4)
+let overlayHideTimeout = null;
+
+function showSongOverlay(durationMs = 15000) {
+  const footer = document.getElementById('songInfoFooter');
+  if (!footer) return;
+
+  footer.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+  footer.classList.add('opacity-100', 'translate-y-0');
+
+  clearTimeout(overlayHideTimeout);
+  if (durationMs > 0) {
+    overlayHideTimeout = setTimeout(() => {
+      footer.classList.remove('opacity-100', 'translate-y-0');
+      footer.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+    }, durationMs);
+  }
+}
+
+// Despertar overlay al mover el mouse o tocar la pantalla
+document.addEventListener('mousemove', () => showSongOverlay(15000));
+document.addEventListener('touchstart', () => showSongOverlay(15000));
+document.addEventListener('click', () => showSongOverlay(15000));
+
+// Promociones en Gran Formato para TV (Punto 5)
 let activePromos = [
   '🍻 ¡Pregunta por nuestras promociones de cerveza en la barra!',
   '🍔 Prueba nuestras picadas y alitas Santa Chela',
   '🥃 Pide tu botella favorita para compartir con tu parche'
 ];
 let currentPromoIdx = 0;
+let promoHideTimeout = null;
+
+function getPromoIcon(text) {
+  const lower = (text || '').toLowerCase();
+  if (lower.includes('cerveza') || lower.includes('pola')) return '🍻';
+  if (lower.includes('comida') || lower.includes('alita') || lower.includes('picada') || lower.includes('hamburguesa')) return '🍔';
+  if (lower.includes('botella') || lower.includes('whisky') || lower.includes('guaro') || lower.includes('ron') || lower.includes('tequila')) return '🥃';
+  if (lower.includes('cumple') || lower.includes('fiesta')) return '🎉';
+  return '🔥';
+}
+
+function showNextPromo() {
+  if (!activePromos || activePromos.length === 0) return;
+  const promoCard = document.getElementById('promoBroadcastCard');
+  const promoTextEl = document.getElementById('promoLargeText');
+  const promoIconEl = document.getElementById('promoIcon');
+  if (!promoCard || !promoTextEl) return;
+
+  const promoMsg = activePromos[currentPromoIdx];
+  currentPromoIdx = (currentPromoIdx + 1) % activePromos.length;
+
+  promoTextEl.textContent = promoMsg;
+  if (promoIconEl) promoIconEl.textContent = getPromoIcon(promoMsg);
+
+  promoCard.classList.remove('hidden');
+  setTimeout(() => {
+    promoCard.classList.remove('opacity-0', 'translate-y-8');
+    promoCard.classList.add('opacity-100', 'translate-y-0');
+  }, 50);
+
+  clearTimeout(promoHideTimeout);
+  promoHideTimeout = setTimeout(() => {
+    promoCard.classList.remove('opacity-100', 'translate-y-0');
+    promoCard.classList.add('opacity-0', 'translate-y-8');
+    setTimeout(() => promoCard.classList.add('hidden'), 700);
+  }, 14000);
+}
 
 function startPromoRotation() {
-  const promoTextEl = document.getElementById('promoText');
-  if (!promoTextEl) return;
-
-  setInterval(() => {
-    if (!activePromos || activePromos.length === 0) return;
-    currentPromoIdx = (currentPromoIdx + 1) % activePromos.length;
-    promoTextEl.textContent = activePromos[currentPromoIdx];
-  }, 12000);
+  // Mostrar primera promo a los 18 segundos
+  setTimeout(showNextPromo, 18000);
+  // Repetir cada 55 segundos
+  setInterval(showNextPromo, 55000);
 }
 
 // Modo Micrófono / Anuncio con Fade Suave de Volumen

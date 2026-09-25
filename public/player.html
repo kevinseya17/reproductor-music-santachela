@@ -104,66 +104,82 @@
       </div>
     </header>
 
-    <!-- Centro: Dedicatoria Animada Especial -->
-    <div id="dedicationBanner" class="self-center hidden max-w-2xl text-center bg-gradient-to-r from-amber-500 via-pink-500 to-amber-500 p-0.5 rounded-3xl shadow-2xl animate-in fade-in zoom-in duration-300 interactive">
-      <div class="bg-black/90 backdrop-blur-xl px-8 py-4 rounded-3xl space-y-1">
-        <p id="dedicationFrom" class="text-xs font-black uppercase tracking-widest text-amber-400 flex items-center justify-center gap-1.5">
-          <span>🎉</span> <span id="dedicationFromText">DEDICATORIA DE LA MESA 4</span>
+    <!-- Centro: Promoción en Gran Formato para TV (Llamativa y Visible desde lejos) -->
+    <div id="promoBroadcastCard" class="self-center hidden max-w-3xl w-full mx-4 transition-all duration-700 transform translate-y-8 opacity-0 shadow-2xl interactive z-30">
+      <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 p-1 rounded-3xl shadow-[0_0_60px_rgba(245,158,11,0.6)]">
+        <div class="bg-black/90 backdrop-blur-2xl px-6 sm:px-10 py-5 sm:py-7 rounded-[22px] flex items-center gap-5 sm:gap-8 border border-white/20">
+          <div class="text-4xl sm:text-6xl animate-bounce shrink-0" id="promoIcon">🍻</div>
+          <div class="min-w-0 flex-1 space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="bg-amber-500 text-black text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-0.5 rounded-full shadow">
+                🔥 PROMOCIÓN ESPECIAL SANTA CHELA
+              </span>
+              <span class="text-[11px] text-amber-200 font-bold hidden sm:inline">Pide en barra o desde tu mesa</span>
+            </div>
+            <h3 id="promoLargeText" class="text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight">
+              ¡Pregunta por nuestras promociones de cerveza en la barra!
+            </h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Centro: Dedicatoria Animada Especial (Visible 15 segundos) -->
+    <div id="dedicationBanner" class="self-center hidden max-w-2xl text-center bg-gradient-to-r from-amber-500 via-pink-500 to-amber-500 p-0.5 rounded-3xl shadow-2xl transition-all duration-700 transform translate-y-6 opacity-0 interactive z-20">
+      <div class="bg-black/90 backdrop-blur-xl px-8 py-5 rounded-3xl space-y-1 border border-white/10 shadow-[0_0_40px_rgba(236,72,153,0.4)]">
+        <p id="dedicationFrom" class="text-xs font-black uppercase tracking-widest text-amber-400 flex items-center justify-center gap-2">
+          <span class="text-base">🎉</span> <span id="dedicationFromText">DEDICATORIA DE LA MESA 4</span>
         </p>
-        <p id="dedicationText" class="text-lg md:text-xl font-extrabold text-white leading-snug">"¡Feliz cumpleaños Laura!"</p>
+        <p id="dedicationText" class="text-lg md:text-2xl font-black text-white leading-snug">"¡Feliz cumpleaños Laura!"</p>
       </div>
     </div>
 
     <!-- Centro: Alerta cuando entra nuevo pedido -->
-    <div id="newRequestNotification" class="self-center hidden animate-bounce bg-amber-500 text-black px-6 py-3 rounded-full font-bold text-sm shadow-2xl flex items-center gap-2">
+    <div id="newRequestNotification" class="self-center hidden animate-bounce bg-amber-500 text-black px-6 py-3 rounded-full font-bold text-sm shadow-2xl flex items-center gap-2 z-20">
       <span>🎉</span>
       <span id="newRequestText">¡Nuevo pedido de la Mesa 4!</span>
     </div>
 
     <!-- Indicador de Modo Micrófono Activo -->
-    <div id="micModeIndicator" class="self-center hidden bg-red-600 text-white font-extrabold px-6 py-2.5 rounded-full text-xs shadow-2xl flex items-center gap-2 animate-pulse">
+    <div id="micModeIndicator" class="self-center hidden bg-red-600 text-white font-extrabold px-6 py-2.5 rounded-full text-xs shadow-2xl flex items-center gap-2 animate-pulse z-20">
       <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
       <span>🎙️ MODO MICRÓFONO ACTIVO (Música atenuada)</span>
     </div>
 
-    <!-- Footer Inferior: Información del tema sonando y siguiente -->
+    <!-- Footer Inferior: Información del tema sonando (Auto-ocultable a los 15s para dejar video limpio) -->
     <footer class="space-y-3">
-      <div class="flex items-end justify-between gap-6">
+      <div id="songInfoFooter" class="transition-all duration-700 ease-in-out transform translate-y-0 opacity-100">
+        <div class="flex items-end justify-between gap-6">
 
-        <!-- Info de la Canción Actual -->
-        <div class="bg-black/75 backdrop-blur-xl p-3 sm:p-5 rounded-2xl sm:rounded-3xl border border-white/15 max-w-2xl flex items-center gap-3 sm:gap-5 shadow-2xl interactive">
-          <img id="currentThumb" src="" class="w-14 h-14 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl object-cover shadow-md border border-white/10 flex-shrink-0">
-          <div class="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
-            <div class="flex items-center gap-2">
-              <span id="currentGenre" class="genre-badge genre-Salsa text-[10px] sm:text-xs">Salsa</span>
-              <span id="requestedByBadge" class="bg-amber-500/20 text-amber-300 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
-                ✨ Lista Base
-              </span>
+          <!-- Info de la Canción Actual -->
+          <div class="bg-black/80 backdrop-blur-xl p-3 sm:p-5 rounded-2xl sm:rounded-3xl border border-white/15 max-w-2xl flex items-center gap-3 sm:gap-5 shadow-2xl interactive">
+            <img id="currentThumb" src="" class="w-14 h-14 sm:w-24 sm:h-24 rounded-xl sm:rounded-2xl object-cover shadow-md border border-white/10 flex-shrink-0">
+            <div class="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
+              <div class="flex items-center gap-2">
+                <span id="currentGenre" class="genre-badge genre-Salsa text-[10px] sm:text-xs">Salsa</span>
+                <span id="requestedByBadge" class="bg-amber-500/20 text-amber-300 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
+                  ✨ Lista Base
+                </span>
+              </div>
+              <h2 id="currentTitle" class="text-sm sm:text-2xl font-bold tracking-tight text-white leading-tight truncate">Cargando música...</h2>
+              <p id="currentArtist" class="text-xs sm:text-base text-gray-300 font-medium truncate">Conectando al sistema del bar</p>
             </div>
-            <h2 id="currentTitle" class="text-sm sm:text-2xl font-bold tracking-tight text-white leading-tight truncate">Cargando música...</h2>
-            <p id="currentArtist" class="text-xs sm:text-base text-gray-300 font-medium truncate">Conectando al sistema del bar</p>
           </div>
-        </div>
 
-        <!-- Siguiente Canción -->
-        <div class="hidden lg:flex items-center gap-3 bg-black/60 backdrop-blur-md px-5 py-4 rounded-2xl border border-white/10 max-w-sm interactive">
-          <div class="text-2xl">⏭️</div>
-          <div class="min-w-0">
-            <p class="text-[10px] uppercase font-bold text-gray-400">A continuación:</p>
-            <p id="nextTitle" class="text-xs font-bold text-white truncate">Cargando siguiente tema...</p>
-            <p id="nextGenre" class="text-[11px] text-amber-400 truncate">Salsa</p>
+          <!-- Siguiente Canción -->
+          <div class="hidden lg:flex items-center gap-3 bg-black/70 backdrop-blur-md px-5 py-4 rounded-2xl border border-white/10 max-w-sm interactive">
+            <div class="text-2xl">⏭️</div>
+            <div class="min-w-0">
+              <p class="text-[10px] uppercase font-bold text-gray-400">A continuación:</p>
+              <p id="nextTitle" class="text-xs font-bold text-white truncate">Cargando siguiente tema...</p>
+              <p id="nextGenre" class="text-[11px] text-amber-400 truncate">Salsa</p>
+            </div>
           </div>
-        </div>
 
+        </div>
       </div>
 
-      <!-- Cinta de Promociones de Santa Chela -->
-      <div id="promoBar" class="bg-black/70 backdrop-blur-md border border-amber-500/30 rounded-2xl px-5 py-2.5 flex items-center gap-3 text-xs text-amber-300 font-bold overflow-hidden interactive shadow-lg">
-        <span class="text-base animate-pulse">🔥</span>
-        <div class="flex-1 truncate">
-          <span id="promoText">🍻 ¡Pregunta por nuestras promociones de cerveza en la barra!</span>
-        </div>
-      </div>
+      <!-- Barra discreta de controles para el televisor (solo interactiva) -->
 
       <!-- Barra de Controles Rápidos para el Barman / Encargado -->
       <div class="flex items-center justify-between pt-1 text-xs text-gray-400 interactive">

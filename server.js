@@ -72,8 +72,40 @@ setInterval(checkSchedule, 60000);
 /**
  * Obtiene la siguiente canción de la lista base (El Norte)
  * Soporta 3 modos:
+let crossoverPercentageCounter = 0;
+
+/**
+ * Selecciona la siguiente lista respetando una distribución porcentual ponderada
+ * (Punto 3: ej 60% Salsa, 30% Reguetón, 10% Vallenato, distribuidos proporcionalmente)
+ */
+function getPlaylistByPercentage(eligiblePlaylists, percentages) {
+  if (eligiblePlaylists.length === 1) return eligiblePlaylists[0];
+
+  const weights = eligiblePlaylists.map(pl => {
+    const raw = percentages[pl.id];
+    const n = (raw !== undefined && !isNaN(Number(raw)) && Number(raw) > 0) ? Number(raw) : 10;
+    return n;
+  });
+  const total = weights.reduce((a, b) => a + b, 0) || 1;
+
+  const cycle = 100;
+  const step = (crossoverPercentageCounter++) % cycle;
+  let cumulative = 0;
+
+  for (let i = 0; i < eligiblePlaylists.length; i++) {
+    cumulative += (weights[i] / total) * cycle;
+    if (step < cumulative) {
+      return eligiblePlaylists[i];
+    }
+  }
+  return eligiblePlaylists[0];
+}
+
+/**
+ * Obtiene la siguiente canción de la lista base (El Norte)
+ * Soporta 3 modos:
  * 1. 'single': Una sola lista base activa.
- * 2. 'crossover': Mezcla automática de tandas (ej: 3 de salsa -> 3 de reggaetón -> 3 de rock).
+ * 2. 'crossover': Mezcla automática (por tandas de 1 a 5 canciones o por porcentajes %).
  * 3. 'sequential': Consecutivo (termina toda la Lista A, luego toda la Lista B, etc).
  */
 function getNextBaseSong() {
@@ -84,7 +116,7 @@ function getNextBaseSong() {
   const mode = settings.basePlaybackMode || 'single';
 
   // ----------------------------------------------------
-  // MODO 2: CROSSOVER MULTILISTAS (TANDAS INTERCALADAS)
+  // MODO 2: CROSSOVER MULTILISTAS (TANDAS O PORCENTAJES)
   // ----------------------------------------------------
   if (mode === 'crossover') {
     const selectedIds = Array.isArray(settings.crossoverPlaylists) && settings.crossoverPlaylists.length > 0
@@ -96,60 +128,81 @@ function getNextBaseSong() {
       .filter(p => p && p.tracks && p.tracks.length > 0);
 
     if (eligiblePlaylists.length > 0) {
+      const distType = settings.crossoverDistributionType || 'batch'; // 'batch' o 'percentage'
       const batchSize = Math.max(1, settings.crossoverBatchSize || 3);
       let selectedTrack = null;
       let activeList = null;
-      let listsChecked = 0;
 
-      // Buscar una canción fresca. Si una lista agotó sus canciones sin repetir, pasar a la siguiente sin repetir
-      while (listsChecked < eligiblePlaylists.length) {
-        if (crossoverCurrentListIdx >= eligiblePlaylists.length) {
-          crossoverCurrentListIdx = 0;
-        }
-
-        activeList = eligiblePlaylists[crossoverCurrentListIdx];
+      if (distType === 'percentage') {
+        // MODO PORCENTAJE (Punto 3: distribución uniforme sin agrupar canciones del mismo género)
+        activeList = getPlaylistByPercentage(eligiblePlaylists, settings.crossoverPercentages || {});
         const numTracks = activeList.tracks.length;
-        let freshTrack = null;
         const startIdx = (activeList._crossoverIndex || 0) % numTracks;
 
         for (let i = 0; i < numTracks; i++) {
           const cIdx = (startIdx + i) % numTracks;
           const candidate = activeList.tracks[cIdx];
           const windowSize = Math.max(5, Math.min(25, numTracks * 2));
-          const isRecent = db.isRecentlyPlayed(candidate.videoId, candidate.title, candidate.artist, windowSize);
-
-          if (!isRecent || (numTracks === 1 && crossoverSongCountInCurrentList === 0 && !db.isRecentlyPlayed(candidate.videoId, candidate.title, candidate.artist, 2))) {
-            freshTrack = candidate;
+          if (!db.isRecentlyPlayed(candidate.videoId, candidate.title, candidate.artist, windowSize)) {
+            selectedTrack = candidate;
             activeList._crossoverIndex = cIdx + 1;
             break;
           }
         }
+        if (!selectedTrack) {
+          const trackIndex = (activeList._crossoverIndex || 0) % numTracks;
+          activeList._crossoverIndex = trackIndex + 1;
+          selectedTrack = activeList.tracks[trackIndex];
+        }
+      } else {
+        // MODO TANDAS INTERCALADAS (ej. 2 o 3 canciones por lista)
+        let listsChecked = 0;
+        while (listsChecked < eligiblePlaylists.length) {
+          if (crossoverCurrentListIdx >= eligiblePlaylists.length) {
+            crossoverCurrentListIdx = 0;
+          }
 
-        if (freshTrack) {
-          selectedTrack = freshTrack;
-          crossoverSongCountInCurrentList++;
-          // Si completó la tanda o agotó las canciones disponibles de esta lista, rotar para la próxima
-          if (crossoverSongCountInCurrentList >= batchSize || crossoverSongCountInCurrentList >= numTracks) {
+          activeList = eligiblePlaylists[crossoverCurrentListIdx];
+          const numTracks = activeList.tracks.length;
+          let freshTrack = null;
+          const startIdx = (activeList._crossoverIndex || 0) % numTracks;
+
+          for (let i = 0; i < numTracks; i++) {
+            const cIdx = (startIdx + i) % numTracks;
+            const candidate = activeList.tracks[cIdx];
+            const windowSize = Math.max(5, Math.min(25, numTracks * 2));
+            const isRecent = db.isRecentlyPlayed(candidate.videoId, candidate.title, candidate.artist, windowSize);
+
+            if (!isRecent || (numTracks === 1 && crossoverSongCountInCurrentList === 0 && !db.isRecentlyPlayed(candidate.videoId, candidate.title, candidate.artist, 2))) {
+              freshTrack = candidate;
+              activeList._crossoverIndex = cIdx + 1;
+              break;
+            }
+          }
+
+          if (freshTrack) {
+            selectedTrack = freshTrack;
+            crossoverSongCountInCurrentList++;
+            if (crossoverSongCountInCurrentList >= batchSize || crossoverSongCountInCurrentList >= numTracks) {
+              crossoverCurrentListIdx = (crossoverCurrentListIdx + 1) % eligiblePlaylists.length;
+              crossoverSongCountInCurrentList = 0;
+            }
+            break;
+          } else {
             crossoverCurrentListIdx = (crossoverCurrentListIdx + 1) % eligiblePlaylists.length;
             crossoverSongCountInCurrentList = 0;
+            listsChecked++;
           }
-          break;
-        } else {
-          // No hay más de este género / lista que no se hayan repetido: pasar inmediatamente a la siguiente
+        }
+
+        if (!selectedTrack) {
+          activeList = eligiblePlaylists[crossoverCurrentListIdx];
+          const trackIndex = (activeList._crossoverIndex || 0) % activeList.tracks.length;
+          activeList._crossoverIndex = trackIndex + 1;
+          selectedTrack = activeList.tracks[trackIndex];
           crossoverCurrentListIdx = (crossoverCurrentListIdx + 1) % eligiblePlaylists.length;
           crossoverSongCountInCurrentList = 0;
-          listsChecked++;
         }
-      }
-
-      // Si todo el repertorio ya sonó recientemente, tomar la siguiente en ciclo
-      if (!selectedTrack) {
-        activeList = eligiblePlaylists[crossoverCurrentListIdx];
-        const trackIndex = (activeList._crossoverIndex || 0) % activeList.tracks.length;
-        activeList._crossoverIndex = trackIndex + 1;
-        selectedTrack = activeList.tracks[trackIndex];
-        crossoverCurrentListIdx = (crossoverCurrentListIdx + 1) % eligiblePlaylists.length;
-        crossoverSongCountInCurrentList = 0;
       }
 
       const songGenre = selectedTrack.genre && selectedTrack.genre !== 'Crossover'
@@ -157,14 +210,16 @@ function getNextBaseSong() {
         : aiDj.classifyGenreFast(selectedTrack.title, selectedTrack.artist, activeList.name);
 
       return {
-        id: `base_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        id: `base_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
         videoId: selectedTrack.videoId,
         title: selectedTrack.title,
         artist: selectedTrack.artist,
         genre: songGenre || 'Crossover',
         duration: selectedTrack.duration || '3:30',
         thumbnail: selectedTrack.thumbnail || `https://i.ytimg.com/vi/${selectedTrack.videoId}/hqdefault.jpg`,
-        requestedBy: { table: null, name: `DJ Crossover (${activeList.name})` },
+        playlistId: activeList ? activeList.id : null,
+        playlistName: activeList ? activeList.name : null,
+        requestedBy: { table: null, name: activeList ? activeList.name : 'Lista Base' },
         isBaseTrack: true,
         addedAt: Date.now()
       };
@@ -308,48 +363,91 @@ function getNextBaseSong() {
   currentPlaylistIndex++;
 
   return {
-    id: `base_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+    id: `base_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
     videoId: track.videoId,
     title: track.title,
     artist: track.artist,
     genre: track.genre || 'Crossover',
     duration: track.duration || '3:30',
     thumbnail: track.thumbnail || `https://i.ytimg.com/vi/${track.videoId}/hqdefault.jpg`,
-    requestedBy: { table: null, name: 'DJ Residente (Lista Base)' },
+    playlistId: playlist.id,
+    playlistName: playlist.name,
+    requestedBy: { table: null, name: playlist.name || 'Lista Base' },
     isBaseTrack: true,
     addedAt: Date.now()
   };
 }
 
 /**
+ * Rellena la cola de reproducción anticipada con al menos 50 canciones
+ * (Punto 1 y 2: Permite al DJ ver, mover y editar las mezclas de listas y pedidos)
+ */
+function replenishPlaybackQueue(targetCount = 50) {
+  let queue = db.getQueue();
+  const allPlaylists = db.getPlaylists();
+  if (!allPlaylists || allPlaylists.length === 0) return queue;
+
+  let added = false;
+  let attempts = 0;
+  while (queue.length < targetCount && attempts < 100) {
+    attempts++;
+    const nextBase = getNextBaseSong();
+    if (!nextBase) break;
+    queue.push(nextBase);
+    added = true;
+  }
+
+  if (added) {
+    db.setQueue(queue);
+  }
+  return queue;
+}
+
+/**
+ * Regenera las canciones base de la cola cuando el DJ cambia de lista o modo de mezcla,
+ * manteniendo a salvo todos los pedidos de clientes de mesas.
+ */
+function regenerateBaseTracksInQueue(targetCount = 50) {
+  let queue = db.getQueue();
+  // Conservar pedidos de mesas y solicitudes manuales no-base
+  const clientRequests = queue.filter(s => s.isBaseTrack !== true);
+  db.setQueue(clientRequests);
+  replenishPlaybackQueue(targetCount);
+
+  io.emit('state-changed', {
+    currentlyPlaying,
+    queue: db.getQueue(),
+    settings: db.getSettings()
+  });
+}
+
+/**
  * Avanza a la siguiente canción
  */
 function advanceToNextSong() {
-  const queue = db.getQueue();
+  let queue = db.getQueue();
 
   if (currentlyPlaying) {
     db.addToHistory(currentlyPlaying);
   }
 
+  // Si la cola está vacía o baja, rellenar de inmediato
+  if (queue.length === 0) {
+    replenishPlaybackQueue(50);
+    queue = db.getQueue();
+  }
+
   if (queue.length > 0) {
-    // Hay canciones pedidas por los clientes en cola
     const nextSong = queue.shift();
     db.setQueue(queue);
     currentlyPlaying = {
       ...nextSong,
       startedAt: Date.now()
     };
+    // Mantener siempre 50 temas en la cola visible de fondo
+    replenishPlaybackQueue(50);
   } else {
-    // Si no hay pedidos de clientes, tomar de la lista base
-    const baseSong = getNextBaseSong();
-    if (baseSong) {
-      currentlyPlaying = {
-        ...baseSong,
-        startedAt: Date.now()
-      };
-    } else {
-      currentlyPlaying = null;
-    }
+    currentlyPlaying = null;
   }
 
   // Notificar a todos los clientes conectados
@@ -364,6 +462,7 @@ function advanceToNextSong() {
 
 // Inicializar la primera canción si no hay nada sonando
 function ensurePlaying() {
+  replenishPlaybackQueue(50);
   if (!currentlyPlaying) {
     advanceToNextSong();
   }
@@ -480,15 +579,23 @@ app.post('/api/request', async (req, res) => {
     }
 
     // 6. Si ya hay una canción sonando (de fondo o de otro cliente),
-    // la canción actual sigue sonando sin cortarse y la nueva entra a la cola para sonar a continuación
-    let slotIndex = currentQueue.length;
-    const currentSettings = db.getSettings();
-    if (currentSettings.autoDJEnabled) {
-      slotIndex = aiDj.calculateSmartSlot(currentQueue, genre, currentlyPlaying);
-      db.insertInQueueAt(slotIndex, song);
+    // la canción actual sigue sonando sin cortarse y la nueva entra a la cola
+    let slotIndex = 0;
+    const existingClientRequests = currentQueue.filter(s => s.isBaseTrack !== true);
+
+    if (existingClientRequests.length > 0) {
+      // Si ya hay pedidos de clientes en cola, colocarlo después de los pedidos previos
+      slotIndex = existingClientRequests.length;
     } else {
-      db.addToQueue(song);
+      // Si solo hay canciones base de fondo, colocar el pedido del cliente en el turno 1 (sonar a continuación)
+      slotIndex = Math.min(1, currentQueue.length);
     }
+
+    if (currentSettings.autoDJEnabled && existingClientRequests.length > 1) {
+      slotIndex = aiDj.calculateSmartSlot(currentQueue.slice(0, Math.min(10, currentQueue.length)), genre, currentlyPlaying);
+    }
+
+    db.insertInQueueAt(slotIndex, song);
 
     // Registrar pedido de la mesa (solo para mesas de clientes, el DJ nunca acumula esperas)
     if (!isDJOrAdmin) {
@@ -688,10 +795,11 @@ app.post('/api/playlists/:id/activate', (req, res) => {
     }
   }
 
-  // 3. Si actualmente suena música de fondo base (sin pedidos de clientes en cola),
-  // avanzar de inmediato para que empiece a sonar la lista recién activada sin demoras
-  const queue = db.getQueue();
-  if (queue.length === 0 && (!currentlyPlaying || currentlyPlaying.isBaseTrack)) {
+  // 3. Regenerar de inmediato la cola unificada visible de 50 temas con la nueva lista
+  regenerateBaseTracksInQueue(50);
+
+  // Si actualmente no hay nada sonando o suena tema base de fondo, empezar a sonar la nueva lista de inmediato
+  if (!currentlyPlaying || currentlyPlaying.isBaseTrack) {
     advanceToNextSong();
   } else {
     io.emit('state-changed', {
@@ -954,6 +1062,31 @@ app.post('/api/admin/add-queue', async (req, res) => {
   }
 });
 
+// Asignar Prioridad VIP a una canción (subir directamente a turno #1 para sonar a continuación)
+app.post('/api/admin/queue/priority', (req, res) => {
+  const { songId } = req.body;
+  const queue = db.getQueue();
+  const idx = queue.findIndex(s => s.id === songId);
+  if (idx > -1) {
+    const [song] = queue.splice(idx, 1);
+    queue.unshift(song);
+    db.setQueue(queue);
+    io.emit('state-changed', {
+      currentlyPlaying,
+      queue: db.getQueue(),
+      settings: db.getSettings()
+    });
+    return res.json({ success: true, message: 'Prioridad VIP asignada: Sonará a continuación' });
+  }
+  res.status(404).json({ error: 'Canción no encontrada en la cola' });
+});
+
+// Regenerar la mezcla de 50 temas base a solicitud del DJ
+app.post('/api/admin/queue/refresh', (req, res) => {
+  regenerateBaseTracksInQueue(50);
+  res.json({ success: true, queue: db.getQueue() });
+});
+
 app.post('/api/admin/play-now', async (req, res) => {
   const { videoId, title, artist, genre, duration, thumbnail } = req.body;
   if (!videoId) return res.status(400).json({ error: 'Falta videoId' });
@@ -1029,11 +1162,16 @@ app.get('/api/settings', (req, res) => {
 
 app.post('/api/settings', (req, res) => {
   const updated = db.updateSettings(req.body);
-  io.emit('state-changed', {
-    currentlyPlaying,
-    queue: db.getQueue(),
-    settings: updated
-  });
+  // Regenerar la cola visible de 50 temas si cambiaron modos de reproducción, listas o porcentajes
+  if (req.body.basePlaybackMode !== undefined || req.body.crossoverPlaylists !== undefined || req.body.crossoverBatchSize !== undefined || req.body.crossoverDistributionType !== undefined || req.body.crossoverPercentages !== undefined || req.body.activePlaylistId !== undefined) {
+    regenerateBaseTracksInQueue(50);
+  } else {
+    io.emit('state-changed', {
+      currentlyPlaying,
+      queue: db.getQueue(),
+      settings: updated
+    });
+  }
   res.json({ success: true, settings: updated });
 });
 
