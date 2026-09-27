@@ -610,7 +610,7 @@ app.post('/api/request', async (req, res) => {
     io.emit('state-changed', {
       currentlyPlaying,
       queue: db.getQueue(),
-      settings
+      settings: currentSettings
     });
 
     io.emit('new-request-alert', {
@@ -624,6 +624,7 @@ app.post('/api/request', async (req, res) => {
       : `¡Canción agregada con éxito! Está en el turno #${displayPosition} dentro de la tanda de ${genre}.`;
 
     res.json({
+      ok: true,
       success: true,
       message: msg,
       position: displayPosition,

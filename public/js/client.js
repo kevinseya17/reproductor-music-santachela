@@ -297,16 +297,21 @@ function closeModal() {
   document.getElementById('confirmModal').classList.add('hidden');
 }
 
+let isSubmittingSongRequest = false;
+
 async function confirmAndSendRequest() {
-  if (!selectedSongForModal) return;
+  if (!selectedSongForModal || isSubmittingSongRequest) return;
+  isSubmittingSongRequest = true;
 
   const btn = document.getElementById('sendRequestBtn');
   const customerName = document.getElementById('customerNameInput').value.trim();
   const dedicationInput = document.getElementById('customerDedicationInput');
   const dedication = dedicationInput ? dedicationInput.value.trim() : '';
 
-  btn.disabled = true;
-  btn.textContent = 'Enviando...';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+  }
 
   try {
     const res = await fetch('/api/request', {
@@ -326,10 +331,10 @@ async function confirmAndSendRequest() {
 
     const data = await res.json();
 
-    if (!res.ok) {
+    if (!res.ok || (!data.success && !data.ok)) {
       showToast('No se pudo pedir', data.error || 'Intenta más tarde', '⚠️');
     } else {
-      showToast('¡Canción Agregada!', data.message, '🎉');
+      showToast('¡Canción Agregada!', data.message || 'Tu canción fue añadida a la cola', '🎉');
       closeModal();
       document.getElementById('searchInput').value = '';
       document.getElementById('clearSearchBtn').classList.add('hidden');
@@ -341,8 +346,11 @@ async function confirmAndSendRequest() {
     console.error('Error enviando pedido:', err);
     showToast('Error', 'No se pudo conectar con el servidor del bar', '❌');
   } finally {
-    btn.disabled = false;
-    btn.textContent = '¡Pedir Canción! 🎶';
+    isSubmittingSongRequest = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '¡Pedir Canción! 🎶';
+    }
   }
 }
 
