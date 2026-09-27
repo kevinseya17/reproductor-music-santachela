@@ -1089,6 +1089,18 @@ app.post('/api/admin/queue/refresh', (req, res) => {
   res.json({ success: true, queue: db.getQueue() });
 });
 
+// Vaciar la lista de espera a solicitud del DJ (elimina turnos/pedidos acumulados y refresca base)
+app.post('/api/admin/queue/clear', (req, res) => {
+  db.setQueue([]);
+  replenishPlaybackQueue(50);
+  io.emit('state-changed', {
+    currentlyPlaying,
+    queue: db.getQueue(),
+    settings: db.getSettings()
+  });
+  res.json({ success: true, message: 'Lista de espera despejada', queue: db.getQueue() });
+});
+
 app.post('/api/admin/play-now', async (req, res) => {
   const { videoId, title, artist, genre, duration, thumbnail } = req.body;
   if (!videoId) return res.status(400).json({ error: 'Falta videoId' });

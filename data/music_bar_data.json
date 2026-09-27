@@ -5,7 +5,7 @@
     "cooldownMinutes": 10,
     "autoDJEnabled": true,
     "smartSlottingWindow": 3,
-    "activePlaylistId": "despecho-cantina",
+    "activePlaylistId": "rumba-cantina",
     "geminiApiKey": "",
     "totalTables": 20,
     "blacklistWords": [
@@ -46,94 +46,26 @@
       }
     ],
     "scheduleEnabled": true,
-    "basePlaybackMode": "crossover",
+    "basePlaybackMode": "genre_focus",
     "crossoverBatchSize": 2,
     "crossoverPlaylists": [
       "imported-1789769792435",
       "imported-1790282398314",
       "imported-1790282515320",
-      "imported-1790363665791"
+      "imported-1790363665791",
+      "regaetoon-mu3lnrlk",
+      "sabados-mu4jdh5d",
+      "imported-1789590908422"
     ],
     "sequentialOrderType": "custom",
     "sequentialPlaylistOrder": [],
-    "focusGenre": "Reggaetón",
+    "focusGenre": "Merengue / Bachata",
     "genrePlaybackStyle": "shuffle",
     "maxSongDuration": 0,
     "dynamicDurationOnQueue": false,
     "fadeTransitionEnabled": true
   },
   "playlists": [
-    {
-      "id": "rumba-cantina",
-      "name": "🔥 Viernes de Rumba y Cantina",
-      "description": "Mezcla equilibrada de Salsa brava, Música Popular de despecho y Vallenato.",
-      "tracks": [
-        {
-          "genre": "Salsa",
-          "title": "Cali Pachanguero",
-          "artist": "Grupo Niche",
-          "videoId": "7KxkMLAZlzw",
-          "duration": "5:10",
-          "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg"
-        },
-        {
-          "genre": "Salsa",
-          "title": "Sobredosis",
-          "artist": "Los Titanes",
-          "videoId": "JLwmBfrbYR4",
-          "duration": "3:12",
-          "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg"
-        },
-        {
-          "genre": "Salsa",
-          "title": "Rebelión",
-          "artist": "Joe Arroyo",
-          "videoId": "oWBf9hfW_4Y",
-          "duration": "4:45",
-          "thumbnail": "https://i.ytimg.com/vi/oWBf9hfW_4Y/hqdefault.jpg"
-        },
-        {
-          "genre": "Popular",
-          "title": "Nadie Es Eterno",
-          "artist": "Darío Gómez",
-          "videoId": "YIo5Rq8ptFU",
-          "duration": "3:50",
-          "thumbnail": "https://i.ytimg.com/vi/YIo5Rq8ptFU/hqdefault.jpg"
-        },
-        {
-          "genre": "Popular",
-          "title": "Guaro (Remix)",
-          "artist": "Pipe Bueno, Carin León, Alzate, Jessi Uribe",
-          "videoId": "l2ABZsKHl2Y",
-          "duration": "5:20",
-          "thumbnail": "https://i.ytimg.com/vi/l2ABZsKHl2Y/hqdefault.jpg"
-        },
-        {
-          "genre": "Popular",
-          "title": "El Precio de tu Error",
-          "artist": "Luis Alfonso / Posada",
-          "videoId": "29RynFdnJ8w",
-          "duration": "3:30",
-          "thumbnail": "https://i.ytimg.com/vi/29RynFdnJ8w/hqdefault.jpg"
-        },
-        {
-          "genre": "Vallenato",
-          "title": "La Plata",
-          "artist": "Diomedes Díaz",
-          "videoId": "EtZ4LRr9mQ8",
-          "duration": "4:20",
-          "thumbnail": "https://i.ytimg.com/vi/EtZ4LRr9mQ8/hqdefault.jpg"
-        },
-        {
-          "genre": "Vallenato",
-          "title": "Obsesión",
-          "artist": "Peter Manjarrés",
-          "videoId": "ZqQCEYKW2f8",
-          "duration": "4:15",
-          "thumbnail": "https://i.ytimg.com/vi/ZqQCEYKW2f8/hqdefault.jpg"
-        }
-      ]
-    },
     {
       "id": "salsa-pesada",
       "name": "🎺 Salsa Brava y Clásica",
@@ -960,6 +892,77 @@
           "videoId": "o2DCZfFvBSY",
           "duration": "3:30",
           "thumbnail": "https://i.ytimg.com/vi/o2DCZfFvBSY/hqdefault.jpg"
+        }
+      ]
+    },
+    {
+      "id": "rumba-cantina",
+      "name": "🔥 Viernes de Rumba y Cantina",
+      "description": "Mezcla equilibrada de Salsa brava, Música Popular de despecho y Vallenato.",
+      "tracks": [
+        {
+          "genre": "Salsa",
+          "title": "Cali Pachanguero",
+          "artist": "Grupo Niche",
+          "videoId": "7KxkMLAZlzw",
+          "duration": "5:10",
+          "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg"
+        },
+        {
+          "genre": "Salsa",
+          "title": "Sobredosis",
+          "artist": "Los Titanes",
+          "videoId": "JLwmBfrbYR4",
+          "duration": "3:12",
+          "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg"
+        },
+        {
+          "genre": "Salsa",
+          "title": "Rebelión",
+          "artist": "Joe Arroyo",
+          "videoId": "oWBf9hfW_4Y",
+          "duration": "4:45",
+          "thumbnail": "https://i.ytimg.com/vi/oWBf9hfW_4Y/hqdefault.jpg"
+        },
+        {
+          "genre": "Popular",
+          "title": "Nadie Es Eterno",
+          "artist": "Darío Gómez",
+          "videoId": "YIo5Rq8ptFU",
+          "duration": "3:50",
+          "thumbnail": "https://i.ytimg.com/vi/YIo5Rq8ptFU/hqdefault.jpg"
+        },
+        {
+          "genre": "Popular",
+          "title": "Guaro (Remix)",
+          "artist": "Pipe Bueno, Carin León, Alzate, Jessi Uribe",
+          "videoId": "l2ABZsKHl2Y",
+          "duration": "5:20",
+          "thumbnail": "https://i.ytimg.com/vi/l2ABZsKHl2Y/hqdefault.jpg"
+        },
+        {
+          "genre": "Popular",
+          "title": "El Precio de tu Error",
+          "artist": "Luis Alfonso / Posada",
+          "videoId": "29RynFdnJ8w",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/29RynFdnJ8w/hqdefault.jpg"
+        },
+        {
+          "genre": "Vallenato",
+          "title": "La Plata",
+          "artist": "Diomedes Díaz",
+          "videoId": "EtZ4LRr9mQ8",
+          "duration": "4:20",
+          "thumbnail": "https://i.ytimg.com/vi/EtZ4LRr9mQ8/hqdefault.jpg"
+        },
+        {
+          "genre": "Vallenato",
+          "title": "Obsesión",
+          "artist": "Peter Manjarrés",
+          "videoId": "ZqQCEYKW2f8",
+          "duration": "4:15",
+          "thumbnail": "https://i.ytimg.com/vi/ZqQCEYKW2f8/hqdefault.jpg"
         }
       ]
     },
@@ -5195,758 +5198,995 @@
           "thumbnail": "https://i.ytimg.com/vi/uL8wKfoJ6MQ/hqdefault.jpg"
         }
       ]
+    },
+    {
+      "id": "regaetoon-mu3lnrlk",
+      "name": "Regaetoon",
+      "description": "Baile",
+      "tracks": [
+        {
+          "genre": "Reggaetón",
+          "title": "Daddy Yankee - Gasolina (Video Oficial)",
+          "artist": "Daddy Yankee",
+          "videoId": "CCF1_jI8Prk",
+          "duration": "4:14",
+          "thumbnail": "https://i.ytimg.com/vi/CCF1_jI8Prk/hq720.jpg"
+        },
+        {
+          "genre": "Reggaetón",
+          "title": "My Space",
+          "artist": "Don Omar",
+          "videoId": "rWRc1WpvLEQ",
+          "duration": "3:42",
+          "thumbnail": "https://i.ytimg.com/vi/rWRc1WpvLEQ/hq720.jpg"
+        },
+        {
+          "genre": "Reggaetón",
+          "title": "Wisin & Yandel - Besos Mojados (Visualizer)",
+          "artist": "Wisin & Yandel",
+          "videoId": "cT6B3EL15JA",
+          "duration": "4:25",
+          "thumbnail": "https://i.ytimg.com/vi/cT6B3EL15JA/hq720.jpg"
+        }
+      ]
+    },
+    {
+      "id": "sabados-mu4jdh5d",
+      "name": "SABADOS",
+      "description": "PARA INICIAR",
+      "tracks": [
+        {
+          "genre": "Crossover",
+          "title": "Rocío Dúrcal — La Gata Bajo La Lluvia [Letra]",
+          "artist": "armxndo",
+          "videoId": "lOi4KbGuNJU",
+          "duration": "3:45",
+          "thumbnail": "https://i.ytimg.com/vi/lOi4KbGuNJU/hqdefault.jpg"
+        }
+      ]
+    },
+    {
+      "id": "imported-1789590908422",
+      "name": "📥 musica variada canciones para escuchar de todo",
+      "description": "Importada directamente de YouTube (23 canciones)",
+      "tracks": [
+        {
+          "genre": "Crossover",
+          "title": "HA-ASH - Lo Aprendí de Ti (Primera Fila - Hecho Realidad [En Vivo])",
+          "artist": "Ha*Ash",
+          "videoId": "Uws510cVia4",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/Uws510cVia4/hqdefault.jpg"
+        },
+        {
+          "genre": "Reggaetón",
+          "title": "KAROL G - Si Antes Te Hubiera Conocido | Coke Studio",
+          "artist": "KAROL G",
+          "videoId": "QCZZwZQ4qNs",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/QCZZwZQ4qNs/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "Mami Quiero Ser Influenser",
+          "artist": "Ritmobytes",
+          "videoId": "Y7YMK6rVu4E",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/Y7YMK6rVu4E/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "Soy Street Fighter , Luchador Callejero !",
+          "artist": "youretro",
+          "videoId": "hzsmfp63Y-0",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/hzsmfp63Y-0/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "musica para escuchar variada",
+          "artist": "Whitemusic : Mundial",
+          "videoId": "8bRUi0nDMAY",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/8bRUi0nDMAY/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "Los Ángeles Azules - Nunca Es Suficiente ft. Natalia Lafourcade (Live)",
+          "artist": "Los Ángeles Azules",
+          "videoId": "k76BgIb89-s",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/k76BgIb89-s/hqdefault.jpg"
+        },
+        {
+          "genre": "Reggaetón",
+          "title": "Musica Variada para escuchar de todo Canciones de Reggaetón MIX",
+          "artist": "Lourdes Perez",
+          "videoId": "0ickxCBEbSw",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/0ickxCBEbSw/hqdefault.jpg"
+        },
+        {
+          "genre": "Salsa",
+          "title": "Marc Anthony - Vivir Mi Vida (Official Video)",
+          "artist": "Marc Anthony",
+          "videoId": "YXnjy5YlDwk",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/YXnjy5YlDwk/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "mix de todo tipo de musica variada",
+          "artist": "Cristina Mira",
+          "videoId": "oRlPtG3rs_E",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/oRlPtG3rs_E/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "mix de todo un poco música variada para escuchar tiktok",
+          "artist": "Crispi Dog",
+          "videoId": "IQLyWtjIvrQ",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/IQLyWtjIvrQ/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "Melendi - Destino o Casualidad ft. Ha*Ash",
+          "artist": "Melendi",
+          "videoId": "D9W4DLjmoOM",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/D9W4DLjmoOM/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "Camilo - Vida de Rico (Official Video)",
+          "artist": "Camilo",
+          "videoId": "qKp1f7Vn9dM",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/qKp1f7Vn9dM/hqdefault.jpg"
+        },
+        {
+          "genre": "Reggaetón",
+          "title": "Becky G - POR EL CONTRARIO (Performance Video) ft. Ángela Aguilar, Leonardo Aguilar",
+          "artist": "Becky G",
+          "videoId": "8c7KOGxeY3w",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/8c7KOGxeY3w/hqdefault.jpg"
+        },
+        {
+          "genre": "Merengue / Bachata",
+          "title": "Chayanne - Bailando Bachata (Official Video)",
+          "artist": "Chayanne",
+          "videoId": "dsLjyLn859g",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/dsLjyLn859g/hqdefault.jpg"
+        },
+        {
+          "genre": "Reggaetón",
+          "title": "Daddy Yankee & Marc Anthony - De Vuelta Pa' La Vuelta (Official Video)",
+          "artist": "Daddy Yankee",
+          "videoId": "VibGLc41UvQ",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/VibGLc41UvQ/hqdefault.jpg"
+        },
+        {
+          "genre": "Salsa",
+          "title": "Piso 21, Marc Anthony y Beéle - Volver (Video Oficial)",
+          "artist": "Piso 21",
+          "videoId": "yTLWGt4e6Hw",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/yTLWGt4e6Hw/hqdefault.jpg"
+        },
+        {
+          "genre": "Reggaetón",
+          "title": "KAROL G ft. Marco Antonio Solis - Coleccionando Heridas (Music Video) Dany Deglein, dennis fernando",
+          "artist": "UNIONN LATINA",
+          "videoId": "Sy3f35o_TlQ",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/Sy3f35o_TlQ/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "ROSÉ & Bruno Mars - APT. (Official Music Video)",
+          "artist": "ROSÉ",
+          "videoId": "ekr2nIex040",
+          "duration": "and Bruno Mars",
+          "thumbnail": "https://i.ytimg.com/vi/ekr2nIex040/hqdefault.jpg"
+        },
+        {
+          "genre": "Rock / Pop",
+          "title": "How It's Done: Las guerreras K-pop 2025  | Clip oficial | Netflix",
+          "artist": "Netflix Latinoamérica",
+          "videoId": "oMi_EVYfso0",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/oMi_EVYfso0/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "Musica variada para escuchar de todo mix 2026",
+          "artist": "Tifany Lopez",
+          "videoId": "SSeU11yhoh0",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/SSeU11yhoh0/hqdefault.jpg"
+        },
+        {
+          "genre": "Crossover",
+          "title": "Beéle, Ovy On The Drums - mi refe (Video Oficial)",
+          "artist": "Beéle",
+          "videoId": "w8l33K5D5CI",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/w8l33K5D5CI/hqdefault.jpg"
+        },
+        {
+          "genre": "Popular",
+          "title": "Aventurero - Yeison Jiménez (Video Oficial)",
+          "artist": "Yeison Jimenez",
+          "videoId": "n6zvD8kA3z4",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/n6zvD8kA3z4/hqdefault.jpg"
+        },
+        {
+          "genre": "Reggaetón",
+          "title": "Myke Towers - Lala (Video Oficial)",
+          "artist": "Myke Towers",
+          "videoId": "BVdngsy95mY",
+          "duration": "3:30",
+          "thumbnail": "https://i.ytimg.com/vi/BVdngsy95mY/hqdefault.jpg"
+        }
+      ]
     }
   ],
   "queue": [
     {
-      "id": "base_1790539601853_1zm6s",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184733_uavkl",
+      "videoId": "3F1aqvXGVQM",
+      "title": "Su Veneno",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/3F1aqvXGVQM/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184733
     },
     {
-      "id": "base_1790539601853_z22s0",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184735_nyqga",
+      "videoId": "Nxazeqc6VgU",
+      "title": "Inmortal",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/Nxazeqc6VgU/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184735
     },
     {
-      "id": "base_1790539601853_i9e7h",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184736_9oet1",
+      "videoId": "4wbbWxLgw70",
+      "title": "You",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/4wbbWxLgw70/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184736
     },
     {
-      "id": "base_1790539601853_dcfii",
-      "videoId": "gxlB1B9emDc",
-      "title": "Llorarás",
-      "artist": "Oscar D'León",
-      "genre": "Salsa",
-      "duration": "3:50",
-      "thumbnail": "https://i.ytimg.com/vi/gxlB1B9emDc/hqdefault.jpg",
+      "id": "base_1790548184737_i0ort",
+      "videoId": "lPmcGxR7dY4",
+      "title": "Solo Conmigo",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/lPmcGxR7dY4/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184737
     },
     {
-      "id": "base_1790539601853_6edfa",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184739_frx48",
+      "videoId": "Uno04Ag6EtY",
+      "title": "Inocente",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/Uno04Ag6EtY/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184739
     },
     {
-      "id": "base_1790539601853_g9azr",
-      "videoId": "JLwmBfrbYR4",
+      "id": "base_1790548184740_2mc4t",
+      "videoId": "aDcpuSE8Atg",
+      "title": "Amor de Madre",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/aDcpuSE8Atg/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184740
+    },
+    {
+      "id": "base_1790548184741_5s5yp",
+      "videoId": "GzMGKJF09AI",
+      "title": "El Malo",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/GzMGKJF09AI/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184741
+    },
+    {
+      "id": "base_1790548184742_nkbso",
+      "videoId": "aDcpuSE8Atg",
+      "title": "Amor de Madre",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/aDcpuSE8Atg/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184742
+    },
+    {
+      "id": "base_1790548184744_wmrw8",
+      "videoId": "3F1aqvXGVQM",
+      "title": "Su Veneno",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/3F1aqvXGVQM/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184744
+    },
+    {
+      "id": "base_1790548184745_fhgzw",
+      "videoId": "vovzTIeYPXo",
+      "title": "Promise",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/vovzTIeYPXo/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184745
+    },
+    {
+      "id": "base_1790548184746_zab60",
+      "videoId": "IcQvHO2rHp0",
+      "title": "La Tormenta",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/IcQvHO2rHp0/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184746
+    },
+    {
+      "id": "base_1790548184748_o5y70",
+      "videoId": "vovzTIeYPXo",
+      "title": "Promise",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/vovzTIeYPXo/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184748
+    },
+    {
+      "id": "base_1790548184750_rpuiw",
+      "videoId": "uL8wKfoJ6MQ",
+      "title": "Llorar",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/uL8wKfoJ6MQ/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184750
+    },
+    {
+      "id": "base_1790548184751_c6n1s",
+      "videoId": "mFVeTuqtDOg",
+      "title": "Cuando Volveras",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/mFVeTuqtDOg/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184751
+    },
+    {
+      "id": "base_1790548184752_8vmvj",
+      "videoId": "uL8wKfoJ6MQ",
+      "title": "Llorar",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/uL8wKfoJ6MQ/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184752
+    },
+    {
+      "id": "base_1790548184753_2h3i0",
+      "videoId": "lPmcGxR7dY4",
+      "title": "Solo Conmigo",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/lPmcGxR7dY4/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184753
+    },
+    {
+      "id": "base_1790548184754_tsrqf",
+      "videoId": "HKNqyiV38ss",
+      "title": "Mi Corazoncito",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/HKNqyiV38ss/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184754
+    },
+    {
+      "id": "base_1790548184756_pisa0",
+      "videoId": "18Do3PRZYSU",
+      "title": "Los Infieles",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/18Do3PRZYSU/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184756
+    },
+    {
+      "id": "base_1790548184757_zbyp6",
+      "videoId": "lPmcGxR7dY4",
+      "title": "Solo Conmigo",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/lPmcGxR7dY4/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184757
+    },
+    {
+      "id": "base_1790548184758_cx43i",
+      "videoId": "r8goFcqS18k",
+      "title": "Llévame Contigo",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/r8goFcqS18k/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184758
+    },
+    {
+      "id": "base_1790548184760_hh8gw",
+      "videoId": "Uno04Ag6EtY",
+      "title": "Inocente",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/Uno04Ag6EtY/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184760
+    },
+    {
+      "id": "base_1790548184762_owerg",
+      "videoId": "NQrgT3cJR2Y",
+      "title": "Volví",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/NQrgT3cJR2Y/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184762
+    },
+    {
+      "id": "base_1790548184763_oabb4",
+      "videoId": "r8goFcqS18k",
+      "title": "Llévame Contigo",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/r8goFcqS18k/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184763
+    },
+    {
+      "id": "base_1790548184764_a4m6x",
+      "videoId": "eGqU6SDE9KM",
+      "title": "Hilito",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/eGqU6SDE9KM/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184764
+    },
+    {
+      "id": "base_1790548184765_w0cfn",
+      "videoId": "r8goFcqS18k",
+      "title": "Llévame Contigo",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/r8goFcqS18k/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184765
+    },
+    {
+      "id": "base_1790548184767_ptm8b",
+      "videoId": "4wbbWxLgw70",
+      "title": "You",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/4wbbWxLgw70/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184767
+    },
+    {
+      "id": "base_1790548184768_9jfsu",
+      "videoId": "lPmcGxR7dY4",
+      "title": "Solo Conmigo",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/lPmcGxR7dY4/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184768
+    },
+    {
+      "id": "base_1790548184769_ef6qs",
+      "videoId": "qho-ZjkX8S4",
+      "title": "Imitadora",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/qho-ZjkX8S4/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184769
+    },
+    {
+      "id": "base_1790548184770_1cu0u",
+      "videoId": "yQd4xQBlBa0",
+      "title": "Obsesion",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/yQd4xQBlBa0/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184770
+    },
+    {
+      "id": "base_1790548184771_nhz72",
+      "videoId": "QwJa3Lkgr-M",
+      "title": "Angelito",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/QwJa3Lkgr-M/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184771
+    },
+    {
+      "id": "base_1790548184773_bxo27",
+      "videoId": "QwJa3Lkgr-M",
+      "title": "Angelito",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/QwJa3Lkgr-M/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184773
+    },
+    {
+      "id": "base_1790548184774_ha6ey",
+      "videoId": "DYuhnVSOzwE",
+      "title": "Eres Mía",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/DYuhnVSOzwE/hqdefault.jpg",
+      "requestedBy": {
+        "table": null,
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
+      },
+      "isBaseTrack": true,
+      "addedAt": 1790548184774
+    },
+    {
+      "id": "base_1790548184775_aqmll",
+      "videoId": "muiC_SmP2AU",
       "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/muiC_SmP2AU/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184775
     },
     {
-      "id": "base_1790539601853_7k1n7",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
+      "id": "base_1790548184776_0rvm3",
+      "videoId": "dsLjyLn859g",
+      "title": "Chayanne - Bailando Bachata (Official Video)",
+      "artist": "Chayanne",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/dsLjyLn859g/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 musica variada canciones para escuchar de todo)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184776
     },
     {
-      "id": "base_1790539601853_cx0x2",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
+      "id": "base_1790548184777_gem9q",
+      "videoId": "3F1aqvXGVQM",
+      "title": "Su Veneno",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/3F1aqvXGVQM/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184777
     },
     {
-      "id": "base_1790539601853_1j16y",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184778_maejk",
+      "videoId": "r8goFcqS18k",
+      "title": "Llévame Contigo",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/r8goFcqS18k/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184778
     },
     {
-      "id": "base_1790539601853_1vur6",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
+      "id": "base_1790548184780_77jm0",
+      "videoId": "If6MUJ4Lxmk",
+      "title": "Tu Jueguito",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/If6MUJ4Lxmk/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184780
     },
     {
-      "id": "base_1790539601853_gleuq",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184781_msjwz",
+      "videoId": "qho-ZjkX8S4",
+      "title": "Imitadora",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/qho-ZjkX8S4/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184781
     },
     {
-      "id": "base_1790539601853_fedny",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184782_8h6vf",
+      "videoId": "yQd4xQBlBa0",
+      "title": "Obsesion",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/yQd4xQBlBa0/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601853
+      "addedAt": 1790548184782
     },
     {
-      "id": "base_1790539601854_pow97",
-      "videoId": "gxlB1B9emDc",
-      "title": "Llorarás",
-      "artist": "Oscar D'León",
-      "genre": "Salsa",
-      "duration": "3:50",
-      "thumbnail": "https://i.ytimg.com/vi/gxlB1B9emDc/hqdefault.jpg",
+      "id": "base_1790548184783_tz7jv",
+      "videoId": "eGqU6SDE9KM",
+      "title": "Hilito",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/eGqU6SDE9KM/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
+      "addedAt": 1790548184783
     },
     {
-      "id": "base_1790539601854_jutkb",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184784_dsbyx",
+      "videoId": "If6MUJ4Lxmk",
+      "title": "Tu Jueguito",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/If6MUJ4Lxmk/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
+      "addedAt": 1790548184784
     },
     {
-      "id": "base_1790539601854_mdfpr",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
+      "id": "base_1790548184785_nynz8",
+      "videoId": "If6MUJ4Lxmk",
+      "title": "Tu Jueguito",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/If6MUJ4Lxmk/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
+      "addedAt": 1790548184785
     },
     {
-      "id": "base_1790539601854_jpgb3",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
+      "id": "base_1790548184786_eyoq8",
+      "videoId": "QwJa3Lkgr-M",
+      "title": "Angelito",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/QwJa3Lkgr-M/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
+      "addedAt": 1790548184786
     },
     {
-      "id": "base_1790539601854_hqza6",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184787_1sfrl",
+      "videoId": "If6MUJ4Lxmk",
+      "title": "Tu Jueguito",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/If6MUJ4Lxmk/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
+      "addedAt": 1790548184787
     },
     {
-      "id": "base_1790539601854_yxcb7",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184789_yte4n",
+      "videoId": "3F1aqvXGVQM",
+      "title": "Su Veneno",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/3F1aqvXGVQM/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
+      "addedAt": 1790548184789
     },
     {
-      "id": "base_1790539601854_4a7sx",
-      "videoId": "gxlB1B9emDc",
-      "title": "Llorarás",
-      "artist": "Oscar D'León",
-      "genre": "Salsa",
-      "duration": "3:50",
-      "thumbnail": "https://i.ytimg.com/vi/gxlB1B9emDc/hqdefault.jpg",
+      "id": "base_1790548184790_ey572",
+      "videoId": "wJYy7Yuf1Ig",
+      "title": "Propuesta Indecente",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/wJYy7Yuf1Ig/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
+      "addedAt": 1790548184790
     },
     {
-      "id": "base_1790539601854_m44c5",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184791_xhmgk",
+      "videoId": "uL8wKfoJ6MQ",
+      "title": "Llorar",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/uL8wKfoJ6MQ/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
+      "addedAt": 1790548184791
     },
     {
-      "id": "base_1790539601854_asysm",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
+      "id": "base_1790548184792_z0mca",
+      "videoId": "h7rdAGqcYWo",
+      "title": "Hermanita",
+      "artist": "Aventura",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/h7rdAGqcYWo/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
+      "addedAt": 1790548184792
     },
     {
-      "id": "base_1790539601854_ndcqt",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184793_zxxa7",
+      "videoId": "4wbbWxLgw70",
+      "title": "You",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/4wbbWxLgw70/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
+      "addedAt": 1790548184793
     },
     {
-      "id": "base_1790539601854_yxkix",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "id": "base_1790548184794_uaa19",
+      "videoId": "ZQA8tYjX2ao",
+      "title": "Centavito",
+      "artist": "Romeo Santos",
+      "genre": "Merengue / Bachata",
+      "duration": "3:30",
+      "thumbnail": "https://i.ytimg.com/vi/ZQA8tYjX2ao/hqdefault.jpg",
       "requestedBy": {
         "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
+        "name": "DJ 100% Merengue / Bachata (📥 Aventura y Romeo Santos Mejores canciones.)"
       },
       "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_kjupl",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_zh0ju",
-      "videoId": "oWBf9hfW_4Y",
-      "title": "Rebelión",
-      "artist": "Joe Arroyo",
-      "genre": "Salsa",
-      "duration": "4:45",
-      "thumbnail": "https://i.ytimg.com/vi/oWBf9hfW_4Y/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_jrp2n",
-      "videoId": "fIPOjkmMpKk",
-      "title": "El Día de Mi Suerte",
-      "artist": "Héctor Lavoe & Willie Colón",
-      "genre": "Salsa",
-      "duration": "5:28",
-      "thumbnail": "https://i.ytimg.com/vi/fIPOjkmMpKk/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_ig4he",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_zdua6",
-      "videoId": "fIPOjkmMpKk",
-      "title": "El Día de Mi Suerte",
-      "artist": "Héctor Lavoe & Willie Colón",
-      "genre": "Salsa",
-      "duration": "5:28",
-      "thumbnail": "https://i.ytimg.com/vi/fIPOjkmMpKk/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_ll3cb",
-      "videoId": "gxlB1B9emDc",
-      "title": "Llorarás",
-      "artist": "Oscar D'León",
-      "genre": "Salsa",
-      "duration": "3:50",
-      "thumbnail": "https://i.ytimg.com/vi/gxlB1B9emDc/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_osj6g",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_oijo9",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_9l09w",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_inp1x",
-      "videoId": "fIPOjkmMpKk",
-      "title": "El Día de Mi Suerte",
-      "artist": "Héctor Lavoe & Willie Colón",
-      "genre": "Salsa",
-      "duration": "5:28",
-      "thumbnail": "https://i.ytimg.com/vi/fIPOjkmMpKk/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_63e0s",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_tgkge",
-      "videoId": "oWBf9hfW_4Y",
-      "title": "Rebelión",
-      "artist": "Joe Arroyo",
-      "genre": "Salsa",
-      "duration": "4:45",
-      "thumbnail": "https://i.ytimg.com/vi/oWBf9hfW_4Y/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_6732w",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_gk8l0",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_0504v",
-      "videoId": "fIPOjkmMpKk",
-      "title": "El Día de Mi Suerte",
-      "artist": "Héctor Lavoe & Willie Colón",
-      "genre": "Salsa",
-      "duration": "5:28",
-      "thumbnail": "https://i.ytimg.com/vi/fIPOjkmMpKk/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_0srr6",
-      "videoId": "fIPOjkmMpKk",
-      "title": "El Día de Mi Suerte",
-      "artist": "Héctor Lavoe & Willie Colón",
-      "genre": "Salsa",
-      "duration": "5:28",
-      "thumbnail": "https://i.ytimg.com/vi/fIPOjkmMpKk/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_7bnc8",
-      "videoId": "oWBf9hfW_4Y",
-      "title": "Rebelión",
-      "artist": "Joe Arroyo",
-      "genre": "Salsa",
-      "duration": "4:45",
-      "thumbnail": "https://i.ytimg.com/vi/oWBf9hfW_4Y/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_2ybfa",
-      "videoId": "oWBf9hfW_4Y",
-      "title": "Rebelión",
-      "artist": "Joe Arroyo",
-      "genre": "Salsa",
-      "duration": "4:45",
-      "thumbnail": "https://i.ytimg.com/vi/oWBf9hfW_4Y/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_smkll",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_xo57m",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_6skf9",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_cbnm7",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_obzpy",
-      "videoId": "gxlB1B9emDc",
-      "title": "Llorarás",
-      "artist": "Oscar D'León",
-      "genre": "Salsa",
-      "duration": "3:50",
-      "thumbnail": "https://i.ytimg.com/vi/gxlB1B9emDc/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_6uknz",
-      "videoId": "oWBf9hfW_4Y",
-      "title": "Rebelión",
-      "artist": "Joe Arroyo",
-      "genre": "Salsa",
-      "duration": "4:45",
-      "thumbnail": "https://i.ytimg.com/vi/oWBf9hfW_4Y/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_e3zmg",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601854_ph0vl",
-      "videoId": "7KxkMLAZlzw",
-      "title": "Cali Pachanguero",
-      "artist": "Grupo Niche",
-      "genre": "Salsa",
-      "duration": "5:10",
-      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601854
-    },
-    {
-      "id": "base_1790539601866_07qj0",
-      "videoId": "JLwmBfrbYR4",
-      "title": "Sobredosis",
-      "artist": "Los Titanes",
-      "genre": "Salsa",
-      "duration": "3:12",
-      "thumbnail": "https://i.ytimg.com/vi/JLwmBfrbYR4/hqdefault.jpg",
-      "requestedBy": {
-        "table": null,
-        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)"
-      },
-      "isBaseTrack": true,
-      "addedAt": 1790539601866
+      "addedAt": 1790548184794
     }
   ],
   "history": [
@@ -7395,12 +7635,97 @@
         "table": null
       },
       "playlistName": "📥 Aventura y Romeo Santos Mejores canciones."
+    },
+    {
+      "id": "base_1790539601853_1zm6s",
+      "genre": "Salsa",
+      "title": "Cali Pachanguero",
+      "artist": "Grupo Niche",
+      "addedAt": 1790539601853,
+      "videoId": "7KxkMLAZlzw",
+      "duration": "5:10",
+      "playedAt": "2026-09-27T22:14:11.024Z",
+      "startedAt": 1790547237027,
+      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "isBaseTrack": true,
+      "requestedBy": {
+        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)",
+        "table": null
+      }
+    },
+    {
+      "id": "base_1790539601853_z22s0",
+      "genre": "Salsa",
+      "title": "Cali Pachanguero",
+      "artist": "Grupo Niche",
+      "addedAt": 1790539601853,
+      "videoId": "7KxkMLAZlzw",
+      "duration": "5:10",
+      "playedAt": "2026-09-27T22:16:49.810Z",
+      "startedAt": 1790547251030,
+      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "isBaseTrack": true,
+      "requestedBy": {
+        "name": "DJ 100% Salsa (🔥 Viernes de Rumba y Cantina)",
+        "table": null
+      }
+    },
+    {
+      "id": "base_1790539601853_i9e7h",
+      "genre": "Salsa",
+      "title": "Cali Pachanguero",
+      "artist": "Grupo Niche",
+      "addedAt": 1790539601853,
+      "videoId": "7KxkMLAZlzw",
+      "duration": "5:10",
+      "playedAt": "2026-09-27T22:16:59.511Z",
+      "startedAt": 1790547409821,
+      "thumbnail": "https://i.ytimg.com/vi/7KxkMLAZlzw/hqdefault.jpg",
+      "isBaseTrack": true,
+      "requestedBy": {
+        "name": "DJ 100% Salsa (🎺 Salsa Brava y Clásica)",
+        "table": null
+      }
+    },
+    {
+      "id": "req_1790547380641_bbqkl",
+      "genre": "Merengue / Bachata",
+      "title": "Aventura - Los Infieles",
+      "artist": "Aventura",
+      "addedAt": 1790547380641,
+      "videoId": "CsziEW_gYhU",
+      "duration": "4:39",
+      "playedAt": "2026-09-27T22:21:01.753Z",
+      "startedAt": 1790547419522,
+      "thumbnail": "https://i.ytimg.com/vi/CsziEW_gYhU/hq720.jpg?sqp=-oaymwEgCNAFEJQDSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLCHoQF22OhbyNcUXsQA1yJ9pZouLg",
+      "isBaseTrack": false,
+      "requestedBy": {
+        "name": "Juan",
+        "table": "1",
+        "dedication": "Feliz cumple bro"
+      }
+    },
+    {
+      "id": "base_1790547635362_flc3j",
+      "genre": "Reggaetón",
+      "title": "Choca",
+      "artist": "Plan B",
+      "addedAt": 1790547635362,
+      "videoId": "e19gXpuRygM",
+      "duration": "3:30",
+      "playedAt": "2026-09-27T22:21:04.937Z",
+      "startedAt": 1790547661762,
+      "thumbnail": "https://i.ytimg.com/vi/e19gXpuRygM/hqdefault.jpg",
+      "isBaseTrack": true,
+      "requestedBy": {
+        "name": "DJ 100% Reggaetón (📥 Reggaeton Viejo)",
+        "table": null
+      }
     }
   ],
   "tableRequests": {
     "1": [
-      1790397414523,
-      1790397420178
+      1790547380646
     ],
     "2": [
       1790397449605,

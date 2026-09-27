@@ -497,6 +497,22 @@ async function refreshPlaybackQueue() {
   }
 }
 
+// Vaciar la lista de espera (elimina pedidos acumulados para pasar a otra música)
+async function clearWaitingQueue() {
+  const confirmed = confirm('¿Deseas vaciar la lista de espera?\n\nSe eliminarán los pedidos y turnos pendientes para que puedas continuar con otra lista o empezar una nueva tanda.');
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch('/api/admin/queue/clear', { method: 'POST' });
+    if (res.ok) {
+      showAdminToast('🗑️ Lista de espera despejada', '✨');
+    }
+  } catch (err) {
+    console.error('Error vaciando lista de espera:', err);
+    alert('No se pudo vaciar la lista de espera.');
+  }
+}
+
 // 2. Control de la Cola
 async function skipCurrentSong() {
   await fetch('/api/admin/skip', { method: 'POST' });
