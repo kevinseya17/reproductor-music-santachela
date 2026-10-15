@@ -23,8 +23,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Estado de reproducción en memoria
-let currentlyPlaying = null;
+// Estado de reproducción en memoria y persistente
+let currentlyPlaying = db.getCurrentlyPlaying();
 let currentPlaylistIndex = 0;
 let micModeActive = false;
 
@@ -444,10 +444,12 @@ function advanceToNextSong() {
       ...nextSong,
       startedAt: Date.now()
     };
+    db.setCurrentlyPlaying(currentlyPlaying);
     // Mantener siempre 50 temas en la cola visible de fondo
     replenishPlaybackQueue(50);
   } else {
     currentlyPlaying = null;
+    db.setCurrentlyPlaying(null);
   }
 
   // Notificar a todos los clientes conectados
@@ -462,6 +464,9 @@ function advanceToNextSong() {
 
 // Inicializar la primera canción si no hay nada sonando
 function ensurePlaying() {
+  if (!currentlyPlaying) {
+    currentlyPlaying = db.getCurrentlyPlaying();
+  }
   replenishPlaybackQueue(50);
   if (!currentlyPlaying) {
     advanceToNextSong();

@@ -9058,5 +9058,22 @@
       1790539613373
     ]
   },
-  "bannedTables": {}
+  "bannedTables": {},
+  "currentlyPlaying": {
+    "id": "base_1792035344333",
+    "videoId": "gxlB1B9emDc",
+    "title": "Llorarás",
+    "artist": "Oscar D'León",
+    "genre": "Salsa",
+    "duration": "3:50",
+    "thumbnail": "https://i.ytimg.com/vi/gxlB1B9emDc/hqdefault.jpg",
+    "playlistId": "salsa-pesada",
+    "playlistName": "🎺 Salsa Brava y Clásica",
+    "requestedBy": {
+      "table": null,
+      "name": "🎺 Salsa Brava y Clásica"
+    },
+    "isBaseTrack": true,
+    "startedAt": 1792035344333
+  }
 }
