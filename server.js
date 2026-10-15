@@ -774,6 +774,8 @@ app.post('/api/playlists/:id/activate', (req, res) => {
 
   db.updateSettings({
     activePlaylistId: req.params.id,
+    basePlaybackMode: 'single',
+    scheduleEnabled: false,
     crossoverPlaylists: crossoverList
   });
 
@@ -1177,7 +1179,7 @@ app.get('/api/settings', (req, res) => {
 app.post('/api/settings', (req, res) => {
   const updated = db.updateSettings(req.body);
   // Regenerar la cola visible de 50 temas si cambiaron modos de reproducción, listas o porcentajes
-  if (req.body.basePlaybackMode !== undefined || req.body.crossoverPlaylists !== undefined || req.body.crossoverBatchSize !== undefined || req.body.crossoverDistributionType !== undefined || req.body.crossoverPercentages !== undefined || req.body.activePlaylistId !== undefined) {
+  if (req.body.basePlaybackMode !== undefined || req.body.focusGenre !== undefined || req.body.crossoverPlaylists !== undefined || req.body.crossoverBatchSize !== undefined || req.body.crossoverDistributionType !== undefined || req.body.crossoverPercentages !== undefined || req.body.activePlaylistId !== undefined) {
     regenerateBaseTracksInQueue(50);
   } else {
     io.emit('state-changed', {
