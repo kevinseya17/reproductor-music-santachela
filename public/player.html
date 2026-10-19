@@ -28,11 +28,21 @@
         inset: 0;
         z-index: 10;
         pointer-events: none;
-        background: linear-gradient(to top, rgba(10,12,16,0.95) 0%, rgba(10,12,16,0.2) 30%, rgba(10,12,16,0.4) 100%);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         padding: 2rem;
+      }
+      .tv-hud-element {
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      body.tv-idle .tv-hud-element {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translateY(12px) !important;
+      }
+      body.tv-idle #playerHeader {
+        transform: translateY(-12px) !important;
       }
     }
 
@@ -80,8 +90,8 @@
   <!-- Capa Overlay Informativa para TV y Bar -->
   <div id="playerOverlay" class="flex flex-col justify-between p-3 sm:p-8">
 
-    <!-- Header Superior: Logo del Bar y QR para pedir -->
-    <header class="flex items-center justify-between gap-2">
+    <!-- Header Superior: Logo del Bar y QR para pedir (Auto-ocultable para dejar TV limpia) -->
+    <header id="playerHeader" class="tv-hud-element flex items-center justify-between gap-2">
       <div class="flex items-center gap-2 sm:gap-3 bg-black/60 backdrop-blur-md px-3 sm:px-5 py-2 sm:py-3 rounded-2xl border border-white/10">
         <span class="text-2xl sm:text-3xl">🎷</span>
         <div>
@@ -146,9 +156,9 @@
       <span>🎙️ MODO MICRÓFONO ACTIVO (Música atenuada)</span>
     </div>
 
-    <!-- Footer Inferior: Información del tema sonando (Auto-ocultable a los 15s para dejar video limpio) -->
+    <!-- Footer Inferior: Información del tema sonando (Auto-ocultable para dejar TV limpia) -->
     <footer class="space-y-3">
-      <div id="songInfoFooter" class="transition-all duration-700 ease-in-out transform translate-y-0 opacity-100">
+      <div id="songInfoFooter" class="tv-hud-element transition-all duration-700 ease-in-out transform translate-y-0 opacity-100">
         <div class="flex items-end justify-between gap-6">
 
           <!-- Info de la Canción Actual -->
@@ -182,7 +192,7 @@
       <!-- Barra discreta de controles para el televisor (solo interactiva) -->
 
       <!-- Barra de Controles Rápidos para el Barman / Encargado -->
-      <div class="flex items-center justify-between pt-1 text-xs text-gray-400 interactive">
+      <div id="playerControlsBar" class="tv-hud-element flex items-center justify-between pt-1 text-xs text-gray-400 interactive">
         <div class="flex items-center gap-4">
           <button id="playPauseBtn" onclick="togglePlayPause()" class="hover:text-amber-400 flex items-center gap-1.5 font-bold">
             <span id="playPauseIcon">⏸️</span> Pausar

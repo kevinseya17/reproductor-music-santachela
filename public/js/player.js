@@ -48,7 +48,6 @@ function onPlayerReady(event) {
   event.target.playVideo();
 
   startProgressMonitor();
-  startPromoRotation();
 
   if (pendingVideoId) {
     loadAndPlay(pendingVideoId);
@@ -327,9 +326,10 @@ socket.on('state-changed', (data) => {
   currentlyPlayingSong = currentlyPlaying;
 
   if (currentlyPlaying) {
-    // Si la canción cambió, cargar el nuevo video
+    // Si la canción cambió, cargar el nuevo video y programar un solo anuncio para este tema
     if (currentlyPlaying.videoId && currentlyPlaying.videoId !== currentVideoId) {
       loadAndPlay(currentlyPlaying.videoId);
+      scheduleSinglePromoForCurrentSong();
     }
 
     document.getElementById('currentTitle').textContent = currentlyPlaying.title || 'Música';
@@ -374,8 +374,8 @@ socket.on('state-changed', (data) => {
       dedBanner.classList.add('hidden');
     }
 
-    // Mostrar información de canción durante 15 segundos y luego ocultar suavemente para dejar el video limpio
-    showSongOverlay(15000);
+    // Mostrar información de canción durante 10 segundos y luego ocultar suavemente para dejar el video 100% limpio
+    showSongOverlay(10000);
   }
 
   // Siguiente canción
@@ -389,31 +389,38 @@ socket.on('state-changed', (data) => {
   }
 });
 
-// Auto-ocultamiento de textos informativos a los 15 segundos (Punto 4)
+// Auto-ocultamiento de todos los elementos visuales a los 10 segundos para dejar el video 100% limpio
 let overlayHideTimeout = null;
+let singlePromoSongTimeout = null;
 
-function showSongOverlay(durationMs = 15000) {
+function showSongOverlay(durationMs = 10000) {
+  // Mostrar todos los elementos del HUD
+  document.body.classList.remove('tv-idle');
   const footer = document.getElementById('songInfoFooter');
-  if (!footer) return;
-
-  footer.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
-  footer.classList.add('opacity-100', 'translate-y-0');
+  if (footer) {
+    footer.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+    footer.classList.add('opacity-100', 'translate-y-0');
+  }
 
   clearTimeout(overlayHideTimeout);
   if (durationMs > 0) {
     overlayHideTimeout = setTimeout(() => {
-      footer.classList.remove('opacity-100', 'translate-y-0');
-      footer.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+      // Ocultar todos los elementos informativos (header, logo, QR, footer, controles)
+      document.body.classList.add('tv-idle');
+      if (footer) {
+        footer.classList.remove('opacity-100', 'translate-y-0');
+        footer.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+      }
     }, durationMs);
   }
 }
 
-// Despertar overlay al mover el mouse o tocar la pantalla
-document.addEventListener('mousemove', () => showSongOverlay(15000));
-document.addEventListener('touchstart', () => showSongOverlay(15000));
-document.addEventListener('click', () => showSongOverlay(15000));
+// Despertar overlay al mover el mouse o tocar la pantalla (y auto-ocultar a los 6 segundos)
+document.addEventListener('mousemove', () => showSongOverlay(6000));
+document.addEventListener('touchstart', () => showSongOverlay(6000));
+document.addEventListener('click', () => showSongOverlay(6000));
 
-// Promociones en Gran Formato para TV (Punto 5)
+// Promociones en Gran Formato para TV
 let activePromos = [
   '🍻 ¡Pregunta por nuestras promociones de cerveza en la barra!',
   '🍔 Prueba nuestras picadas y alitas Santa Chela',
@@ -431,7 +438,25 @@ function getPromoIcon(text) {
   return '🔥';
 }
 
-function showNextPromo() {
+/**
+ * Muestra exactamente un solo anuncio/promoción por canción
+ * Aparece a los 35 segundos de iniciar el tema y dura 8 segundos para no saturar la pantalla.
+ */
+function scheduleSinglePromoForCurrentSong() {
+  clearTimeout(singlePromoSongTimeout);
+  clearTimeout(promoHideTimeout);
+  const promoCard = document.getElementById('promoBroadcastCard');
+  if (promoCard) promoCard.classList.add('hidden');
+
+  if (!activePromos || activePromos.length === 0) return;
+
+  // Programar para que salga una sola vez a los 35 segundos de la canción
+  singlePromoSongTimeout = setTimeout(() => {
+    showSinglePromo();
+  }, 35000);
+}
+
+function showSinglePromo() {
   if (!activePromos || activePromos.length === 0) return;
   const promoCard = document.getElementById('promoBroadcastCard');
   const promoTextEl = document.getElementById('promoLargeText');
@@ -451,18 +476,12 @@ function showNextPromo() {
   }, 50);
 
   clearTimeout(promoHideTimeout);
+  // Se oculta a los 8 segundos para dejar la pantalla limpia
   promoHideTimeout = setTimeout(() => {
     promoCard.classList.remove('opacity-100', 'translate-y-0');
     promoCard.classList.add('opacity-0', 'translate-y-8');
     setTimeout(() => promoCard.classList.add('hidden'), 700);
-  }, 14000);
-}
-
-function startPromoRotation() {
-  // Mostrar primera promo a los 18 segundos
-  setTimeout(showNextPromo, 18000);
-  // Repetir cada 55 segundos
-  setInterval(showNextPromo, 55000);
+  }, 8000);
 }
 
 // Modo Micrófono / Anuncio con Fade Suave de Volumen

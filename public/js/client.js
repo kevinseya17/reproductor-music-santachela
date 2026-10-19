@@ -45,13 +45,8 @@ function updateTableUI() {
 }
 
 function promptChangeTable() {
-  const newTable = prompt('Ingresa el número de tu mesa:', currentTable);
-  if (newTable && newTable.trim()) {
-    currentTable = newTable.trim();
-    localStorage.setItem('music_bar_table', currentTable);
-    updateTableUI();
-    showToast('Mesa cambiada', `Ahora estás ordenando para la Mesa ${currentTable}`, '📍');
-  }
+  // Deshabilitado: La mesa queda fijada estrictamente por el código QR escaneado
+  console.log('La mesa está bloqueada al código QR escaneado.');
 }
 
 // 2. Cargar estado inicial
