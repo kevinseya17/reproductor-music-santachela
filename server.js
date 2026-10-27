@@ -1278,6 +1278,8 @@ app.delete('/api/queue/:index', (req, res) => {
 // ==========================================
 // SOCKET.IO (Sincronización en tiempo real)
 // ==========================================
+let lastSongEndedTimestamp = 0;
+
 io.on('connection', (socket) => {
   // Enviar estado actual al cliente recién conectado
   socket.emit('state-changed', {
@@ -1286,8 +1288,14 @@ io.on('connection', (socket) => {
     settings: db.getSettings()
   });
 
-  // El reproductor de pantalla avisa que terminó una canción
+  // El reproductor de pantalla avisa que terminó una canción (con protección anti-rebote)
   socket.on('song-ended', () => {
+    const now = Date.now();
+    if (now - lastSongEndedTimestamp < 5000) {
+      console.warn('[Server] Descartando song-ended duplicado (dentro de cooldown de 5s)');
+      return;
+    }
+    lastSongEndedTimestamp = now;
     advanceToNextSong();
   });
 

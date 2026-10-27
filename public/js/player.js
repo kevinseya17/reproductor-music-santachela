@@ -1,3 +1,26 @@
+// 0. Verificación y protección contra teléfonos celulares (evita que dañen la reproducción de la TV)
+(function enforceDeviceGuard() {
+  if (typeof window === 'undefined') return;
+
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('force') === '1' || params.get('preview') === '1') return;
+
+  var ua = navigator.userAgent || '';
+  var isTV = /SmartTV|Tizen|Web0S|BRAVIA|NetCast|Android TV|GoogleTV|AFT[A-Z]|CrKey|AppleTV|Roku|HbbTV|Xbox|PlayStation/i.test(ua);
+  if (isTV) return;
+
+  var isMobileUA = /iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || 
+                   (/Android/i.test(ua) && /Mobile/i.test(ua));
+  var isSmall = (window.innerWidth < 800 || screen.width < 800) && (window.innerHeight > window.innerWidth || screen.height > window.width);
+  var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+  if (window.__IS_MOBILE_BLOCKED__ || isMobileUA || (isSmall && isTouch)) {
+    console.warn('[TV Player] Acceso bloqueado en teléfono móvil para proteger la pantalla.');
+    window.onYouTubeIframeAPIReady = function() {};
+    throw new Error('[TV Player] Bloqueado en teléfono celular para evitar interrupciones en la pantalla del bar.');
+  }
+})();
+
 const socket = io();
 
 let ytPlayer = null;

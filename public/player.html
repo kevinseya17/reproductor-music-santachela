@@ -3,11 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reproductor Bar & TV | Music Bar</title>
+  <title>Reproductor Bar & TV | Santa Chela</title>
+  <script>
+    // Detección inmediata de teléfonos celulares para evitar que interfieran con la pantalla del bar
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('force') === '1' || params.get('preview') === '1') return;
+
+      var ua = navigator.userAgent || '';
+      // Excluir Smart TVs, Android TV, Tizen, WebOS, consolas y sticks
+      var isTV = /SmartTV|Tizen|Web0S|BRAVIA|NetCast|Android TV|GoogleTV|AFT[A-Z]|CrKey|AppleTV|Roku|HbbTV|Xbox|PlayStation/i.test(ua);
+      if (isTV) return;
+
+      // Detectar celulares móviles
+      var isMobileUA = /iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || 
+                       (/Android/i.test(ua) && /Mobile/i.test(ua));
+      var isSmallScreen = (window.innerWidth < 800 || screen.width < 800) && (window.innerHeight > window.innerWidth || screen.height > window.width);
+      var isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+      if (isMobileUA || (isSmallScreen && isTouch)) {
+        window.__IS_MOBILE_BLOCKED__ = true;
+        document.documentElement.classList.add('mobile-blocked');
+      }
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/css/style.css">
   <script src="/socket.io/socket.io.js"></script>
   <style>
+    /* Ocultar elementos si se abre desde celular */
+    html.mobile-blocked body {
+      overflow: hidden !important;
+      background-color: #0b0e14 !important;
+    }
+    html.mobile-blocked #playerContainer,
+    html.mobile-blocked #playerOverlay {
+      display: none !important;
+    }
+
     /* En pantallas grandes (TV, PC, Proyector): video de fondo full-screen con overlay cinemático */
     @media (min-width: 768px) {
       body {
@@ -81,6 +114,42 @@
   </style>
 </head>
 <body class="bg-black text-white select-none">
+
+  <!-- Modal de Bloqueo Exclusivo para Celulares Móviles -->
+  <div id="mobileBlockModal" class="fixed inset-0 z-[9999] bg-[#0b0e14] hidden flex-col items-center justify-center p-6 text-center text-white">
+    <div class="w-20 h-20 rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-6 shadow-2xl shadow-amber-500/10">
+      <svg class="w-10 h-10 text-amber-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+        <line x1="8" y1="21" x2="16" y2="21"></line>
+        <line x1="12" y1="17" x2="12" y2="21"></line>
+      </svg>
+    </div>
+    <div class="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 px-3.5 py-1.5 rounded-full text-xs font-bold text-amber-400 mb-3 uppercase tracking-wider">
+      <span>🔒</span> Vista Exclusiva de Pantalla TV
+    </div>
+    <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight mb-3">Solo para Televisores y Computadores</h1>
+    <p class="text-sm text-gray-400 max-w-sm mb-8 leading-relaxed">
+      Esta pantalla reproduce el video oficial y sonido de Santa Chela. No se puede abrir desde celulares para evitar desconectar o interrumpir la música del bar.
+    </p>
+    <a href="/" class="w-full max-w-xs bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold py-4 px-6 rounded-2xl text-sm shadow-xl shadow-amber-500/25 transition-all flex items-center justify-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+      </svg>
+      Pedir Música desde mi Celular
+    </a>
+    <p class="text-[11px] text-gray-600 mt-6">
+      Santa Chela Music Bar • Reproductor Protegido
+    </p>
+  </div>
+  <script>
+    if (window.__IS_MOBILE_BLOCKED__) {
+      var modal = document.getElementById('mobileBlockModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+  </script>
 
   <!-- Contenedor del video de YouTube -->
   <div id="playerContainer">
