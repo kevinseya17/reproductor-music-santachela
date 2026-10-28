@@ -191,11 +191,11 @@ function updatePlayerTelemetry(data) {
     if (playerTelemetry.isPlaying) {
       playPauseIcon.textContent = '⏸️';
       playPauseText.textContent = 'PAUSAR';
-      playPauseBtn.className = 'tactile-btn-gold px-7 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg flex items-center gap-2';
+      playPauseBtn.className = 'tactile-btn-gold w-full sm:w-auto justify-center px-2.5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-lg flex items-center gap-1.5 whitespace-nowrap';
     } else {
       playPauseIcon.textContent = '▶️';
       playPauseText.textContent = 'REANUDAR';
-      playPauseBtn.className = 'tactile-btn-dark px-7 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg flex items-center gap-2 border-amber-400 text-amber-400';
+      playPauseBtn.className = 'tactile-btn-dark w-full sm:w-auto justify-center px-2.5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-lg flex items-center gap-1.5 border-amber-400 text-amber-400 whitespace-nowrap';
     }
   }
 
@@ -304,15 +304,15 @@ function renderMicModeState(active) {
   if (active) {
     if (icon) icon.className = 'w-2 h-2 rounded-full bg-red-500 animate-ping inline-block';
     if (text) text.textContent = 'Mic ACTIVO';
-    if (topBtn) topBtn.className = 'btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3 bg-red-500/20 text-red-400 border-red-500/40 font-bold';
+    if (topBtn) topBtn.className = 'btn-secondary text-xs flex items-center justify-center gap-1.5 py-1.5 px-2 sm:px-3 bg-red-500/20 text-red-400 border-red-500/40 font-bold';
     if (deckLabel) deckLabel.textContent = 'Mic ON';
-    if (deckBtn) deckBtn.className = 'tactile-btn-gold px-3.5 py-2 text-xs flex items-center gap-1.5 border-red-400 bg-red-500 text-white';
+    if (deckBtn) deckBtn.className = 'tactile-btn-gold h-[38px] px-3 sm:px-3.5 py-2 text-xs flex items-center justify-center gap-1.5 border-red-400 bg-red-500 text-white whitespace-nowrap';
   } else {
     if (icon) icon.className = 'w-2 h-2 rounded-full bg-gray-400 inline-block';
     if (text) text.textContent = 'Modo Micrófono';
-    if (topBtn) topBtn.className = 'btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3 transition';
+    if (topBtn) topBtn.className = 'btn-secondary text-xs flex items-center justify-center gap-1.5 py-1.5 px-2 sm:px-3 transition';
     if (deckLabel) deckLabel.textContent = 'Mic';
-    if (deckBtn) deckBtn.className = 'tactile-btn-dark px-3.5 py-2 text-xs flex items-center gap-1.5';
+    if (deckBtn) deckBtn.className = 'tactile-btn-dark h-[38px] px-3 sm:px-3.5 py-2 text-xs flex items-center justify-center gap-1.5 whitespace-nowrap';
   }
 }
 
