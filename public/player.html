@@ -79,6 +79,31 @@
       }
     }
 
+    /* Reglas para asegurar que el overlay siempre quede por encima del video en pantalla completa */
+    :fullscreen body,
+    :-webkit-full-screen body {
+      width: 100vw !important;
+      height: 100vh !important;
+      overflow: hidden !important;
+    }
+    :fullscreen #playerContainer,
+    :-webkit-full-screen #playerContainer {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 1 !important;
+    }
+    :fullscreen #playerOverlay,
+    :-webkit-full-screen #playerOverlay {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 50 !important;
+      pointer-events: none !important;
+    }
+
     /* En celulares (pantalla vertical): video 16:9 arriba y tarjeta/controles organizados abajo */
     @media (max-width: 767px) {
       body {

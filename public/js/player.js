@@ -60,7 +60,7 @@ window.onYouTubeIframeAPIReady = function() {
       controls: 1,
       modestbranding: 1,
       rel: 0,
-      fs: 1,
+      fs: 0, // Desactiva el botón nativo de YouTube para evitar que oculte los anuncios del bar
       iv_load_policy: 3
     },
     events: {
@@ -198,14 +198,52 @@ function setVolume(val) {
 }
 
 function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(err => console.log(err));
+  const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  if (!isFull) {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (req) {
+      req.call(el).catch(err => console.log('Error activando pantalla completa:', err));
+    }
   } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    if (exit) {
+      exit.call(document).catch(err => console.log('Error saliendo de pantalla completa:', err));
     }
   }
 }
+
+// Interceptar si el iframe de YouTube entra en pantalla completa de forma aislada
+['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
+  document.addEventListener(evt, () => {
+    const cur = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+    // Si el elemento maximizado es el iframe de YouTube, corregirlo para que sea toda la página web
+    if (cur && cur.tagName === 'IFRAME') {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) {
+        exit.call(document).then(() => {
+          toggleFullscreen();
+        }).catch(() => {});
+      }
+    }
+  });
+});
+
+// Doble clic en cualquier parte de la pantalla para alternar pantalla completa limpia
+document.addEventListener('dblclick', (e) => {
+  // Ignorar si hace doble clic sobre un botón interactivo
+  if (e.target.closest('button, input, select, a')) return;
+  toggleFullscreen();
+});
+
+// Tecla F para alternar pantalla completa
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'f' || e.key === 'F') {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+      toggleFullscreen();
+    }
+  }
+});
 
 // 3. Monitor de Progreso, Límite de Duración y Fade-Out
 function startProgressMonitor() {
