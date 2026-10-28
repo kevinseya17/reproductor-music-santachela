@@ -209,18 +209,18 @@
     </header>
 
     <!-- Centro: Promoción en Gran Formato para TV (Llamativa y Visible desde lejos) -->
-    <div id="promoBroadcastCard" class="self-center hidden max-w-3xl w-full mx-4 transition-all duration-700 transform translate-y-8 opacity-0 shadow-2xl interactive z-30">
-      <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 p-1 rounded-3xl shadow-[0_0_60px_rgba(245,158,11,0.6)]">
-        <div class="bg-black/90 backdrop-blur-2xl px-6 sm:px-10 py-5 sm:py-7 rounded-[22px] flex items-center gap-5 sm:gap-8 border border-white/20">
-          <div class="text-4xl sm:text-6xl animate-bounce shrink-0" id="promoIcon">🍻</div>
-          <div class="min-w-0 flex-1 space-y-1">
-            <div class="flex items-center gap-2">
-              <span class="bg-amber-500 text-black text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-0.5 rounded-full shadow">
-                🔥 PROMOCIÓN ESPECIAL SANTA CHELA
+    <div id="promoBroadcastCard" class="self-center hidden max-w-5xl w-[92%] transition-all duration-700 transform translate-y-8 opacity-0 shadow-2xl interactive z-35">
+      <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 p-1 sm:p-2 rounded-[36px] shadow-[0_0_120px_rgba(245,158,11,0.8)]">
+        <div class="bg-black/95 backdrop-blur-3xl px-8 sm:px-14 py-8 sm:py-12 rounded-[32px] flex items-center gap-6 sm:gap-10 border border-white/20">
+          <div class="text-6xl sm:text-8xl md:text-9xl animate-bounce shrink-0" id="promoIcon">🍻</div>
+          <div class="min-w-0 flex-1 space-y-3">
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <span class="bg-amber-500 text-black text-xs sm:text-base font-black uppercase tracking-widest px-4 sm:px-5 py-1.5 rounded-full shadow-lg">
+                🔥 PROMOCIÓN SANTA CHELA
               </span>
-              <span class="text-[11px] text-amber-200 font-bold hidden sm:inline">Pide en barra o desde tu mesa</span>
+              <span class="text-xs sm:text-base text-amber-200 font-bold hidden sm:inline">Pide en barra o desde tu mesa</span>
             </div>
-            <h3 id="promoLargeText" class="text-lg sm:text-2xl md:text-3xl font-black text-white leading-tight">
+            <h3 id="promoLargeText" class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
               ¡Pregunta por nuestras promociones de cerveza en la barra!
             </h3>
           </div>
@@ -228,13 +228,23 @@
       </div>
     </div>
 
-    <!-- Centro: Dedicatoria Animada Especial (Visible 15 segundos) -->
-    <div id="dedicationBanner" class="self-center hidden max-w-2xl text-center bg-gradient-to-r from-amber-500 via-pink-500 to-amber-500 p-0.5 rounded-3xl shadow-2xl transition-all duration-700 transform translate-y-6 opacity-0 interactive z-20">
-      <div class="bg-black/90 backdrop-blur-xl px-8 py-5 rounded-3xl space-y-1 border border-white/10 shadow-[0_0_40px_rgba(236,72,153,0.4)]">
-        <p id="dedicationFrom" class="text-xs font-black uppercase tracking-widest text-amber-400 flex items-center justify-center gap-2">
-          <span class="text-base">🎉</span> <span id="dedicationFromText">DEDICATORIA DE LA MESA 4</span>
-        </p>
-        <p id="dedicationText" class="text-lg md:text-2xl font-black text-white leading-snug">"¡Feliz cumpleaños Laura!"</p>
+    <!-- Centro: Saludo y Dedicatoria Especial en Gran Formato (Visible al inicio y final) -->
+    <div id="dedicationBanner" class="self-center hidden max-w-5xl w-[92%] text-center transition-all duration-700 transform translate-y-8 opacity-0 interactive z-35">
+      <div class="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 p-1 sm:p-2 rounded-[36px] shadow-[0_0_120px_rgba(245,158,11,0.85)]">
+        <div class="bg-black/95 backdrop-blur-3xl px-6 sm:px-14 py-8 sm:py-12 rounded-[32px] space-y-4 sm:space-y-5 border border-white/20">
+          <div class="flex items-center justify-center">
+            <div class="inline-flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-sm sm:text-lg md:text-xl uppercase tracking-widest px-6 sm:px-8 py-2 sm:py-2.5 rounded-full shadow-2xl">
+              <span class="text-xl sm:text-2xl animate-pulse">🎉</span>
+              <span id="dedicationFromText">MENSAJE ESPECIAL DE LA MESA</span>
+            </div>
+          </div>
+          <h2 id="dedicationText" class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-[0_6px_25px_rgba(0,0,0,0.95)] break-words py-1 sm:py-2">
+            "¡Feliz cumpleaños Laura!"
+          </h2>
+          <p class="text-xs sm:text-sm font-black uppercase tracking-widest text-amber-300/80 flex items-center justify-center gap-2">
+            <span>✨</span> <span>Canción pedida desde la mesa • Santa Chela Music Bar</span> <span>✨</span>
+          </p>
+        </div>
       </div>
     </div>
 

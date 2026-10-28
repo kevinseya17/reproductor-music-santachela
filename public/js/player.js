@@ -105,7 +105,7 @@ function onPlayerStateChange(event) {
     // Mostrar mensaje/dedicatoria al inicio del tema
     if (currentlyPlayingSong?.requestedBy?.dedication && !hasShownStartDedication) {
       hasShownStartDedication = true;
-      showDedicationBanner(14000);
+      showDedicationBanner(16000);
     }
   } else if (event.data === YT.PlayerState.PAUSED) {
     if (playPauseIcon) playPauseIcon.textContent = '▶️';
@@ -299,29 +299,29 @@ function startProgressMonitor() {
         }
       }
 
-      // 0. Dedicatoria / Mensaje del cliente al inicio de la canción (garantizar que se muestre)
+      // 0. Saludo y Dedicatoria del cliente al inicio de la canción (Visible 16 segundos)
       if (currentlyPlayingSong?.requestedBy?.dedication && !hasShownStartDedication && currentTime <= 18) {
         hasShownStartDedication = true;
-        showDedicationBanner(15000);
-        console.log(`[TV Player] Mensaje/dedicatoria de inicio activada (${Math.round(currentTime)}s)`);
+        showDedicationBanner(16000);
+        console.log(`[TV Player] Saludo/dedicatoria de inicio activada (${Math.round(currentTime)}s)`);
       }
 
-      // 1. Anuncio / Promoción exactamente a la mitad de la canción (50% de la duración)
+      // 1. Promoción del Bar exactamente a la mitad de la canción (50% de la duración)
       if (!hasShownMidSongPromo && targetMaxDuration > 20) {
         if (currentTime >= midPoint) {
           hasShownMidSongPromo = true;
-          showSinglePromo(9000);
-          console.log(`[TV Player] Anuncio a mitad de canción activado (${Math.round(currentTime)}s de ${Math.round(targetMaxDuration)}s)`);
+          showSinglePromo(10000);
+          console.log(`[TV Player] Promoción a mitad de canción activada (${Math.round(currentTime)}s de ${Math.round(targetMaxDuration)}s)`);
         }
       }
 
-      // 2. Comentario / Dedicatoria del cliente al final de la canción
+      // 2. Saludo y Dedicatoria del cliente al final de la canción (Visible 14 segundos)
       if (currentlyPlayingSong?.requestedBy?.dedication && !hasShownEndDedication) {
         // Disparar en el tramo final (~22 segundos antes del corte/fadeout y tras haber superado la mitad)
         if (timeLeft <= 22 && currentTime > (midPoint + 8)) {
           hasShownEndDedication = true;
-          showDedicationBanner(13000);
-          console.log(`[TV Player] Mensaje/dedicatoria de cierre activada (quedan ${Math.round(timeLeft)}s)`);
+          showDedicationBanner(14000);
+          console.log(`[TV Player] Saludo/dedicatoria de cierre activada (quedan ${Math.round(timeLeft)}s)`);
         }
       }
 
@@ -468,12 +468,12 @@ socket.on('state-changed', (data) => {
       reqBadge.className = 'bg-white/10 text-gray-300 font-medium text-xs px-3 py-1 rounded-full';
     }
 
-    // Dedicatoria especial en TV al inicio del tema (Visible 15 segundos)
+    // Saludo / Dedicatoria especial en TV al inicio del tema (Visible 16 segundos)
     if (currentlyPlaying.requestedBy && currentlyPlaying.requestedBy.dedication) {
       if (!hasShownStartDedication) {
         hasShownStartDedication = true;
         setTimeout(() => {
-          showDedicationBanner(15000);
+          showDedicationBanner(16000);
         }, 150);
       }
     } else {
@@ -606,9 +606,9 @@ function showSinglePromo(durationMs = 9000) {
 
 /**
  * Muestra el mensaje o dedicatoria del cliente en gran formato en TV.
- * Se muestra al inicio del tema (15 segundos) y vuelve a mostrarse al final de la canción (14 segundos).
+ * Se muestra al inicio del tema (16 segundos) y vuelve a mostrarse al final de la canción (14 segundos).
  */
-function showDedicationBanner(durationMs = 15000) {
+function showDedicationBanner(durationMs = 16000) {
   clearTimeout(dedicationTimer);
   clearTimeout(dedicationHideTimeout);
 
