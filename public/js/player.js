@@ -908,3 +908,337 @@ async function loadScreenQR() {
 document.addEventListener('DOMContentLoaded', () => {
   loadScreenQR();
 });
+
+// =========================================================================
+// MOTOR DE RULETA 3D EN VIVO EN EL TV (SINCRONIZADA CON EL DEDO DEL DJ)
+// =========================================================================
+let tvRouletteState = {
+  visible: false,
+  items: ['Mesa 1', 'Mesa 2', 'Mesa 3', 'Mesa 4', 'Mesa 5', 'Mesa 6'],
+  prizeText: '🥃 Ronda de Shots Gratis',
+  modeTitle: 'RULETA DE MESAS • SANTA CHELA',
+  currentAngle: 0,
+  spinning: false,
+  animFrame: null,
+  lastTickSlice: -1,
+  savedVol: 100
+};
+
+const ROULETTE_COLORS = [
+  ['#f59e0b', '#b45309', '#000000'], // Dorado
+  ['#111827', '#1f2937', '#fbbf24'], // Negro / Oro
+  ['#ea580c', '#9a3412', '#ffffff'], // Naranja Fuego
+  ['#1e1b4b', '#312e81', '#fde047'], // Indigo / Neón
+  ['#10b981', '#047857', '#000000'], // Esmeralda
+  ['#27272a', '#3f3f46', '#f59e0b'], // Grafito
+  ['#e11d48', '#9f1239', '#ffffff'], // Rubí
+  ['#0f172a', '#1e293b', '#38bdf8']  // Azul Noche
+];
+
+function playTvRouletteTick() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!window._tvRouletteAudioCtx) window._tvRouletteAudioCtx = new AudioCtx();
+    const ctx = window._tvRouletteAudioCtx;
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(1100, now);
+    osc.frequency.exponentialRampToValueAtTime(280, now + 0.035);
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.045);
+  } catch (e) {}
+}
+
+function playTvRouletteWinFanfare() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!window._tvRouletteAudioCtx) window._tvRouletteAudioCtx = new AudioCtx();
+    const ctx = window._tvRouletteAudioCtx;
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    notes.forEach((freq, i) => {
+      const now = ctx.currentTime + i * 0.11;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.6);
+    });
+  } catch (e) {}
+}
+
+function drawTvRouletteWheel() {
+  const canvas = document.getElementById('tvRouletteCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const items = tvRouletteState.items.length > 0 ? tvRouletteState.items : ['Mesa 1', 'Mesa 2'];
+  const n = items.length;
+  const arc = (Math.PI * 2) / n;
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const radius = cx - 12;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < n; i++) {
+    const startAngle = tvRouletteState.currentAngle + i * arc;
+    const endAngle = startAngle + arc;
+    const palette = ROULETTE_COLORS[i % ROULETTE_COLORS.length];
+
+    // Gradiente radial del segmento
+    const grad = ctx.createRadialGradient(cx, cy, 30, cx, cy, radius);
+    grad.addColorStop(0, palette[1]);
+    grad.addColorStop(1, palette[0]);
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+    ctx.stroke();
+
+    // Pin dorado en el borde de cada casilla
+    const pinX = cx + Math.cos(startAngle) * (radius - 8);
+    const pinY = cy + Math.sin(startAngle) * (radius - 8);
+    ctx.beginPath();
+    ctx.arc(pinX, pinY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fef08a';
+    ctx.fill();
+
+    // Texto de la casilla
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(startAngle + arc / 2);
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = palette[2];
+    const fontSize = n > 14 ? 15 : (n > 10 ? 18 : 22);
+    ctx.font = `900 ${fontSize}px sans-serif`;
+    const label = String(items[i]).length > 18 ? String(items[i]).slice(0, 17) + '…' : String(items[i]);
+    ctx.fillText(label.toUpperCase(), radius - 26, 0);
+    ctx.restore();
+  }
+}
+
+function launchTvConfetti() {
+  const canvas = document.getElementById('tvConfettiCanvas');
+  if (!canvas) return;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  const pieces = [];
+  const colors = ['#fbbf24', '#f59e0b', '#34d399', '#38bdf8', '#f43f5e', '#ffffff'];
+
+  for (let i = 0; i < 130; i++) {
+    pieces.push({
+      x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 22,
+      vy: -Math.random() * 20 - 6,
+      size: Math.random() * 10 + 6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * Math.PI * 2,
+      vrot: (Math.random() - 0.5) * 0.25
+    });
+  }
+
+  let frames = 0;
+  function step() {
+    frames++;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.42;
+      p.rot += p.vrot;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      ctx.restore();
+    });
+    if (frames < 180) {
+      requestAnimationFrame(step);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+socket.on('tv-roulette-show', (data) => {
+  const overlay = document.getElementById('tvRouletteOverlay');
+  if (!overlay) return;
+
+  if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+    tvRouletteState.items = data.items;
+  }
+  if (data.prizeText) tvRouletteState.prizeText = data.prizeText;
+  if (data.modeTitle) tvRouletteState.modeTitle = data.modeTitle;
+
+  const badge = document.getElementById('tvRouletteModeBadge');
+  const header = document.getElementById('tvRoulettePrizeHeader');
+  const sub = document.getElementById('tvRouletteSubtext');
+  const winBanner = document.getElementById('tvRouletteWinnerBanner');
+
+  if (badge) badge.textContent = tvRouletteState.modeTitle;
+  if (header) header.textContent = tvRouletteState.prizeText;
+  if (sub) sub.textContent = 'El DJ está preparando el giro desde su teléfono...';
+  if (winBanner) {
+    winBanner.classList.add('hidden', 'scale-75', 'opacity-0');
+    winBanner.classList.remove('scale-100', 'opacity-100');
+  }
+
+  if (!tvRouletteState.visible) {
+    tvRouletteState.visible = true;
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+    if (ytPlayer && isPlayerReady && ytPlayer.getVolume) {
+      tvRouletteState.savedVol = ytPlayer.getVolume() || 100;
+      fadeVolume(tvRouletteState.savedVol, Math.max(20, Math.round(tvRouletteState.savedVol * 0.35)), 600);
+    }
+  }
+
+  drawTvRouletteWheel();
+});
+
+socket.on('tv-roulette-drag', (data) => {
+  if (!tvRouletteState.visible || tvRouletteState.spinning) return;
+  if (typeof data.angle === 'number') {
+    tvRouletteState.currentAngle = data.angle;
+    const n = tvRouletteState.items.length || 1;
+    const arc = (Math.PI * 2) / n;
+    const normalized = (((-Math.PI / 2 - tvRouletteState.currentAngle) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const slice = Math.floor(normalized / arc);
+    if (slice !== tvRouletteState.lastTickSlice) {
+      tvRouletteState.lastTickSlice = slice;
+      playTvRouletteTick();
+      const ptr = document.getElementById('tvRoulettePointer');
+      if (ptr) {
+        ptr.style.transform = 'translateX(-50%) rotate(-18deg)';
+        setTimeout(() => { ptr.style.transform = 'translateX(-50%) rotate(0deg)'; }, 65);
+      }
+    }
+    drawTvRouletteWheel();
+  }
+});
+
+socket.on('tv-roulette-spin', (data) => {
+  const overlay = document.getElementById('tvRouletteOverlay');
+  if (!overlay) return;
+
+  if (!tvRouletteState.visible) {
+    tvRouletteState.visible = true;
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+  }
+
+  if (data.items && data.items.length > 0) tvRouletteState.items = data.items;
+  if (data.prizeText) tvRouletteState.prizeText = data.prizeText;
+  if (data.modeTitle) tvRouletteState.modeTitle = data.modeTitle;
+
+  const badge = document.getElementById('tvRouletteModeBadge');
+  const header = document.getElementById('tvRoulettePrizeHeader');
+  const sub = document.getElementById('tvRouletteSubtext');
+  const winBanner = document.getElementById('tvRouletteWinnerBanner');
+  if (badge) badge.textContent = tvRouletteState.modeTitle;
+  if (header) header.textContent = tvRouletteState.prizeText;
+  if (sub) sub.textContent = '🎰 ¡GIRANDO LA RULETA EN VIVO! ¡SUERTE A TODOS!';
+  if (winBanner) {
+    winBanner.classList.add('hidden', 'scale-75', 'opacity-0');
+    winBanner.classList.remove('scale-100', 'opacity-100');
+  }
+
+  if (tvRouletteState.animFrame) cancelAnimationFrame(tvRouletteState.animFrame);
+  tvRouletteState.spinning = true;
+
+  const startAngle = typeof data.startAngle === 'number' ? data.startAngle : tvRouletteState.currentAngle;
+  const targetAngle = data.targetAngle;
+  const duration = data.durationMs || 6500;
+  const startTime = performance.now();
+  const n = tvRouletteState.items.length || 1;
+  const arc = (Math.PI * 2) / n;
+
+  function animateSpin(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / duration);
+    // Desaceleración realista de ruleta física (quintic ease-out)
+    const ease = 1 - Math.pow(1 - t, 4.2);
+    tvRouletteState.currentAngle = startAngle + (targetAngle - startAngle) * ease;
+
+    // Detectar cruce de casilla bajo la aguja superior (-PI/2)
+    const normalized = (((-Math.PI / 2 - tvRouletteState.currentAngle) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const slice = Math.floor(normalized / arc);
+    if (slice !== tvRouletteState.lastTickSlice) {
+      tvRouletteState.lastTickSlice = slice;
+      playTvRouletteTick();
+      const ptr = document.getElementById('tvRoulettePointer');
+      if (ptr) {
+        ptr.style.transform = 'translateX(-50%) rotate(-24deg)';
+        setTimeout(() => { ptr.style.transform = 'translateX(-50%) rotate(0deg)'; }, 60);
+      }
+    }
+
+    drawTvRouletteWheel();
+
+    if (t < 1) {
+      tvRouletteState.animFrame = requestAnimationFrame(animateSpin);
+    } else {
+      tvRouletteState.spinning = false;
+      const winnerLabel = data.winnerLabel || tvRouletteState.items[slice] || '¡GANADOR!';
+      if (sub) sub.textContent = `🏆 ¡FELICIDADES A ${String(winnerLabel).toUpperCase()}!`;
+
+      const winTitle = document.getElementById('tvRouletteWinnerTitle');
+      const winPrize = document.getElementById('tvRouletteWinnerPrize');
+      if (winTitle) winTitle.textContent = `¡${winnerLabel}!`;
+      if (winPrize) winPrize.textContent = tvRouletteState.prizeText;
+
+      if (winBanner) {
+        winBanner.classList.remove('hidden');
+        setTimeout(() => {
+          winBanner.classList.remove('scale-75', 'opacity-0');
+          winBanner.classList.add('scale-100', 'opacity-100');
+        }, 40);
+      }
+
+      playTvRouletteWinFanfare();
+      launchTvConfetti();
+    }
+  }
+
+  tvRouletteState.animFrame = requestAnimationFrame(animateSpin);
+});
+
+socket.on('tv-roulette-hide', () => {
+  const overlay = document.getElementById('tvRouletteOverlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+    overlay.classList.remove('flex');
+  }
+  tvRouletteState.visible = false;
+  tvRouletteState.spinning = false;
+  if (ytPlayer && isPlayerReady && ytPlayer.getVolume) {
+    fadeVolume(ytPlayer.getVolume(), tvRouletteState.savedVol || masterVolume || 100, 800);
+  }
+});

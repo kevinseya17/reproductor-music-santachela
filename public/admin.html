@@ -275,6 +275,15 @@
 
           </div>
 
+          <!-- Botón de Show en Vivo: Ruleta 3D en el TV controlada con el dedo -->
+          <div class="pt-2.5 border-t border-white/10">
+            <button onclick="openRouletteModal()" class="w-full py-2.5 px-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/25 to-amber-500/20 hover:from-amber-500/35 hover:to-orange-500/35 border border-amber-400/50 text-amber-300 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.18)] active:scale-[0.98] transition">
+              <span class="text-base">🎰</span>
+              <span class="truncate">RULETA 3D EN VIVO (MESAS Y PREMIOS)</span>
+              <span class="text-[9.5px] bg-amber-400 text-black font-black px-2 py-0.5 rounded-full uppercase shrink-0">Girar con Dedo</span>
+            </button>
+          </div>
+
         </div>
 
         <!-- Buscador Manual para el DJ / Barman -->
@@ -1044,6 +1053,106 @@
       <div class="pt-2 flex justify-end border-t border-white/10">
         <button onclick="closeImportModal()" class="btn-secondary text-xs py-2 px-4">Cerrar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DE CONTROL TÁCTIL DE RULETA 3D EN VIVO (CELULAR DJ -> TV)          -->
+  <!-- ========================================================================= -->
+  <div id="rouletteControlModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="glass-card w-full max-w-xl p-4 sm:p-6 space-y-4 border border-amber-500/40 max-h-[94vh] overflow-y-auto shadow-[0_0_60px_rgba(245,158,11,0.2)]">
+      
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">🎰</span>
+          <div>
+            <h3 class="font-black text-white text-sm sm:text-base uppercase tracking-wider">Ruleta 3D en Vivo (TV)</h3>
+            <p class="text-[11px] text-amber-300 font-semibold">Gírala con tu dedo aquí y mírala girar en el televisor</p>
+          </div>
+        </div>
+        <button onclick="closeRouletteModal()" class="text-gray-400 hover:text-white p-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition" title="Cerrar">✕</button>
+      </div>
+
+      <!-- Selector de Modo: 1. Sorteo de Mesas | 2. Ruleta de Premios -->
+      <div class="grid grid-cols-2 gap-2 bg-black/50 p-1 rounded-2xl border border-white/10">
+        <button id="btnRouletteModeTables" onclick="switchRouletteMode('tables')" class="py-2 px-3 rounded-xl text-xs font-black transition bg-amber-500 text-black shadow">
+          🎯 1. ¿Qué Mesa Gana?
+        </button>
+        <button id="btnRouletteModePrizes" onclick="switchRouletteMode('prizes')" class="py-2 px-3 rounded-xl text-xs font-bold transition text-gray-300 hover:text-white">
+          🎁 2. ¿Qué Premio Toca?
+        </button>
+      </div>
+
+      <!-- Configuración Modo 1: Sorteo entre Mesas -->
+      <div id="rouletteConfigTables" class="space-y-3 bg-white/[0.03] p-3.5 rounded-2xl border border-white/10">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <span class="text-xs font-bold text-gray-300">¿Qué mesas participan?</span>
+          <div class="flex items-center gap-1.5">
+            <button id="btnTableFilterActive" onclick="setRouletteTableFilter('active')" class="text-[11px] font-black px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 transition">
+              🔥 Con pedidos hoy
+            </button>
+            <button id="btnTableFilterAll" onclick="setRouletteTableFilter('all')" class="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white/5 text-gray-400 border border-white/10 transition">
+              🪑 Todas las mesas
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-amber-300 uppercase tracking-wider mb-1">Premio a sortear en pantalla:</label>
+          <input type="text" id="roulettePrizeInput" value="🥃 Ronda de Shots Gratis" oninput="syncRouletteConfigToTv()" placeholder="Ej: 🥃 Ronda de Shots Gratis..." class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white font-bold outline-none focus:border-amber-400">
+          <div class="flex items-center gap-1.5 flex-wrap mt-2">
+            <button onclick="setQuickRoulettePrize('🥃 Ronda de Shots Gratis')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🥃 Ronda Shots</button>
+            <button onclick="setQuickRoulettePrize('🍺 1 Cerveza / Jarra Gratis')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🍺 Cerveza Gratis</button>
+            <button onclick="setQuickRoulettePrize('👑 2 Canciones VIP Ya Mismo')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">👑 2 Canciones VIP</button>
+            <button onclick="setQuickRoulettePrize('🍟 Picada de Cortesía')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🍟 Picada</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configuración Modo 2: Ruleta de Premios / Retos -->
+      <div id="rouletteConfigPrizes" class="hidden space-y-3 bg-white/[0.03] p-3.5 rounded-2xl border border-white/10">
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-gray-300 shrink-0">Para quién gira:</label>
+          <input type="text" id="rouletteTargetTableInput" value="¡TODA LA CASA!" oninput="syncRouletteConfigToTv()" placeholder="Ej: MESA 4 o ¡TODA LA CASA!" class="flex-1 bg-black/60 border border-white/15 rounded-xl px-3 py-1.5 text-xs text-amber-300 font-bold outline-none focus:border-amber-400">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-gray-300 mb-1">Casillas de premios (separadas por coma):</label>
+          <input type="text" id="rouletteCustomPrizesInput" value="🥃 Shot Gratis, 🍺 2x1 Cerveza, 👑 Canción VIP, 🎤 Cantar o Shot, 🍟 Nachos Gratis, 😅 ¡Casi!" oninput="onCustomPrizesChanged()" class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+        </div>
+      </div>
+
+      <!-- Rueda Táctil Interactiva en el Celular (Sincronizada a 60fps con la TV) -->
+      <div class="flex flex-col items-center justify-center py-2 select-none">
+        <p id="adminRouletteStatusText" class="text-[11px] font-black text-amber-300 uppercase tracking-wider mb-2 text-center">
+          👆 Desliza la rueda con tu dedo para darle impulso hacia el TV
+        </p>
+
+        <div class="relative flex items-center justify-center">
+          <!-- Aguja superior -->
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+            <div class="w-0 h-0 border-l-[11px] border-l-transparent border-r-[11px] border-r-transparent border-t-[22px] border-t-amber-400 drop-shadow"></div>
+          </div>
+
+          <div class="p-2 rounded-full bg-gradient-to-b from-amber-400 to-amber-800 shadow-[0_0_40px_rgba(245,158,11,0.4)]">
+            <canvas id="adminRouletteCanvas" width="260" height="260" style="touch-action: none; -webkit-user-select: none; user-select: none;" class="w-[230px] h-[230px] sm:w-[250px] sm:h-[250px] rounded-full cursor-grab active:cursor-grabbing block"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción en TV -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2 border-t border-white/10">
+        <button onclick="projectRouletteOnTv()" class="btn-secondary py-2.5 px-3 text-xs font-bold flex items-center justify-center gap-1.5 text-amber-300 border-amber-400/40">
+          <span>📺</span> <span>Mostrar en TV</span>
+        </button>
+        <button onclick="triggerRouletteSpin(1)" class="tactile-btn-gold py-2.5 px-4 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+          <span>🚀</span> <span>¡GIRAR EN TV!</span>
+        </button>
+        <button onclick="hideRouletteFromTv()" class="col-span-2 sm:col-span-1 btn-secondary py-2.5 px-3 text-xs font-bold flex items-center justify-center gap-1.5 text-rose-300 border-rose-500/30 hover:bg-rose-500/20">
+          <span>✕</span> <span>Quitar de TV</span>
+        </button>
+      </div>
+
     </div>
   </div>
 

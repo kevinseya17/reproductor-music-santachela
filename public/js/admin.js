@@ -2688,3 +2688,341 @@ function escapeHtml(text) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+// =========================================================================
+// CONTROLADOR TÁCTIL DE RULETA 3D EN VIVO (CELULAR DJ -> TV)
+// =========================================================================
+let adminRouletteState = {
+  mode: 'tables', // 'tables' | 'prizes'
+  tableFilter: 'active', // 'active' | 'all'
+  items: ['Mesa 1', 'Mesa 2', 'Mesa 3', 'Mesa 4', 'Mesa 5', 'Mesa 6'],
+  currentAngle: 0,
+  spinning: false,
+  dragging: false,
+  lastTouchAngle: 0,
+  lastTouchY: 0,
+  angularVelocity: 0,
+  animFrame: null,
+  touchInitialized: false
+};
+
+const ADMIN_ROULETTE_PALETTE = [
+  ['#f59e0b', '#b45309', '#000000'],
+  ['#111827', '#1f2937', '#fbbf24'],
+  ['#ea580c', '#9a3412', '#ffffff'],
+  ['#1e1b4b', '#312e81', '#fde047'],
+  ['#10b981', '#047857', '#000000'],
+  ['#27272a', '#3f3f46', '#f59e0b'],
+  ['#e11d48', '#9f1239', '#ffffff'],
+  ['#0f172a', '#1e293b', '#38bdf8']
+];
+
+function computeRouletteItems() {
+  if (adminRouletteState.mode === 'tables') {
+    if (adminRouletteState.tableFilter === 'active') {
+      const activeSet = new Set();
+      (currentQueueState || []).forEach(s => {
+        if (s.isBaseTrack !== true && s.requestedBy?.table) {
+          activeSet.add(`Mesa ${s.requestedBy.table}`);
+        }
+      });
+      if (activeSet.size >= 2) {
+        adminRouletteState.items = Array.from(activeSet);
+        return;
+      }
+    }
+    const totalTables = Math.max(2, Math.min(24, Number(currentSettings?.tableCount) || 10));
+    const arr = [];
+    for (let t = 1; t <= totalTables; t++) {
+      arr.push(`Mesa ${t}`);
+    }
+    adminRouletteState.items = arr;
+  } else {
+    const input = document.getElementById('rouletteCustomPrizesInput');
+    const raw = input ? input.value : '';
+    const list = raw.split(',').map(s => s.trim()).filter(Boolean);
+    adminRouletteState.items = list.length >= 2 ? list : ['🥃 Shot Gratis', '🍺 2x1 Cerveza', '👑 Canción VIP', '😅 ¡Casi!'];
+  }
+}
+
+function getRoulettePayload() {
+  computeRouletteItems();
+  if (adminRouletteState.mode === 'tables') {
+    const prize = document.getElementById('roulettePrizeInput')?.value.trim() || '🥃 Ronda de Shots Gratis';
+    return {
+      items: adminRouletteState.items,
+      prizeText: `PREMIO: ${prize.toUpperCase()}`,
+      modeTitle: 'SORTEO DE MESAS • SANTA CHELA'
+    };
+  } else {
+    const target = document.getElementById('rouletteTargetTableInput')?.value.trim() || '¡TODA LA CASA!';
+    return {
+      items: adminRouletteState.items,
+      prizeText: `JUEGA: ${target.toUpperCase()}`,
+      modeTitle: 'RULETA DE PREMIOS • SANTA CHELA'
+    };
+  }
+}
+
+function drawAdminRouletteWheel() {
+  const canvas = document.getElementById('adminRouletteCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const items = adminRouletteState.items.length > 0 ? adminRouletteState.items : ['Mesa 1', 'Mesa 2'];
+  const n = items.length;
+  const arc = (Math.PI * 2) / n;
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const radius = cx - 6;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < n; i++) {
+    const startAngle = adminRouletteState.currentAngle + i * arc;
+    const endAngle = startAngle + arc;
+    const palette = ADMIN_ROULETTE_PALETTE[i % ADMIN_ROULETTE_PALETTE.length];
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = palette[0];
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(startAngle + arc / 2);
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = palette[2];
+    const fontSize = n > 14 ? 9 : (n > 10 ? 10 : 12);
+    ctx.font = `900 ${fontSize}px sans-serif`;
+    const label = String(items[i]).length > 14 ? String(items[i]).slice(0, 13) + '…' : String(items[i]);
+    ctx.fillText(label.toUpperCase(), radius - 12, 0);
+    ctx.restore();
+  }
+
+  // Centro
+  ctx.beginPath();
+  ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+  ctx.fillStyle = '#0e1118';
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#fbbf24';
+  ctx.stroke();
+}
+
+function openRouletteModal() {
+  const savedPrizes = localStorage.getItem('santachela_custom_roulette_prizes');
+  const customInput = document.getElementById('rouletteCustomPrizesInput');
+  if (savedPrizes && customInput) {
+    customInput.value = savedPrizes;
+  }
+
+  const modal = document.getElementById('rouletteControlModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  computeRouletteItems();
+  drawAdminRouletteWheel();
+  setupAdminRouletteTouch();
+  projectRouletteOnTv();
+}
+
+function closeRouletteModal() {
+  const modal = document.getElementById('rouletteControlModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function switchRouletteMode(mode) {
+  adminRouletteState.mode = mode;
+  const btnTables = document.getElementById('btnRouletteModeTables');
+  const btnPrizes = document.getElementById('btnRouletteModePrizes');
+  const cfgTables = document.getElementById('rouletteConfigTables');
+  const cfgPrizes = document.getElementById('rouletteConfigPrizes');
+
+  if (mode === 'tables') {
+    if (btnTables) btnTables.className = 'py-2 px-3 rounded-xl text-xs font-black transition bg-amber-500 text-black shadow';
+    if (btnPrizes) btnPrizes.className = 'py-2 px-3 rounded-xl text-xs font-bold transition text-gray-300 hover:text-white';
+    cfgTables?.classList.remove('hidden');
+    cfgPrizes?.classList.add('hidden');
+  } else {
+    if (btnPrizes) btnPrizes.className = 'py-2 px-3 rounded-xl text-xs font-black transition bg-amber-500 text-black shadow';
+    if (btnTables) btnTables.className = 'py-2 px-3 rounded-xl text-xs font-bold transition text-gray-300 hover:text-white';
+    cfgPrizes?.classList.remove('hidden');
+    cfgTables?.classList.add('hidden');
+  }
+
+  syncRouletteConfigToTv();
+}
+
+function setRouletteTableFilter(filter) {
+  adminRouletteState.tableFilter = filter;
+  const btnActive = document.getElementById('btnTableFilterActive');
+  const btnAll = document.getElementById('btnTableFilterAll');
+
+  if (filter === 'active') {
+    if (btnActive) btnActive.className = 'text-[11px] font-black px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 transition';
+    if (btnAll) btnAll.className = 'text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white/5 text-gray-400 border border-white/10 transition';
+  } else {
+    if (btnAll) btnAll.className = 'text-[11px] font-black px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 transition';
+    if (btnActive) btnActive.className = 'text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white/5 text-gray-400 border border-white/10 transition';
+  }
+
+  syncRouletteConfigToTv();
+}
+
+function setQuickRoulettePrize(text) {
+  const input = document.getElementById('roulettePrizeInput');
+  if (input) {
+    input.value = text;
+    syncRouletteConfigToTv();
+  }
+}
+
+function onCustomPrizesChanged() {
+  const input = document.getElementById('rouletteCustomPrizesInput');
+  if (input) {
+    localStorage.setItem('santachela_custom_roulette_prizes', input.value);
+  }
+  syncRouletteConfigToTv();
+}
+
+function syncRouletteConfigToTv() {
+  const payload = getRoulettePayload();
+  drawAdminRouletteWheel();
+  socket.emit('roulette-show', payload);
+}
+
+function projectRouletteOnTv() {
+  const payload = getRoulettePayload();
+  drawAdminRouletteWheel();
+  socket.emit('roulette-show', payload);
+  showAdminToast('🎰 Ruleta proyectada en vivo en la pantalla del TV', '📺');
+}
+
+function hideRouletteFromTv() {
+  socket.emit('roulette-hide');
+  showAdminToast('Ruleta ocultada de la pantalla del TV', '✕');
+}
+
+function triggerRouletteSpin(velocityBoost = 1) {
+  if (adminRouletteState.spinning) return;
+  const payload = getRoulettePayload();
+  const items = payload.items;
+  const n = items.length;
+  if (n < 2) return;
+
+  if (navigator.vibrate) {
+    try { navigator.vibrate([35, 50, 90]); } catch (e) {}
+  }
+  playMobileWhooshSound();
+
+  const winnerIndex = Math.floor(Math.random() * n);
+  const winnerLabel = items[winnerIndex];
+  const arc = (Math.PI * 2) / n;
+
+  // Calcular ángulo final exacto para que winnerIndex quede justo bajo la aguja superior (-PI/2)
+  const sliceCenterOffset = winnerIndex * arc + arc / 2 + (Math.random() - 0.5) * (arc * 0.55);
+  const desiredMod = ((-Math.PI / 2 - sliceCenterOffset) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+  const currentMod = ((adminRouletteState.currentAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+  let deltaMod = desiredMod - currentMod;
+  if (deltaMod < 0) deltaMod += Math.PI * 2;
+
+  const extraSpins = Math.max(5, Math.min(10, Math.round(6 * Math.max(0.8, velocityBoost))));
+  const startAngle = adminRouletteState.currentAngle;
+  const targetAngle = startAngle + extraSpins * (Math.PI * 2) + deltaMod;
+  const durationMs = 6400;
+
+  socket.emit('roulette-spin', {
+    ...payload,
+    startAngle,
+    targetAngle,
+    durationMs,
+    winnerIndex,
+    winnerLabel
+  });
+
+  // Animar también la rueda del celular en perfecta sincronía con el TV
+  adminRouletteState.spinning = true;
+  const statusEl = document.getElementById('adminRouletteStatusText');
+  if (statusEl) statusEl.textContent = '🎰 ¡GIRANDO EN EL TELEVISOR EN VIVO!...';
+
+  const startTime = performance.now();
+  function stepAdminWheel(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / durationMs);
+    const ease = 1 - Math.pow(1 - t, 4.2);
+    adminRouletteState.currentAngle = startAngle + (targetAngle - startAngle) * ease;
+    drawAdminRouletteWheel();
+
+    if (t < 1) {
+      adminRouletteState.animFrame = requestAnimationFrame(stepAdminWheel);
+    } else {
+      adminRouletteState.spinning = false;
+      if (statusEl) statusEl.textContent = `🏆 ¡GANADOR EN TV: ${winnerLabel.toUpperCase()}!`;
+      showAdminToast(`🏆 ¡Ganador de la Ruleta: ${winnerLabel}!`, '🎉');
+    }
+  }
+  adminRouletteState.animFrame = requestAnimationFrame(stepAdminWheel);
+}
+
+function setupAdminRouletteTouch() {
+  if (adminRouletteState.touchInitialized) return;
+  const canvas = document.getElementById('adminRouletteCanvas');
+  if (!canvas) return;
+  adminRouletteState.touchInitialized = true;
+
+  function getAngleFromPoint(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    return Math.atan2(clientY - cy, clientX - cx);
+  }
+
+  canvas.addEventListener('touchstart', (e) => {
+    if (adminRouletteState.spinning) return;
+    if (e.cancelable) e.preventDefault();
+    const touch = e.touches[0];
+    adminRouletteState.dragging = true;
+    adminRouletteState.lastTouchAngle = getAngleFromPoint(touch.clientX, touch.clientY);
+    adminRouletteState.lastTouchY = touch.clientY;
+    adminRouletteState.angularVelocity = 0;
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (!adminRouletteState.dragging || adminRouletteState.spinning) return;
+    if (e.cancelable) e.preventDefault();
+    const touch = e.touches[0];
+    const newAngle = getAngleFromPoint(touch.clientX, touch.clientY);
+    let delta = newAngle - adminRouletteState.lastTouchAngle;
+    if (delta > Math.PI) delta -= Math.PI * 2;
+    if (delta < -Math.PI) delta += Math.PI * 2;
+
+    adminRouletteState.currentAngle += delta;
+    adminRouletteState.angularVelocity = delta;
+    adminRouletteState.lastTouchAngle = newAngle;
+
+    drawAdminRouletteWheel();
+    socket.emit('roulette-drag', { angle: adminRouletteState.currentAngle });
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', (e) => {
+    if (!adminRouletteState.dragging) return;
+    adminRouletteState.dragging = false;
+    const vel = Math.abs(adminRouletteState.angularVelocity);
+    if (vel > 0.025) {
+      const boost = Math.min(1.6, Math.max(0.9, vel * 12));
+      triggerRouletteSpin(boost);
+    }
+  });
+}
+
+

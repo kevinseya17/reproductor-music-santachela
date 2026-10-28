@@ -1363,6 +1363,25 @@ io.on('connection', (socket) => {
   socket.on('player-progress', (data) => {
     io.emit('player-telemetry', data);
   });
+
+  // ==========================================================
+  // RULETA 3D INTERACTIVA EN VIVO (DESDE CELULAR DJ HACIA TV)
+  // ==========================================================
+  socket.on('roulette-show', (data) => {
+    io.emit('tv-roulette-show', data);
+  });
+
+  socket.on('roulette-drag', (data) => {
+    socket.broadcast.emit('tv-roulette-drag', data);
+  });
+
+  socket.on('roulette-spin', (data) => {
+    io.emit('tv-roulette-spin', data);
+  });
+
+  socket.on('roulette-hide', () => {
+    io.emit('tv-roulette-hide');
+  });
 });
 
 // Iniciar servidor
