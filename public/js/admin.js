@@ -84,6 +84,12 @@ function renderAdminState(data) {
     if (document.getElementById('settingDynamicDuration')) {
       document.getElementById('settingDynamicDuration').checked = settings.dynamicDurationOnQueue === true;
     }
+    if (document.getElementById('settingAllowClientPhoto')) {
+      document.getElementById('settingAllowClientPhoto').checked = settings.allowClientPhotoDedication === true;
+    }
+    if (document.getElementById('camModalAllowQrPhotosToggle')) {
+      document.getElementById('camModalAllowQrPhotosToggle').checked = settings.allowClientPhotoDedication === true;
+    }
 
     // Actualizar controles de Modo de Reproducción Base
     renderBasePlaybackModeControls(settings);
@@ -445,7 +451,10 @@ function renderQueueList(queue) {
 
     if (isClientReq) {
       const tableNum = song.requestedBy?.table || '?';
-      badgeHtml = `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black tracking-wide">👑 MESA ${escapeHtml(tableNum)}</span>`;
+      const hasPhotoBadge = song.requestedBy?.photo
+        ? `<span class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">📸 Foto</span>`
+        : '';
+      badgeHtml = `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black tracking-wide">👑 MESA ${escapeHtml(tableNum)}</span>${hasPhotoBadge}`;
       rowBorderClass = 'border-amber-500/40 bg-amber-500/[0.05] hover:border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.06)]';
       if (!isFirst) {
         vipButtonHtml = `
@@ -1894,6 +1903,7 @@ async function saveSettings() {
   const maxSongDuration = maxSongDurationVal !== undefined && !isNaN(parseInt(maxSongDurationVal, 10)) ? parseInt(maxSongDurationVal, 10) : 0;
   const dynamicDurationOnQueue = document.getElementById('settingDynamicDuration')?.checked === true;
   const genreBatchSize = parseInt(document.getElementById('settingGenreBatchSize')?.value || 3);
+  const allowClientPhotoDedication = document.getElementById('settingAllowClientPhoto')?.checked === true;
 
   await fetch('/api/settings', {
     method: 'POST',
@@ -1909,11 +1919,35 @@ async function saveSettings() {
       fadeTransitionEnabled,
       maxSongDuration,
       dynamicDurationOnQueue,
-      genreBatchSize
+      genreBatchSize,
+      allowClientPhotoDedication
     })
   });
 
   alert('¡Ajustes guardados correctamente!');
+}
+
+async function toggleClientPhotoSettingImmediate(checked) {
+  const isEnabled = !!checked;
+  const setChk = document.getElementById('settingAllowClientPhoto');
+  const camChk = document.getElementById('camModalAllowQrPhotosToggle');
+  if (setChk) setChk.checked = isEnabled;
+  if (camChk) camChk.checked = isEnabled;
+
+  try {
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ allowClientPhotoDedication: isEnabled })
+    });
+    if (isEnabled) {
+      showAdminToast('🔓 Fotos en pedidos QR DESBLOQUEADAS para las mesas', '📸');
+    } else {
+      showAdminToast('🔒 Fotos en pedidos QR desactivadas (modo normal)', '✓');
+    }
+  } catch (err) {
+    console.error('Error guardando ajuste de foto QR:', err);
+  }
 }
 
 // 8. Navegación de Pestañas de la Barra Lateral
@@ -3142,6 +3176,191 @@ function setupAdminRouletteTouch() {
     if (vel > 0.025) {
       const boost = Math.min(1.6, Math.max(0.9, vel * 12));
       triggerRouletteSpin(boost);
+    }
+  });
+}
+
+// =========================================================================
+// SANTA CHELA CAM: FOTO / SELFIE VOLADORA DEL DJ AL TV (CON ARRASTRE 3D)
+// =========================================================================
+let djCamCurrentPhotoDataUrl = null;
+let djCamDragInitialized = false;
+
+function openSantaChelaCamModal() {
+  const modal = document.getElementById('santaChelaCamModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+  const camChk = document.getElementById('camModalAllowQrPhotosToggle');
+  if (camChk && currentSettings) {
+    camChk.checked = currentSettings.allowClientPhotoDedication === true;
+  }
+  setupDjCamPolaroidDrag();
+}
+
+function closeSantaChelaCamModal() {
+  const modal = document.getElementById('santaChelaCamModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function setQuickDjCamCaption(text) {
+  const input = document.getElementById('djCamCaptionInput');
+  if (input) {
+    input.value = text;
+    updateDjCamPolaroidPreviewText();
+  }
+}
+
+function updateDjCamPolaroidPreviewText() {
+  const input = document.getElementById('djCamCaptionInput');
+  const previewText = document.getElementById('djCamPreviewCaption');
+  if (input && previewText) {
+    previewText.textContent = input.value.trim() || '¡Salud y buena rumba en Santa Chela! 🍻';
+  }
+}
+
+function onDjCamPhotoSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxDim = 900;
+      let w = img.width;
+      let h = img.height;
+      if (w > h && w > maxDim) {
+        h = Math.round((h * maxDim) / w);
+        w = maxDim;
+      } else if (h >= w && h > maxDim) {
+        w = Math.round((w * maxDim) / h);
+        h = maxDim;
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      djCamCurrentPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+
+      const previewImg = document.getElementById('djCamPreviewImg');
+      const emptyState = document.getElementById('djCamEmptyState');
+      const polaroidZone = document.getElementById('djCamPolaroidZone');
+      const polaroidCard = document.getElementById('djCamDraggablePolaroid');
+
+      if (previewImg) previewImg.src = djCamCurrentPhotoDataUrl;
+      if (emptyState) emptyState.classList.add('hidden');
+      if (polaroidZone) {
+        polaroidZone.classList.remove('hidden');
+        polaroidZone.classList.add('flex');
+      }
+      if (polaroidCard) {
+        polaroidCard.style.transform = 'translate3d(0,0,0) scale(1)';
+        polaroidCard.style.opacity = '1';
+      }
+      updateDjCamPolaroidPreviewText();
+      playArmCardSound();
+      if (navigator.vibrate) {
+        try { navigator.vibrate([25, 35, 25]); } catch (err) {}
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function launchDjCamPhotoToTv() {
+  if (!djCamCurrentPhotoDataUrl) {
+    showAdminToast('Primero toma una foto o elígela de tu galería', '📸');
+    return;
+  }
+
+  const caption = document.getElementById('djCamCaptionInput')?.value.trim() || '¡Salud y buena rumba en Santa Chela! 🍻';
+  const senderLabel = document.getElementById('djCamSenderBadgeInput')?.value.trim() || '📸 SANTA CHELA CAM • EN VIVO';
+
+  playMobileWhooshSound();
+  if (navigator.vibrate) {
+    try { navigator.vibrate([40, 50, 90]); } catch (e) {}
+  }
+
+  socket.emit('cast-photo-to-tv', {
+    photo: djCamCurrentPhotoDataUrl,
+    caption,
+    senderLabel,
+    durationMs: 12000
+  });
+
+  showAdminToast('📸 ¡Foto lanzada en vivo a la pantalla del TV!', '🚀');
+}
+
+function hideDjCamPhotoFromTv() {
+  socket.emit('hide-photo-from-tv');
+  showAdminToast('Foto ocultada de la pantalla del TV', '✕');
+}
+
+function setupDjCamPolaroidDrag() {
+  if (djCamDragInitialized) return;
+  const card = document.getElementById('djCamDraggablePolaroid');
+  if (!card) return;
+  djCamDragInitialized = true;
+
+  let dragging = false;
+  let startX = 0;
+  let startY = 0;
+  let deltaX = 0;
+  let deltaY = 0;
+
+  card.addEventListener('touchstart', (e) => {
+    if (!djCamCurrentPhotoDataUrl) return;
+    if (e.cancelable) e.preventDefault();
+    const t = e.touches[0];
+    dragging = true;
+    startX = t.clientX;
+    startY = t.clientY;
+    deltaX = 0;
+    deltaY = 0;
+    card.style.transition = 'none';
+    const portal = document.getElementById('castDropPortal');
+    if (portal) portal.classList.remove('-translate-y-full');
+  }, { passive: false });
+
+  card.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    if (e.cancelable) e.preventDefault();
+    const t = e.touches[0];
+    deltaX = t.clientX - startX;
+    deltaY = t.clientY - startY;
+    const tilt = Math.max(-14, Math.min(14, deltaX * 0.08));
+    const liftScale = deltaY < -45 ? 1.08 : 1.03;
+    card.style.transform = `translate3d(${deltaX * 0.45}px, ${deltaY}px, 0) scale(${liftScale}) rotate(${tilt}deg)`;
+  }, { passive: false });
+
+  card.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    const portal = document.getElementById('castDropPortal');
+    if (portal) portal.classList.add('-translate-y-full');
+
+    if (deltaY < -65) {
+      // ¡Despegue en 3D hacia arriba rumbo al TV!
+      card.style.transition = 'transform 0.48s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease-in';
+      card.style.transform = 'translate3d(0, -110vh, 0) scale(0.4) rotate(-8deg)';
+      card.style.opacity = '0';
+      launchDjCamPhotoToTv();
+
+      setTimeout(() => {
+        card.style.transition = 'transform 0.35s ease-out, opacity 0.35s ease-out';
+        card.style.transform = 'translate3d(0, 0, 0) scale(1) rotate(0deg)';
+        card.style.opacity = '1';
+      }, 950);
+    } else {
+      card.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      card.style.transform = 'translate3d(0, 0, 0) scale(1) rotate(0deg)';
     }
   });
 }

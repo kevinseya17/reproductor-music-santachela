@@ -13,14 +13,15 @@ const qrService = require('./lib/qr');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*' }
+  cors: { origin: '*' },
+  maxHttpBufferSize: 1e7
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.set('trust proxy', 1);
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Estado de reproducción en memoria y persistente
@@ -501,7 +502,7 @@ app.get('/api/search', async (req, res) => {
 // Pedir canción (Cliente desde la mesa)
 app.post('/api/request', async (req, res) => {
   try {
-    const { videoId, title, artist, duration, thumbnail, table, customerName, dedication } = req.body;
+    const { videoId, title, artist, duration, thumbnail, table, customerName, dedication, photo } = req.body;
     const tableClean = table ? String(table).trim() : 'Mesa';
     const isDJOrAdmin = req.body.isAdmin === true || ['dj', 'admin', 'bar', 'caja'].includes(tableClean.toLowerCase());
     const currentSettings = db.getSettings();
@@ -544,6 +545,12 @@ app.post('/api/request', async (req, res) => {
     // 4. Clasificar género con el DJ Inteligente
     const genre = await aiDj.classifyGenre(title, artist);
 
+    // Validar foto opcional si la función está desbloqueada en Configuración (o si es el DJ)
+    const canAttachPhoto = currentSettings.allowClientPhotoDedication === true || isDJOrAdmin;
+    const validPhoto = (canAttachPhoto && typeof photo === 'string' && photo.startsWith('data:image/') && photo.length < 3500000)
+      ? photo
+      : null;
+
     const song = {
       id: `${isDJOrAdmin ? 'admin' : 'req'}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       videoId,
@@ -555,7 +562,8 @@ app.post('/api/request', async (req, res) => {
       requestedBy: {
         table: isDJOrAdmin ? 'DJ' : tableClean,
         name: isDJOrAdmin ? 'DJ / Bar' : (customerName ? customerName.trim() : `Mesa ${tableClean}`),
-        dedication: (dedication || '').trim().slice(0, 120)
+        dedication: (dedication || '').trim().slice(0, 120),
+        ...(validPhoto ? { photo: validPhoto } : {})
       },
       isBaseTrack: false,
       addedAt: Date.now()
@@ -1381,6 +1389,23 @@ io.on('connection', (socket) => {
 
   socket.on('roulette-hide', () => {
     io.emit('tv-roulette-hide');
+  });
+
+  // ==========================================================
+  // SANTA CHELA CAM (FOTO / SELFIE VOLADORA DEL DJ AL TV)
+  // ==========================================================
+  socket.on('cast-photo-to-tv', (data) => {
+    if (!data || !data.photo || typeof data.photo !== 'string') return;
+    io.emit('tv-photo-casted', {
+      photo: data.photo,
+      caption: (data.caption || '').trim().slice(0, 120),
+      senderLabel: (data.senderLabel || '📸 SANTA CHELA CAM • EN VIVO').trim().slice(0, 80),
+      durationMs: Number(data.durationMs) || 12000
+    });
+  });
+
+  socket.on('hide-photo-from-tv', () => {
+    io.emit('tv-photo-hide');
   });
 });
 

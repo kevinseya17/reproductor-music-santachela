@@ -256,9 +256,19 @@
               <span id="dedicationFromText">MENSAJE ESPECIAL DE LA MESA</span>
             </div>
           </div>
-          <h2 id="dedicationText" class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-[0_6px_25px_rgba(0,0,0,0.95)] break-words py-1 sm:py-2">
-            "¡Feliz cumpleaños Laura!"
-          </h2>
+
+          <div class="flex flex-col md:flex-row items-center justify-center gap-6 sm:gap-10">
+            <!-- Marco Polaroid Dorado (Se muestra solo si el pedido incluye foto/selfie) -->
+            <div id="dedicationPhotoFrame" class="hidden shrink-0 transform -rotate-2 bg-gradient-to-b from-[#fffbeb] to-[#fef3c7] p-3 pb-7 rounded-2xl shadow-[0_15px_50px_rgba(245,158,11,0.65)] border-2 border-amber-300">
+              <img id="dedicationPhotoImg" src="" alt="Foto Mesa" class="w-44 h-44 sm:w-64 sm:h-64 object-cover rounded-xl shadow-inner border border-black/10">
+              <p id="dedicationPhotoStamp" class="text-[11px] sm:text-xs font-black text-amber-900 uppercase tracking-widest mt-2">📸 SANTA CHELA VIP</p>
+            </div>
+
+            <h2 id="dedicationText" class="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-[0_6px_25px_rgba(0,0,0,0.95)] break-words py-1 sm:py-2 flex-1">
+              "¡Feliz cumpleaños Laura!"
+            </h2>
+          </div>
+
           <p class="text-xs sm:text-sm font-black uppercase tracking-widest text-amber-300/80 flex items-center justify-center gap-2">
             <span>✨</span> <span>Canción pedida desde la mesa • Santa Chela Music Bar</span> <span>✨</span>
           </p>
@@ -440,6 +450,46 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- OVERLAY SANTA CHELA CAM: FOTO / SELFIE VOLADORA 3D EN MARCO POLAROID VIP  -->
+  <!-- ========================================================================= -->
+  <div id="tvPhotoCastOverlay" class="fixed inset-0 z-[65] pointer-events-none hidden items-center justify-center overflow-hidden">
+    <!-- Destello de Flash de Cámara -->
+    <div id="tvPhotoFlash" class="absolute inset-0 bg-white opacity-0 transition-opacity duration-300 z-40 pointer-events-none"></div>
+
+    <!-- Fondo oscuro translúcido con halo dorado -->
+    <div id="tvPhotoBackdrop" class="absolute inset-0 bg-gradient-to-t from-amber-500/30 via-black/80 to-black/85 backdrop-blur-md opacity-0 transition-opacity duration-500"></div>
+
+    <!-- Tarjeta Polaroid VIP 3D que entra volando desde abajo -->
+    <div id="tvPhotoPolaroidCard" class="relative z-30 transform translate-y-[120%] scale-50 rotate-6 opacity-0 transition-all duration-700 ease-out max-w-2xl w-[90%] flex flex-col items-center">
+      <!-- Badge Superior Flotante -->
+      <div class="mb-4 inline-flex items-center gap-2.5 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 text-black font-black text-xs sm:text-base uppercase tracking-[0.2em] px-6 py-2 rounded-full shadow-[0_0_45px_rgba(245,158,11,0.95)] animate-bounce">
+        <span>📸</span> <span id="tvPhotoSenderBadge">SANTA CHELA CAM • EN VIVO</span>
+      </div>
+
+      <!-- Marco Polaroid Dorado de Lujo -->
+      <div class="bg-gradient-to-b from-[#fffbeb] via-[#fef3c7] to-[#fde68a] p-4 sm:p-6 pb-8 sm:pb-10 rounded-[32px] shadow-[0_25px_120px_rgba(245,158,11,0.9),0_0_40px_rgba(255,255,255,0.4)] border-4 border-amber-300 transform -rotate-1 w-full max-w-lg">
+        <div class="relative w-full aspect-square max-h-[54vh] rounded-2xl overflow-hidden bg-black shadow-inner border-2 border-amber-900/20">
+          <img id="tvPhotoCastImg" src="" alt="Santa Chela Cam" class="w-full h-full object-cover">
+          <div class="absolute top-3 right-3 bg-black/75 backdrop-blur-md border border-amber-400/50 px-3 py-1 rounded-full flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+            <span class="text-[11px] font-black text-amber-300 tracking-wider uppercase">⚡ SANTA CHELA</span>
+          </div>
+        </div>
+
+        <!-- Pie de foto estilo Polaroid -->
+        <div class="mt-4 sm:mt-5 text-center px-2 space-y-1">
+          <h3 id="tvPhotoCastCaption" class="text-xl sm:text-3xl font-black text-gray-900 tracking-tight leading-snug break-words">
+            ¡Salud y buena rumba en Santa Chela! 🍻
+          </h3>
+          <p class="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.2em] text-amber-800/80">
+            ✨ Momento VIP en Pantalla Gigante ✨
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 

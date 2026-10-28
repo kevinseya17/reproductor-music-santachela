@@ -220,8 +220,8 @@ function onPlayerStateChange(event) {
       fadeVolume(0, masterVolume, 1800);
     }
 
-    // Mostrar mensaje/dedicatoria al inicio del tema
-    if (currentlyPlayingSong?.requestedBy?.dedication && !hasShownStartDedication) {
+    // Mostrar mensaje/dedicatoria (o foto QR) al inicio del tema
+    if ((currentlyPlayingSong?.requestedBy?.dedication || currentlyPlayingSong?.requestedBy?.photo) && !hasShownStartDedication) {
       hasShownStartDedication = true;
       showDedicationBanner(16000);
     }
@@ -495,8 +495,8 @@ function startProgressMonitor() {
         }
       }
 
-      // 0. Saludo y Dedicatoria del cliente al inicio de la canción (Visible 16 segundos)
-      if (currentlyPlayingSong?.requestedBy?.dedication && !hasShownStartDedication && currentTime <= 18) {
+      // 0. Saludo y Dedicatoria (o foto QR) del cliente al inicio de la canción (Visible 16 segundos)
+      if ((currentlyPlayingSong?.requestedBy?.dedication || currentlyPlayingSong?.requestedBy?.photo) && !hasShownStartDedication && currentTime <= 18) {
         hasShownStartDedication = true;
         showDedicationBanner(16000);
         console.log(`[TV Player] Saludo/dedicatoria de inicio activada (${Math.round(currentTime)}s)`);
@@ -511,8 +511,8 @@ function startProgressMonitor() {
         }
       }
 
-      // 2. Saludo y Dedicatoria del cliente al final de la canción (Visible 14 segundos)
-      if (currentlyPlayingSong?.requestedBy?.dedication && !hasShownEndDedication) {
+      // 2. Saludo y Dedicatoria (o foto QR) del cliente al final de la canción (Visible 14 segundos)
+      if ((currentlyPlayingSong?.requestedBy?.dedication || currentlyPlayingSong?.requestedBy?.photo) && !hasShownEndDedication) {
         // Disparar en el tramo final (~22 segundos antes del corte/fadeout y tras haber superado la mitad)
         if (timeLeft <= 22 && currentTime > (midPoint + 8)) {
           hasShownEndDedication = true;
@@ -671,8 +671,8 @@ socket.on('state-changed', (data) => {
       reqBadge.className = 'bg-white/10 text-gray-300 font-medium text-xs px-3 py-1 rounded-full';
     }
 
-    // Saludo / Dedicatoria especial en TV al inicio del tema (Visible 16 segundos)
-    if (currentlyPlaying.requestedBy && currentlyPlaying.requestedBy.dedication) {
+    // Saludo / Dedicatoria especial (o foto QR) en TV al inicio del tema (Visible 16 segundos)
+    if (currentlyPlaying.requestedBy && (currentlyPlaying.requestedBy.dedication || currentlyPlaying.requestedBy.photo)) {
       if (!hasShownStartDedication) {
         hasShownStartDedication = true;
         setTimeout(() => {
@@ -818,10 +818,16 @@ function showDedicationBanner(durationMs = 16000) {
   const dedBanner = document.getElementById('dedicationBanner');
   const dedText = document.getElementById('dedicationText');
   const dedFromText = document.getElementById('dedicationFromText');
+  const photoFrame = document.getElementById('dedicationPhotoFrame');
+  const photoImg = document.getElementById('dedicationPhotoImg');
+  const photoStamp = document.getElementById('dedicationPhotoStamp');
   if (!dedBanner || !dedText || !dedFromText) return;
 
   const req = currentlyPlayingSong?.requestedBy;
-  if (!req || !req.dedication || !req.dedication.trim()) {
+  const hasDed = !!(req && req.dedication && req.dedication.trim());
+  const hasPhoto = !!(req && req.photo && typeof req.photo === 'string' && req.photo.startsWith('data:image/'));
+
+  if (!hasDed && !hasPhoto) {
     dedBanner.classList.add('hidden');
     return;
   }
@@ -830,8 +836,23 @@ function showDedicationBanner(durationMs = 16000) {
   hidePromoBanner(true);
 
   const fromName = req.name ? req.name : (req.table ? `Mesa ${req.table}` : 'Cliente');
-  dedFromText.textContent = `MENSAJE ESPECIAL DE ${fromName.toUpperCase()}`;
-  dedText.textContent = `"${req.dedication.trim()}"`;
+  dedFromText.textContent = hasPhoto
+    ? `📸 FOTO & SALUDO DE ${fromName.toUpperCase()}`
+    : `MENSAJE ESPECIAL DE ${fromName.toUpperCase()}`;
+
+  if (hasPhoto && photoFrame && photoImg) {
+    photoImg.src = req.photo;
+    if (photoStamp) {
+      photoStamp.textContent = `📸 ${req.table ? 'MESA ' + req.table : 'VIP'} • SANTA CHELA`;
+    }
+    photoFrame.classList.remove('hidden');
+    dedText.textContent = hasDed
+      ? `"${req.dedication.trim()}"`
+      : `"¡Salud y buena rumba desde la ${req.table ? 'Mesa ' + req.table : 'casa'}! 🍻"`;
+  } else {
+    if (photoFrame) photoFrame.classList.add('hidden');
+    dedText.textContent = `"${req.dedication.trim()}"`;
+  }
 
   dedBanner.classList.remove('hidden');
   setTimeout(() => {
@@ -1241,4 +1262,137 @@ socket.on('tv-roulette-hide', () => {
   if (ytPlayer && isPlayerReady && ytPlayer.getVolume) {
     fadeVolume(ytPlayer.getVolume(), tvRouletteState.savedVol || masterVolume || 100, 800);
   }
+});
+
+// =========================================================================
+// SANTA CHELA CAM: FOTO / SELFIE VOLADORA 3D EN MARCO POLAROID VIP (TV)
+// =========================================================================
+let tvPhotoCastTimeout = null;
+let tvPhotoHideAnimTimeout = null;
+
+function playTvCameraShutterSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!rouletteAudioCtx) rouletteAudioCtx = new AudioCtx();
+    if (rouletteAudioCtx.state === 'suspended') rouletteAudioCtx.resume();
+
+    const now = rouletteAudioCtx.currentTime;
+
+    // 1. Sonido de obturador de cámara (Shutter Click + Flash)
+    const oscClick = rouletteAudioCtx.createOscillator();
+    const gainClick = rouletteAudioCtx.createGain();
+    oscClick.type = 'triangle';
+    oscClick.frequency.setValueAtTime(1400, now);
+    oscClick.frequency.exponentialRampToValueAtTime(180, now + 0.065);
+    gainClick.gain.setValueAtTime(0.35, now);
+    gainClick.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+    oscClick.connect(gainClick);
+    gainClick.connect(rouletteAudioCtx.destination);
+    oscClick.start(now);
+    oscClick.stop(now + 0.075);
+
+    // 2. Acorde brillante de celebración VIP
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, i) => {
+      const osc = rouletteAudioCtx.createOscillator();
+      const gain = rouletteAudioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + 0.08 + i * 0.06);
+      gain.gain.setValueAtTime(0.18, now + 0.08 + i * 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65 + i * 0.06);
+      osc.connect(gain);
+      gain.connect(rouletteAudioCtx.destination);
+      osc.start(now + 0.08 + i * 0.06);
+      osc.stop(now + 0.68 + i * 0.06);
+    });
+  } catch (e) {}
+}
+
+function hideTvPhotoCastOverlay(immediate = false) {
+  clearTimeout(tvPhotoCastTimeout);
+  clearTimeout(tvPhotoHideAnimTimeout);
+  const overlay = document.getElementById('tvPhotoCastOverlay');
+  const backdrop = document.getElementById('tvPhotoBackdrop');
+  const card = document.getElementById('tvPhotoPolaroidCard');
+  if (!overlay) return;
+
+  if (backdrop) {
+    backdrop.classList.remove('opacity-100');
+    backdrop.classList.add('opacity-0');
+  }
+  if (card) {
+    card.classList.remove('translate-y-0', 'scale-100', 'rotate-0', 'opacity-100');
+    card.classList.add('translate-y-[120%]', 'scale-50', 'rotate-6', 'opacity-0');
+  }
+
+  if (immediate) {
+    overlay.classList.add('hidden');
+    overlay.classList.remove('flex');
+  } else {
+    tvPhotoHideAnimTimeout = setTimeout(() => {
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+    }, 650);
+  }
+}
+
+socket.on('tv-photo-casted', (data) => {
+  if (!data || !data.photo) return;
+  const overlay = document.getElementById('tvPhotoCastOverlay');
+  const flash = document.getElementById('tvPhotoFlash');
+  const backdrop = document.getElementById('tvPhotoBackdrop');
+  const card = document.getElementById('tvPhotoPolaroidCard');
+  const img = document.getElementById('tvPhotoCastImg');
+  const captionEl = document.getElementById('tvPhotoCastCaption');
+  const badgeEl = document.getElementById('tvPhotoSenderBadge');
+  if (!overlay || !card || !img) return;
+
+  clearTimeout(tvPhotoCastTimeout);
+  clearTimeout(tvPhotoHideAnimTimeout);
+
+  img.src = data.photo;
+  if (captionEl) {
+    captionEl.textContent = data.caption && data.caption.trim()
+      ? data.caption.trim()
+      : '¡Salud y buena rumba en Santa Chela! 🍻';
+  }
+  if (badgeEl) {
+    badgeEl.textContent = data.senderLabel || '📸 SANTA CHELA CAM • EN VIVO';
+  }
+
+  overlay.classList.remove('hidden');
+  overlay.classList.add('flex');
+
+  // Flash de cámara instantáneo
+  if (flash) {
+    flash.classList.remove('opacity-0');
+    flash.classList.add('opacity-90');
+    setTimeout(() => {
+      flash.classList.remove('opacity-90');
+      flash.classList.add('opacity-0');
+    }, 220);
+  }
+
+  playTvCameraShutterSound();
+  launchTvConfetti();
+
+  // Entrada en 3D desde abajo
+  setTimeout(() => {
+    if (backdrop) {
+      backdrop.classList.remove('opacity-0');
+      backdrop.classList.add('opacity-100');
+    }
+    card.classList.remove('translate-y-[120%]', 'scale-50', 'rotate-6', 'opacity-0');
+    card.classList.add('translate-y-0', 'scale-100', 'rotate-0', 'opacity-100');
+  }, 40);
+
+  const durationMs = Number(data.durationMs) || 12000;
+  tvPhotoCastTimeout = setTimeout(() => {
+    hideTvPhotoCastOverlay(false);
+  }, durationMs);
+});
+
+socket.on('tv-photo-hide', () => {
+  hideTvPhotoCastOverlay(false);
 });

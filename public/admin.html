@@ -275,12 +275,17 @@
 
           </div>
 
-          <!-- Botón de Show en Vivo: Ruleta 3D en el TV controlada con el dedo -->
-          <div class="pt-2.5 border-t border-white/10">
-            <button onclick="openRouletteModal()" class="w-full py-2.5 px-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/25 to-amber-500/20 hover:from-amber-500/35 hover:to-orange-500/35 border border-amber-400/50 text-amber-300 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.18)] active:scale-[0.98] transition">
+          <!-- Botones de Show en Vivo: Ruleta 3D y Santa Chela Cam -->
+          <div class="pt-2.5 border-t border-white/10 grid grid-cols-2 gap-2">
+            <button onclick="openRouletteModal()" class="w-full py-2.5 px-2.5 sm:px-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/25 to-amber-500/20 hover:from-amber-500/35 hover:to-orange-500/35 border border-amber-400/50 text-amber-300 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_20px_rgba(245,158,11,0.15)] active:scale-[0.98] transition">
               <span class="text-base">🎰</span>
-              <span class="truncate">RULETA 3D EN VIVO (MESAS Y PREMIOS)</span>
-              <span class="text-[9.5px] bg-amber-400 text-black font-black px-2 py-0.5 rounded-full uppercase shrink-0">Girar con Dedo</span>
+              <span class="truncate">RULETA 3D</span>
+              <span class="hidden sm:inline text-[9.5px] bg-amber-400 text-black font-black px-2 py-0.5 rounded-full uppercase shrink-0">TV</span>
+            </button>
+            <button onclick="openSantaChelaCamModal()" class="w-full py-2.5 px-2.5 sm:px-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-orange-500/25 hover:from-amber-500/35 hover:to-orange-500/35 border border-amber-400/50 text-amber-300 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_20px_rgba(245,158,11,0.15)] active:scale-[0.98] transition">
+              <span class="text-base">📸</span>
+              <span class="truncate">FOTO AL TV</span>
+              <span class="hidden sm:inline text-[9.5px] bg-amber-400 text-black font-black px-2 py-0.5 rounded-full uppercase shrink-0">Cam</span>
             </button>
           </div>
 
@@ -845,6 +850,20 @@
           </div>
         </div>
 
+        <!-- Opción Desbloqueable: Permitir Foto / Selfie en Pedidos QR de las Mesas -->
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white/5 to-white/5 border border-amber-500/35">
+          <div class="pr-3">
+            <div class="flex items-center gap-2">
+              <p class="text-sm font-bold text-amber-300">📸 Permitir Foto / Selfie en Pedidos QR (Mesas)</p>
+              <span class="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">Desbloqueable</span>
+            </div>
+            <p class="text-xs text-gray-300 mt-1">
+              Si activas esta opción, cuando una mesa pida una canción por QR podrá tomarse una foto/selfie opcional para que salga en el TV junto con su saludo. Si está desactivada, el formulario QR aparece normal como siempre.
+            </p>
+          </div>
+          <input type="checkbox" id="settingAllowClientPhoto" onchange="toggleClientPhotoSettingImmediate(this.checked)" class="w-5 h-5 accent-amber-500 shrink-0 cursor-pointer">
+        </div>
+
         <!-- Transiciones y Duración de Canciones (Ritmo DJ) -->
         <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-white/5 to-white/5 border border-amber-500/30 space-y-3">
           <div class="flex items-center justify-between border-b border-white/10 pb-2">
@@ -1160,6 +1179,116 @@
         </button>
         <button onclick="hideRouletteFromTv()" class="col-span-2 sm:col-span-1 btn-secondary py-2.5 px-3 text-xs font-bold flex items-center justify-center gap-1.5 text-rose-300 border-rose-500/30 hover:bg-rose-500/20">
           <span>✕</span> <span>Quitar de TV</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL SANTA CHELA CAM: FOTO / SELFIE EN VIVO AL TV (CON ARRASTRE 3D)     -->
+  <!-- ========================================================================= -->
+  <div id="santaChelaCamModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-4">
+    <div class="glass-card w-full max-w-xl p-4 sm:p-6 space-y-4 border border-amber-500/40 max-h-[94vh] overflow-y-auto shadow-[0_0_60px_rgba(245,158,11,0.2)]">
+      
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">📸</span>
+          <div>
+            <h3 class="font-black text-white text-sm sm:text-base uppercase tracking-wider">Santa Chela Cam (TV en Vivo)</h3>
+            <p class="text-[11px] text-amber-300 font-semibold">Toma una foto y lánzala con tu dedo hacia arriba al televisor</p>
+          </div>
+        </div>
+        <button onclick="closeSantaChelaCamModal()" class="text-gray-400 hover:text-white p-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition" title="Cerrar">✕</button>
+      </div>
+
+      <!-- Switch rápido sincronizado con Ajustes: Desbloquear fotos en pedidos QR de mesas -->
+      <div class="flex items-center justify-between p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30">
+        <div class="pr-2">
+          <p class="text-xs font-black text-amber-300 flex items-center gap-1.5">
+            <span>🔓</span> <span>Permitir Foto en Pedidos QR de las Mesas</span>
+          </p>
+          <p class="text-[10.5px] text-gray-300 mt-0.5">
+            Si lo activas, los clientes podrán subir selfie junto con su mensaje al pedir canción.
+          </p>
+        </div>
+        <input type="checkbox" id="camModalAllowQrPhotosToggle" onchange="toggleClientPhotoSettingImmediate(this.checked)" class="w-5 h-5 accent-amber-500 shrink-0 cursor-pointer">
+      </div>
+
+      <!-- Inputs ocultos para Cámara Trasera, Frontal y Galería -->
+      <input type="file" id="djCamInputRear" accept="image/*" capture="environment" class="hidden" onchange="onDjCamPhotoSelected(event)">
+      <input type="file" id="djCamInputSelfie" accept="image/*" capture="user" class="hidden" onchange="onDjCamPhotoSelected(event)">
+      <input type="file" id="djCamInputGallery" accept="image/*" class="hidden" onchange="onDjCamPhotoSelected(event)">
+
+      <!-- Botones de Captura de Foto -->
+      <div class="grid grid-cols-3 gap-2">
+        <button type="button" onclick="document.getElementById('djCamInputRear').click()" class="py-2.5 px-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-black flex flex-col items-center justify-center gap-1 transition active:scale-95">
+          <span class="text-lg">📷</span>
+          <span>Cámara Bar</span>
+        </button>
+        <button type="button" onclick="document.getElementById('djCamInputSelfie').click()" class="py-2.5 px-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-black flex flex-col items-center justify-center gap-1 transition active:scale-95">
+          <span class="text-lg">🤳</span>
+          <span>Selfie DJ</span>
+        </button>
+        <button type="button" onclick="document.getElementById('djCamInputGallery').click()" class="py-2.5 px-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-gray-200 text-xs font-bold flex flex-col items-center justify-center gap-1 transition active:scale-95">
+          <span class="text-lg">🖼️</span>
+          <span>Galería</span>
+        </button>
+      </div>
+
+      <!-- Texto / Mensaje y Etiqueta de Mesa -->
+      <div class="space-y-2.5 bg-white/[0.03] p-3.5 rounded-2xl border border-white/10">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <div class="sm:w-1/3">
+            <label class="block text-[10.5px] font-bold text-gray-400 uppercase mb-1">Etiqueta superior:</label>
+            <input type="text" id="djCamSenderBadgeInput" value="📸 SANTA CHELA CAM • EN VIVO" class="w-full bg-black/60 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-amber-300 font-bold outline-none focus:border-amber-400">
+          </div>
+          <div class="flex-1">
+            <label class="block text-[10.5px] font-bold text-amber-300 uppercase mb-1">Mensaje al pie de la foto:</label>
+            <input type="text" id="djCamCaptionInput" oninput="updateDjCamPolaroidPreviewText()" placeholder="Ej: ¡La Mesa 3 prendiendo la noche! 🍻" value="¡Salud y buena rumba en Santa Chela! 🍻" class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white font-bold outline-none focus:border-amber-400">
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button type="button" onclick="setQuickDjCamCaption('¡Salud y buena rumba en Santa Chela! 🍻')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🍻 ¡Salud Santa Chela!</button>
+          <button type="button" onclick="setQuickDjCamCaption('🔥 ¡La mesa más prendida de la noche!')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🔥 Mesa más prendida</button>
+          <button type="button" onclick="setQuickDjCamCaption('🎂 ¡Feliz Cumpleaños! Que siga la fiesta 🎉')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🎂 Feliz Cumpleaños</button>
+          <button type="button" onclick="setQuickDjCamCaption('🥃 ¡Ronda de shots para esta mesa!')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🥃 Ronda de Shots</button>
+        </div>
+      </div>
+
+      <!-- Zona de Vista Previa y Lanzamiento Táctil Polaroid 3D hacia arriba -->
+      <div id="djCamEmptyState" class="py-6 px-4 rounded-2xl border border-dashed border-white/15 bg-black/30 text-center space-y-1.5">
+        <div class="text-3xl">📸</div>
+        <p class="text-xs font-bold text-gray-300">Toma una foto o elígela de tu galería arriba</p>
+        <p class="text-[11px] text-gray-500">Aparecerá aquí en marco Polaroid lista para arrastrarla hacia el TV</p>
+      </div>
+
+      <div id="djCamPolaroidZone" class="hidden flex-col items-center justify-center py-2 select-none space-y-2.5">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500 text-black text-[11px] font-black uppercase tracking-wider shadow-[0_0_20px_rgba(245,158,11,0.6)] animate-pulse">
+          <span>🚀</span> <span>¡Arrastra la Polaroid hacia arriba para lanzarla al TV! ↑</span>
+        </div>
+
+        <!-- Tarjeta Polaroid Táctil Arrastrable hacia el TV -->
+        <div id="djCamDraggablePolaroid" style="touch-action: none; -webkit-user-select: none; user-select: none;" class="w-56 sm:w-64 bg-gradient-to-b from-[#fffbeb] via-[#fef3c7] to-[#fde68a] p-3 pb-5 rounded-2xl shadow-[0_15px_45px_rgba(245,158,11,0.5)] border-2 border-amber-300 cursor-grab active:cursor-grabbing transition-transform duration-150">
+          <div class="w-full aspect-square rounded-xl overflow-hidden bg-black relative">
+            <img id="djCamPreviewImg" src="" alt="Preview" class="w-full h-full object-cover pointer-events-none">
+            <span class="absolute top-2 right-2 bg-black/75 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-400/40">⚡ SANTA CHELA</span>
+          </div>
+          <p id="djCamPreviewCaption" class="text-xs font-black text-gray-900 text-center mt-2.5 px-1 truncate">
+            ¡Salud y buena rumba en Santa Chela! 🍻
+          </p>
+        </div>
+      </div>
+
+      <!-- Botones de Acción Directa -->
+      <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
+        <button type="button" onclick="launchDjCamPhotoToTv()" class="tactile-btn-gold py-2.5 px-4 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+          <span>🚀</span> <span>¡LANZAR FOTO AL TV!</span>
+        </button>
+        <button type="button" onclick="hideDjCamPhotoFromTv()" class="btn-secondary py-2.5 px-3 text-xs font-bold flex items-center justify-center gap-1.5 text-rose-300 border-rose-500/30 hover:bg-rose-500/20">
+          <span>✕</span> <span>Quitar Foto de TV</span>
         </button>
       </div>
 

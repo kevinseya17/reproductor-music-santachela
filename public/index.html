@@ -198,6 +198,48 @@
           <input type="text" id="customerDedicationInput" maxlength="100" placeholder="Ej: ¡Feliz cumpleaños Laura! 🎉 / Saludos de la Mesa 4" class="w-full bg-black/40 border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400 placeholder-gray-500">
           <p class="text-[10px] text-gray-400 mt-1">✨ Este mensaje saldrá animado en el televisor del bar cuando empiece tu canción.</p>
         </div>
+
+        <!-- Opción Desbloqueable desde Admin: Subir Foto / Selfie junto con el mensaje al TV -->
+        <div id="clientPhotoDedicationContainer" class="hidden pt-1">
+          <div class="p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-500/30 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                <span>📸</span> <span>Foto / Selfie para la TV (Opcional)</span>
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-400/30">NUEVO</span>
+            </div>
+            <p class="text-[10.5px] text-gray-300 leading-snug">
+              ¡Tómate una selfie con tu mesa! Saldrá en marco dorado en el televisor junto con tu saludo cuando suene tu canción.
+            </p>
+
+            <input type="file" id="clientPhotoInputCamera" accept="image/*" capture="user" class="hidden" onchange="onClientPhotoSelected(event)">
+            <input type="file" id="clientPhotoInputGallery" accept="image/*" class="hidden" onchange="onClientPhotoSelected(event)">
+
+            <!-- Botones para tomar selfie o elegir foto -->
+            <div id="clientPhotoButtonsRow" class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="document.getElementById('clientPhotoInputCamera').click()" class="py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95">
+                <span>🤳</span> <span>Tomar Selfie</span>
+              </button>
+              <button type="button" onclick="document.getElementById('clientPhotoInputGallery').click()" class="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-gray-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95">
+                <span>🖼️</span> <span>Elegir Foto</span>
+              </button>
+            </div>
+
+            <!-- Vista previa cuando ya eligieron foto -->
+            <div id="clientPhotoPreviewBox" class="hidden flex items-center justify-between bg-black/50 p-2 rounded-xl border border-amber-400/40">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <img id="clientPhotoPreviewImg" src="" alt="Preview" class="w-12 h-12 rounded-lg object-cover border-2 border-amber-400 shadow">
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-amber-300 truncate">✨ ¡Foto lista para el TV!</p>
+                  <p class="text-[10px] text-gray-400">Saldrá cuando empiece tu canción</p>
+                </div>
+              </div>
+              <button type="button" onclick="clearClientPhoto()" class="text-xs text-rose-400 hover:text-rose-300 font-bold px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/30">
+                ✕ Quitar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="flex gap-2">

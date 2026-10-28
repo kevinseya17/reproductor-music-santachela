@@ -71,12 +71,23 @@ function renderStatus(data) {
     if (barTitle) barTitle.textContent = settings.barName;
   }
 
-  // Aplicar modo de pedidos (abierto vs solo listas)
+  // Aplicar modo de pedidos (abierto vs solo listas) y opción desbloqueable de foto con mensaje
   if (settings) {
     const newMode = settings.requestMode || 'open';
     if (newMode !== currentRequestMode || !window.hasInitRequestMode) {
       window.hasInitRequestMode = true;
       applyRequestMode(newMode);
+    }
+
+    const photoSection = document.getElementById('clientPhotoDedicationContainer');
+    window.allowClientPhotoDedication = settings.allowClientPhotoDedication === true;
+    if (photoSection) {
+      if (window.allowClientPhotoDedication) {
+        photoSection.classList.remove('hidden');
+      } else {
+        photoSection.classList.add('hidden');
+        if (typeof clearClientPhoto === 'function') clearClientPhoto();
+      }
     }
   }
 
@@ -287,8 +298,61 @@ function openConfirmModal(index) {
   document.getElementById('confirmModal').classList.remove('hidden');
 }
 
+let currentClientPhotoDataUrl = null;
+
+function onClientPhotoSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxDim = 800;
+      let w = img.width;
+      let h = img.height;
+      if (w > h && w > maxDim) {
+        h = Math.round((h * maxDim) / w);
+        w = maxDim;
+      } else if (h >= w && h > maxDim) {
+        w = Math.round((w * maxDim) / h);
+        h = maxDim;
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      currentClientPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.80);
+
+      const previewImg = document.getElementById('clientPhotoPreviewImg');
+      const previewBox = document.getElementById('clientPhotoPreviewBox');
+      const buttonsRow = document.getElementById('clientPhotoButtonsRow');
+      if (previewImg) previewImg.src = currentClientPhotoDataUrl;
+      if (previewBox) previewBox.classList.remove('hidden');
+      if (buttonsRow) buttonsRow.classList.add('hidden');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearClientPhoto() {
+  currentClientPhotoDataUrl = null;
+  const camInput = document.getElementById('clientPhotoInputCamera');
+  const galInput = document.getElementById('clientPhotoInputGallery');
+  if (camInput) camInput.value = '';
+  if (galInput) galInput.value = '';
+
+  const previewBox = document.getElementById('clientPhotoPreviewBox');
+  const buttonsRow = document.getElementById('clientPhotoButtonsRow');
+  if (previewBox) previewBox.classList.add('hidden');
+  if (buttonsRow) buttonsRow.classList.remove('hidden');
+}
+
 function closeModal() {
   selectedSongForModal = null;
+  clearClientPhoto();
   document.getElementById('confirmModal').classList.add('hidden');
 }
 
@@ -320,7 +384,8 @@ async function confirmAndSendRequest() {
         thumbnail: selectedSongForModal.thumbnail,
         table: currentTable,
         customerName: customerName || `Mesa ${currentTable}`,
-        dedication
+        dedication,
+        ...(window.allowClientPhotoDedication && currentClientPhotoDataUrl ? { photo: currentClientPhotoDataUrl } : {})
       })
     });
 
@@ -336,6 +401,7 @@ async function confirmAndSendRequest() {
       hideSearchResults();
       document.getElementById('customerNameInput').value = '';
       if (dedicationInput) dedicationInput.value = '';
+      clearClientPhoto();
     }
   } catch (err) {
     console.error('Error enviando pedido:', err);
