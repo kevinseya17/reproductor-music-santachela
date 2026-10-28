@@ -132,9 +132,9 @@ function loadAndPlay(videoId) {
   hasShownEndDedication = false;
   currentTrackInitializedId = videoId;
 
-  // Limpiar anuncios o dedicatorias previos
-  if (typeof hidePromoBanner === 'function') hidePromoBanner();
-  if (typeof hideDedicationBanner === 'function') hideDedicationBanner();
+  // Limpiar anuncios o dedicatorias previos inmediatamente sin timeouts residuales
+  if (typeof hidePromoBanner === 'function') hidePromoBanner(true);
+  if (typeof hideDedicationBanner === 'function') hideDedicationBanner(true);
 
   if (activeFadeInterval) {
     clearInterval(activeFadeInterval);
@@ -299,6 +299,13 @@ function startProgressMonitor() {
         }
       }
 
+      // 0. Dedicatoria / Mensaje del cliente al inicio de la canción (garantizar que se muestre)
+      if (currentlyPlayingSong?.requestedBy?.dedication && !hasShownStartDedication && currentTime <= 18) {
+        hasShownStartDedication = true;
+        showDedicationBanner(15000);
+        console.log(`[TV Player] Mensaje/dedicatoria de inicio activada (${Math.round(currentTime)}s)`);
+      }
+
       // 1. Anuncio / Promoción exactamente a la mitad de la canción (50% de la duración)
       if (!hasShownMidSongPromo && targetMaxDuration > 20) {
         if (currentTime >= midPoint) {
@@ -461,14 +468,16 @@ socket.on('state-changed', (data) => {
       reqBadge.className = 'bg-white/10 text-gray-300 font-medium text-xs px-3 py-1 rounded-full';
     }
 
-    // Dedicatoria especial en TV al inicio del tema (Visible 14 segundos)
+    // Dedicatoria especial en TV al inicio del tema (Visible 15 segundos)
     if (currentlyPlaying.requestedBy && currentlyPlaying.requestedBy.dedication) {
       if (!hasShownStartDedication) {
         hasShownStartDedication = true;
-        showDedicationBanner(14000);
+        setTimeout(() => {
+          showDedicationBanner(15000);
+        }, 150);
       }
     } else {
-      hideDedicationBanner();
+      hideDedicationBanner(true);
     }
 
     // Mostrar información de canción durante 10 segundos y luego ocultar suavemente para dejar el video 100% limpio
@@ -539,19 +548,28 @@ function getPromoIcon(text) {
  * Muestra exactamente un solo anuncio/promoción por canción
  * Se activa a la mitad exacta de la duración de la canción (50%).
  */
+let promoHideCardTimeout = null;
+let dedicationTimer = null;
+let dedicationHideTimeout = null;
+
 function scheduleSinglePromoForCurrentSong() {
   hasShownMidSongPromo = false;
-  hidePromoBanner();
+  hidePromoBanner(true);
 }
 
-function hidePromoBanner() {
+function hidePromoBanner(immediate = false) {
   clearTimeout(singlePromoSongTimeout);
   clearTimeout(promoHideTimeout);
+  clearTimeout(promoHideCardTimeout);
   const promoCard = document.getElementById('promoBroadcastCard');
   if (promoCard) {
     promoCard.classList.remove('opacity-100', 'translate-y-0');
     promoCard.classList.add('opacity-0', 'translate-y-8');
-    setTimeout(() => promoCard.classList.add('hidden'), 500);
+    if (immediate) {
+      promoCard.classList.add('hidden');
+    } else {
+      promoHideCardTimeout = setTimeout(() => promoCard.classList.add('hidden'), 500);
+    }
   }
 }
 
@@ -562,8 +580,12 @@ function showSinglePromo(durationMs = 9000) {
   const promoIconEl = document.getElementById('promoIcon');
   if (!promoCard || !promoTextEl) return;
 
-  // Ocultar dedicatoria si estuviese activa para no sobrecargar
-  hideDedicationBanner();
+  // Cancelar cualquier timeout previo
+  clearTimeout(promoHideTimeout);
+  clearTimeout(promoHideCardTimeout);
+
+  // Ocultar dedicatoria si estuviese activa de inmediato
+  hideDedicationBanner(true);
 
   const promoMsg = activePromos[currentPromoIdx];
   currentPromoIdx = (currentPromoIdx + 1) % activePromos.length;
@@ -577,20 +599,19 @@ function showSinglePromo(durationMs = 9000) {
     promoCard.classList.add('opacity-100', 'translate-y-0');
   }, 50);
 
-  clearTimeout(promoHideTimeout);
-  // Se oculta a los 9 segundos para dejar la pantalla limpia
   promoHideTimeout = setTimeout(() => {
-    promoCard.classList.remove('opacity-100', 'translate-y-0');
-    promoCard.classList.add('opacity-0', 'translate-y-8');
-    setTimeout(() => promoCard.classList.add('hidden'), 700);
+    hidePromoBanner(false);
   }, durationMs);
 }
 
 /**
  * Muestra el mensaje o dedicatoria del cliente en gran formato en TV.
- * Se muestra al inicio del tema y vuelve a mostrarse al final de la canción.
+ * Se muestra al inicio del tema (15 segundos) y vuelve a mostrarse al final de la canción (14 segundos).
  */
-function showDedicationBanner(durationMs = 14000) {
+function showDedicationBanner(durationMs = 15000) {
+  clearTimeout(dedicationTimer);
+  clearTimeout(dedicationHideTimeout);
+
   const dedBanner = document.getElementById('dedicationBanner');
   const dedText = document.getElementById('dedicationText');
   const dedFromText = document.getElementById('dedicationFromText');
@@ -602,8 +623,8 @@ function showDedicationBanner(durationMs = 14000) {
     return;
   }
 
-  // Ocultar promo si estuviese activa
-  hidePromoBanner();
+  // Ocultar promo de inmediato si estuviese activa
+  hidePromoBanner(true);
 
   const fromName = req.name ? req.name : (req.table ? `Mesa ${req.table}` : 'Cliente');
   dedFromText.textContent = `MENSAJE ESPECIAL DE ${fromName.toUpperCase()}`;
@@ -615,21 +636,23 @@ function showDedicationBanner(durationMs = 14000) {
     dedBanner.classList.add('opacity-100', 'translate-y-0');
   }, 50);
 
-  clearTimeout(window.dedicationTimer);
-  window.dedicationTimer = setTimeout(() => {
-    dedBanner.classList.remove('opacity-100', 'translate-y-0');
-    dedBanner.classList.add('opacity-0', 'translate-y-6');
-    setTimeout(() => dedBanner.classList.add('hidden'), 700);
+  dedicationTimer = setTimeout(() => {
+    hideDedicationBanner(false);
   }, durationMs);
 }
 
-function hideDedicationBanner() {
-  clearTimeout(window.dedicationTimer);
+function hideDedicationBanner(immediate = false) {
+  clearTimeout(dedicationTimer);
+  clearTimeout(dedicationHideTimeout);
   const dedBanner = document.getElementById('dedicationBanner');
   if (dedBanner) {
     dedBanner.classList.remove('opacity-100', 'translate-y-0');
     dedBanner.classList.add('opacity-0', 'translate-y-6');
-    setTimeout(() => dedBanner.classList.add('hidden'), 500);
+    if (immediate) {
+      dedBanner.classList.add('hidden');
+    } else {
+      dedicationHideTimeout = setTimeout(() => dedBanner.classList.add('hidden'), 500);
+    }
   }
 }
 
@@ -655,12 +678,13 @@ socket.on('new-request-alert', (data) => {
 
   if (notif && text && data.song) {
     const tableStr = data.song.requestedBy?.table ? `Mesa ${data.song.requestedBy.table}` : 'un cliente';
-    text.textContent = `¡Nuevo pedido de ${tableStr}: "${data.song.title}"!`;
+    const dedicationStr = data.song.requestedBy?.dedication ? ` — "${data.song.requestedBy.dedication}"` : '';
+    text.textContent = `¡Nuevo pedido de ${tableStr}: "${data.song.title}"${dedicationStr}!`;
     notif.classList.remove('hidden');
 
     setTimeout(() => {
       notif.classList.add('hidden');
-    }, 5000);
+    }, 6000);
   }
 });
 
