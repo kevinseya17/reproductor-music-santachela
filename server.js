@@ -1314,6 +1314,51 @@ io.on('connection', (socket) => {
     io.emit('tv-fullscreen-status', data);
   });
 
+  // Efecto Drag-to-Cast: Canción lanzada desde el celular / consola hacia el TV
+  socket.on('cast-song-to-tv', (data) => {
+    const { videoId, title, artist, genre, duration, thumbnail, requestedBy, queueIndex } = data || {};
+    if (!videoId) return;
+
+    // Si la canción estaba en la cola, removerla de la cola
+    if (typeof queueIndex === 'number' && queueIndex >= 0) {
+      const q = [...db.getQueue()];
+      if (q[queueIndex] && q[queueIndex].videoId === videoId) {
+        q.splice(queueIndex, 1);
+        db.setQueue(q);
+      }
+    }
+
+    if (currentlyPlaying) {
+      db.addToHistory(currentlyPlaying);
+    }
+
+    currentlyPlaying = {
+      id: `cast_${Date.now()}`,
+      videoId,
+      title: title || 'Canción',
+      artist: artist || 'Artista',
+      genre: genre || 'Crossover',
+      duration: duration || '3:30',
+      thumbnail: thumbnail || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+      requestedBy: requestedBy || { table: null, name: 'DJ / Celular' },
+      isBaseTrack: false,
+      startedAt: Date.now()
+    };
+
+    // 1. Emitir animación de impacto supersónico en la pantalla del TV
+    io.emit('tv-song-casted', {
+      song: currentlyPlaying,
+      senderName: requestedBy?.name || (requestedBy?.table ? `Mesa ${requestedBy.table}` : 'DJ / Celular')
+    });
+
+    // 2. Transmitir actualización de estado a todas las vistas
+    io.emit('state-changed', {
+      currentlyPlaying,
+      queue: db.getQueue(),
+      settings: db.getSettings()
+    });
+  });
+
   // Progreso en tiempo real desde el reproductor TV hacia la consola DJ
   socket.on('player-progress', (data) => {
     io.emit('player-telemetry', data);

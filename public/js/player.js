@@ -50,6 +50,124 @@ let hasShownStartDedication = false;
 let hasShownEndDedication = false;
 let currentTrackInitializedId = null;
 
+// ==========================================
+// SINTETIZADOR DE EFECTOS DJ (WEB AUDIO API)
+// Sin dependencias de archivos externos, latencia cero
+// ==========================================
+let djAudioCtx = null;
+function getDjAudioContext() {
+  if (!djAudioCtx) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      djAudioCtx = new AudioCtx();
+    }
+  }
+  if (djAudioCtx && djAudioCtx.state === 'suspended') {
+    djAudioCtx.resume();
+  }
+  return djAudioCtx;
+}
+
+function playDjWarpSweep() {
+  try {
+    const ctx = getDjAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc.type = 'sawtooth';
+    filter.type = 'lowpass';
+
+    // Rápida subida de tono y luego caída con filtro
+    osc.frequency.setValueAtTime(120, now);
+    osc.frequency.exponentialRampToValueAtTime(1400, now + 0.6);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 1.4);
+
+    filter.frequency.setValueAtTime(400, now);
+    filter.frequency.exponentialRampToValueAtTime(7000, now + 0.5);
+    filter.frequency.exponentialRampToValueAtTime(300, now + 1.4);
+
+    gain.gain.setValueAtTime(0.01, now);
+    gain.gain.linearRampToValueAtTime(0.35, now + 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 1.5);
+  } catch (e) {
+    console.warn('Audio FX no disponible:', e);
+  }
+}
+
+let castOverlayTimeout = null;
+
+function showCastIncomingOverlay(song, senderName) {
+  const overlay = document.getElementById('castIncomingOverlay');
+  const vortexBg = document.getElementById('castVortexBg');
+  const card = document.getElementById('castIncomingCard');
+  const thumb = document.getElementById('castIncomingThumb');
+  const title = document.getElementById('castIncomingTitle');
+  const artist = document.getElementById('castIncomingArtist');
+  const sender = document.getElementById('castIncomingSender');
+
+  if (!overlay || !card) return;
+
+  clearTimeout(castOverlayTimeout);
+
+  if (thumb) thumb.src = song.thumbnail || `https://i.ytimg.com/vi/${song.videoId}/hqdefault.jpg`;
+  if (title) title.textContent = song.title || 'Canción';
+  if (artist) artist.textContent = song.artist || 'Artista';
+  if (sender) sender.textContent = `Lanzada por: ${senderName || 'DJ / Celular'}`;
+
+  // Reset visual inicial (fuera de la pantalla abajo)
+  overlay.classList.remove('hidden');
+  if (vortexBg) {
+    vortexBg.classList.remove('opacity-100');
+    vortexBg.classList.add('opacity-0');
+  }
+  card.classList.remove('translate-y-0', 'scale-100', 'opacity-100');
+  card.classList.add('translate-y-[120%]', 'scale-50', 'opacity-0');
+
+  // Disparo supersónico hacia el centro (en 50ms)
+  setTimeout(() => {
+    if (vortexBg) {
+      vortexBg.classList.remove('opacity-0');
+      vortexBg.classList.add('opacity-100');
+    }
+    card.classList.remove('translate-y-[120%]', 'scale-50', 'opacity-0');
+    card.classList.add('translate-y-0', 'scale-100', 'opacity-100');
+  }, 50);
+
+  // Ocultar suavemente después de 3.2 segundos
+  castOverlayTimeout = setTimeout(() => {
+    if (vortexBg) {
+      vortexBg.classList.remove('opacity-100');
+      vortexBg.classList.add('opacity-0');
+    }
+    card.classList.remove('translate-y-0', 'scale-100', 'opacity-100');
+    card.classList.add('-translate-y-12', 'scale-105', 'opacity-0');
+
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+    }, 600);
+  }, 3200);
+}
+
+// Escuchar animación de impacto: Canción lanzada desde el celular
+socket.on('tv-song-casted', (data) => {
+  const { song, senderName } = data || {};
+  if (!song) return;
+
+  playDjWarpSweep();
+  showCastIncomingOverlay(song, senderName);
+});
+
 // 1. YouTube IFrame API Callback global
 window.onYouTubeIframeAPIReady = function() {
   ytPlayer = new YT.Player('ytPlayer', {

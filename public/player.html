@@ -318,6 +318,51 @@
 
   </div>
 
+  <!-- Overlay Cinematográfico: Canción Lanzada desde Celular (Efecto WOW) -->
+  <div id="castIncomingOverlay" class="fixed inset-0 z-50 pointer-events-none flex items-center justify-center hidden">
+    <!-- Portal de luz cósmica en el fondo -->
+    <div id="castVortexBg" class="absolute inset-0 bg-gradient-to-t from-amber-500/40 via-black/85 to-black/95 backdrop-blur-md opacity-0 transition-opacity duration-500"></div>
+
+    <!-- Tarjeta voladora que entra desde abajo -->
+    <div id="castIncomingCard" class="relative max-w-4xl w-[92%] transform translate-y-[120%] scale-50 opacity-0 transition-all duration-700 ease-out">
+      <div class="bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 p-1.5 sm:p-2.5 rounded-[40px] shadow-[0_0_150px_rgba(245,158,11,1)]">
+        <div class="bg-black/95 backdrop-blur-3xl px-8 sm:px-14 py-8 sm:py-12 rounded-[34px] flex flex-col md:flex-row items-center gap-6 sm:gap-10 border-2 border-white/30 text-center md:text-left">
+          
+          <!-- Disco de vinilo giratorio con la carátula -->
+          <div class="relative shrink-0">
+            <div class="w-28 h-28 sm:w-40 sm:h-40 rounded-full border-4 border-amber-400/90 shadow-[0_0_60px_rgba(245,158,11,0.9)] overflow-hidden animate-spin" style="animation-duration: 4s;">
+              <img id="castIncomingThumb" src="" class="w-full h-full object-cover">
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div class="w-8 h-8 rounded-full bg-black border-2 border-amber-400 shadow"></div>
+            </div>
+          </div>
+
+          <!-- Información impactante -->
+          <div class="flex-1 min-w-0 space-y-3">
+            <div class="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-xs sm:text-base uppercase tracking-widest px-5 py-1.5 rounded-full shadow-2xl animate-pulse">
+              <span>🚀</span> <span>¡LANZADA AL AIRE DESDE EL CELULAR!</span>
+            </div>
+            
+            <h2 id="castIncomingTitle" class="text-3xl sm:text-5xl md:text-6xl font-black text-white leading-tight tracking-tight drop-shadow-[0_4px_25px_rgba(0,0,0,0.95)] truncate">
+              Título de la canción
+            </h2>
+            
+            <p id="castIncomingArtist" class="text-xl sm:text-3xl font-extrabold text-amber-300 drop-shadow truncate">
+              Artista
+            </p>
+
+            <div class="flex items-center justify-center md:justify-start gap-2 pt-1 text-xs sm:text-sm text-gray-300 font-bold">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+              <span id="castIncomingSender">Lanzada por el DJ / Celular</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- YouTube IFrame API -->
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="/js/player.js"></script>
