@@ -443,7 +443,7 @@ function renderQueueList(queue) {
       rowBorderClass = 'border-amber-500/40 bg-amber-500/[0.05] hover:border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.06)]';
       if (!isFirst) {
         vipButtonHtml = `
-          <button onclick="setSongPriority('${song.id}')" class="btn-secondary text-[11px] sm:text-xs py-1 px-1.5 sm:px-2.5 text-amber-300 font-bold border-amber-500/40 hover:bg-amber-500/20 whitespace-nowrap" title="Dar Prioridad VIP para que suene a continuación">
+          <button onclick="setSongPriority('${song.id}')" class="no-cast-drag btn-secondary text-[11px] sm:text-xs py-1 px-1.5 sm:px-2.5 text-amber-300 font-bold border-amber-500/40 hover:bg-amber-500/20 whitespace-nowrap" style="touch-action: manipulation;" title="Dar Prioridad VIP para que suene a continuación">
             <span class="sm:hidden">⭐ VIP</span><span class="hidden sm:inline">⭐ Prioridad VIP</span>
           </button>
         `;
@@ -453,33 +453,39 @@ function renderQueueList(queue) {
       badgeHtml = `<span class="px-2 py-0.5 rounded-md bg-white/10 text-gray-300 text-[10px] font-medium">🎵 Base: ${escapeHtml(plName)}</span>`;
     }
 
+    const rowTouchAction = (typeof touchCastLockMode === 'undefined' || touchCastLockMode) ? 'none' : 'pan-y';
+
     return `
       <div id="queue-row-${i}"
-           draggable="true"
            data-queue-index="${i}"
+           onmousedown="if(!('ontouchstart' in window)) this.draggable = true;"
            ondragstart="handleQueueDragStart(event, ${i})"
            ondragover="handleQueueDragOver(event, ${i})"
            ondragenter="handleQueueDragEnter(event, ${i})"
            ondragleave="handleQueueDragLeave(event, ${i})"
            ondrop="handleQueueDrop(event, ${i})"
            ondragend="handleQueueDragEnd(event)"
-           ontouchstart="initCardTouchCast(event, ${i})"
+           ontouchstart="this.draggable = false; initCardTouchCast(event, ${i})"
+           style="touch-action: ${rowTouchAction}; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;"
            class="queue-row flex items-center justify-between p-2 sm:p-2.5 rounded-2xl ${rowBorderClass} gap-1.5 sm:gap-2.5 group select-none cursor-grab active:cursor-grabbing transition-all relative overflow-hidden">
         
-        <!-- Izquierda: Reordenar ▲ ▼ y Número 1., 2., 3. -->
-        <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <!-- Izquierda: Reordenar ▲ ▼ y Número 1., 2., 3. (Zona de scroll libre en móvil) -->
+        <div class="no-cast-drag flex items-center gap-1 sm:gap-1.5 shrink-0" style="touch-action: pan-y;">
           <span class="text-gray-500 group-hover:text-amber-400 text-xs px-0.5 cursor-grab hidden md:inline-block" title="Arrastra para cambiar de posición">⋮⋮</span>
           <div class="flex flex-col items-center">
-            <button onclick="reorderQueueItem(${i}, 'up')" class="text-[9px] sm:text-[10px] leading-none py-0.5 px-0.5 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isFirst ? 'opacity-20 cursor-not-allowed' : ''}" title="Subir turno" ${isFirst ? 'disabled' : ''}>▲</button>
-            <button onclick="reorderQueueItem(${i}, 'down')" class="text-[9px] sm:text-[10px] leading-none py-0.5 px-0.5 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isLast ? 'opacity-20 cursor-not-allowed' : ''}" title="Bajar turno" ${isLast ? 'disabled' : ''}>▼</button>
+            <button onclick="reorderQueueItem(${i}, 'up')" class="no-cast-drag text-[9px] sm:text-[10px] leading-none py-0.5 px-0.5 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isFirst ? 'opacity-20 cursor-not-allowed' : ''}" title="Subir turno" ${isFirst ? 'disabled' : ''}>▲</button>
+            <button onclick="reorderQueueItem(${i}, 'down')" class="no-cast-drag text-[9px] sm:text-[10px] leading-none py-0.5 px-0.5 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isLast ? 'opacity-20 cursor-not-allowed' : ''}" title="Bajar turno" ${isLast ? 'disabled' : ''}>▼</button>
           </div>
           <span class="font-mono font-black text-amber-400 text-xs sm:text-sm w-4 sm:w-5 text-center">${i + 1}.</span>
         </div>
 
-        <!-- Carátula + Info de la canción con espacio horizontal amplio -->
-        <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pointer-events-none">
-          <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover border border-white/10 shrink-0 shadow-sm">
-          <div class="min-w-0 flex-1">
+        <!-- Carátula + Info de la canción con bloqueo nativo de scroll en iPhone -->
+        <div class="cast-direct-zone flex items-center gap-2 sm:gap-3 min-w-0 flex-1" style="touch-action: ${rowTouchAction};">
+          <div class="cast-force-lock relative shrink-0" style="touch-action: none;">
+            <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover border border-white/10 shrink-0 shadow-sm pointer-events-none">
+            <span class="md:hidden absolute -top-1 -right-1 text-[9px] bg-amber-500 text-black font-black rounded-full w-4 h-4 flex items-center justify-center shadow pointer-events-none">↑</span>
+          </div>
+          <div class="min-w-0 flex-1 pointer-events-none">
             <div class="flex items-center gap-1.5">
               <p class="text-xs sm:text-sm font-bold text-white truncate group-hover:text-amber-300 transition" title="${escapeHtml(song.title)}">
                 ${escapeHtml(song.title)}
@@ -499,10 +505,10 @@ function renderQueueList(queue) {
         <div class="flex items-center gap-1 sm:gap-2 shrink-0">
           <span class="font-mono text-xs text-gray-400 hidden lg:inline">${song.duration || '3:30'}</span>
           ${vipButtonHtml}
-          <button onclick="castSongDirect(${i})" class="tactile-btn-gold text-[10.5px] sm:text-xs py-1.5 px-2.5 sm:px-3 font-black whitespace-nowrap flex items-center gap-1 shadow-[0_0_12px_rgba(245,158,11,0.25)] hover:scale-105 active:scale-95 transition rounded-xl" title="Hacer sonar en la TV ahora mismo">
+          <button onclick="castSongDirect(${i})" style="touch-action: none;" class="cast-force-lock tactile-btn-gold text-[10.5px] sm:text-xs py-1.5 px-2.5 sm:px-3 font-black whitespace-nowrap flex items-center gap-1 shadow-[0_0_12px_rgba(245,158,11,0.25)] hover:scale-105 active:scale-95 transition rounded-xl" title="Toca o arrastra hacia arriba para sonar en la TV">
             <span class="text-xs">▶</span> <span>Sonar</span>
           </button>
-          <button onclick="removeQueueItem('${song.id}')" class="text-gray-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-white/10 transition shrink-0" title="Eliminar de la cola">
+          <button onclick="removeQueueItem('${song.id}')" style="touch-action: pan-y;" class="no-cast-drag text-gray-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-white/10 transition shrink-0" title="Eliminar de la cola">
             ✕
           </button>
         </div>
@@ -637,6 +643,33 @@ function playMobileWhooshSound() {
   } catch (err) {}
 }
 
+let touchCastLockMode = true;
+
+function toggleTouchCastLockMode() {
+  touchCastLockMode = !touchCastLockMode;
+  const btn = document.getElementById('btnToggleTouchCastMode');
+  const icon = document.getElementById('touchCastModeIcon');
+  const text = document.getElementById('touchCastModeText');
+
+  if (touchCastLockMode) {
+    if (icon) icon.textContent = '🚀';
+    if (text) text.textContent = 'Lanzar con Dedo (Cola Fija)';
+    if (btn) {
+      btn.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/30 to-orange-500/30 border border-amber-400 text-[10px] sm:text-xs font-black text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.3)] active:scale-95 transition';
+    }
+    showAdminToast('🚀 Cola fija activada: Arrastra cualquier canción al TV sin que se mueva la lista', '🔒');
+  } else {
+    if (icon) icon.textContent = '↕️';
+    if (text) text.textContent = 'Modo Mover Lista (Toca para fijar)';
+    if (btn) {
+      btn.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/25 text-[10px] sm:text-xs font-bold text-gray-200 active:scale-95 transition';
+    }
+    showAdminToast('↕️ Modo deslizar lista activado (aún puedes lanzar desde la carátula o botón Sonar)', '📜');
+  }
+
+  renderQueueList(currentQueueState);
+}
+
 let touchCastState = {
   active: false,
   card: null,
@@ -644,9 +677,11 @@ let touchCastState = {
   index: -1,
   startY: 0,
   startX: 0,
+  lastY: 0,
   deltaY: 0,
   deltaX: 0,
   isDraggingUp: false,
+  lockScroll: true,
   rect: null
 };
 
@@ -655,23 +690,31 @@ function onWindowTouchMove(e) {
   const touch = e.touches[0];
   const deltaY = touch.clientY - touchCastState.startY;
   const deltaX = touch.clientX - touchCastState.startX;
+  const stepY = touch.clientY - touchCastState.lastY;
+  touchCastState.lastY = touch.clientY;
   touchCastState.deltaY = deltaY;
   touchCastState.deltaX = deltaX;
 
-  // Si el usuario mueve hacia arriba más de 12px y el movimiento es más vertical que horizontal
-  if (!touchCastState.isDraggingUp && deltaY < -12 && Math.abs(deltaY) > Math.abs(deltaX)) {
+  // CRÍTICO EN iPHONE (iOS Safari): Cancelar el evento en el Frame 1 ANTES de que WebKit inicie el scroll nativo
+  if (touchCastState.lockScroll || touchCastState.isDraggingUp || deltaY < 0) {
+    if (e.cancelable) e.preventDefault();
+  }
+
+  // Si aún no ha despegado hacia arriba y el usuario desliza hacia ABAJO (> 8px), permitir subir la página suavemente
+  if (!touchCastState.isDraggingUp && deltaY > 8 && Math.abs(deltaY) > Math.abs(deltaX)) {
+    window.scrollBy(0, -stepY);
+    return;
+  }
+
+  // Despegue instantáneo a los -4px hacia arriba: la columna jamás se mueve
+  if (!touchCastState.isDraggingUp && deltaY < -4 && (touchCastState.lockScroll || Math.abs(deltaY) > Math.abs(deltaX))) {
     touchCastState.isDraggingUp = true;
 
-    // 1. Congelar completamente el scroll de la página y cola para que NO se muevan
-    document.body.style.overflow = 'hidden';
-    const mainArea = document.getElementById('adminMainArea');
-    if (mainArea) mainArea.style.overflow = 'hidden';
-
-    // 2. Mostrar portal superior en el teléfono
+    // 1. Mostrar portal superior en el teléfono
     const portal = document.getElementById('castDropPortal');
     if (portal) portal.classList.remove('-translate-y-full');
 
-    // 3. Crear clon flotante desacoplado de la lista con position: fixed
+    // 2. Crear clon 3D flotante desacoplado de la lista con position: fixed
     const card = touchCastState.card;
     const rect = card.getBoundingClientRect();
     touchCastState.rect = rect;
@@ -686,31 +729,39 @@ function onWindowTouchMove(e) {
     clone.style.margin = '0';
     clone.style.zIndex = '9999';
     clone.style.pointerEvents = 'none';
-    clone.style.boxShadow = '0 0 50px rgba(245, 158, 11, 0.95), 0 15px 40px rgba(0,0,0,0.8)';
+    clone.style.overflow = 'visible';
+    clone.style.boxShadow = '0 0 50px rgba(245, 158, 11, 0.95), 0 18px 45px rgba(0,0,0,0.9)';
     clone.style.border = '2px solid rgba(245, 158, 11, 1)';
     clone.style.background = '#0e1118';
-    clone.style.borderRadius = '1.25rem';
+    clone.style.borderRadius = '1rem';
     clone.style.transition = 'none';
+    clone.style.willChange = 'transform';
+
+    // Etiqueta flotante neón sobre la tarjeta que llevas en el dedo
+    const floatingBadge = document.createElement('div');
+    floatingBadge.className = 'absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-black text-[9.5px] font-black px-3 py-0.5 rounded-full shadow-[0_0_20px_rgba(245,158,11,0.9)] whitespace-nowrap uppercase tracking-wider flex items-center gap-1';
+    floatingBadge.innerHTML = '<span>🚀</span> <span>¡Suelta para sonar en TV!</span>';
+    clone.appendChild(floatingBadge);
+
     document.body.appendChild(clone);
     touchCastState.clone = clone;
 
-    // 4. Atenuar la tarjeta original fija en la lista para que sirva de guía
-    card.style.opacity = '0.2';
-    card.style.filter = 'grayscale(0.7)';
+    // 3. Dejar la ranura guía fija en la cola (la columna no se mueve ni 1px)
+    card.style.opacity = '0.18';
+    card.style.filter = 'grayscale(0.8)';
+    card.style.borderStyle = 'dashed';
   }
 
-  // Si ya estamos arrastrando la tarjeta flotante
+  // Mover el clon 3D con aceleración por hardware (60/120fps en iPhone)
   if (touchCastState.isDraggingUp) {
-    if (e.cancelable) e.preventDefault();
-
     const clone = touchCastState.clone;
     if (clone) {
-      const progress = Math.min(1, Math.abs(deltaY) / 220);
-      const scale = Math.max(0.78, 1 - (progress * 0.15));
-      const tilt = Math.max(-10, Math.min(10, deltaX * 0.06));
+      const progress = Math.min(1, Math.abs(deltaY) / 180);
+      const scale = 1.03 - (progress * 0.14);
+      const tilt = Math.max(-8, Math.min(8, deltaX * 0.05));
 
-      clone.style.transform = `translate(${deltaX * 0.35}px, ${deltaY}px) scale(${scale}) rotate(${tilt}deg)`;
-      clone.style.boxShadow = `0 0 ${30 + progress * 40}px rgba(245, 158, 11, ${0.6 + progress * 0.4}), 0 20px 50px rgba(0,0,0,0.9)`;
+      clone.style.transform = `translate3d(${deltaX * 0.4}px, ${deltaY}px, 0) scale(${scale}) rotate(${tilt}deg)`;
+      clone.style.boxShadow = `0 0 ${35 + progress * 45}px rgba(245, 158, 11, ${0.7 + progress * 0.3}), 0 22px 50px rgba(0,0,0,0.95)`;
     }
   }
 }
@@ -723,11 +774,6 @@ function onWindowTouchEnd(e) {
   window.removeEventListener('touchend', onWindowTouchEnd);
   window.removeEventListener('touchcancel', onWindowTouchEnd);
 
-  // Restaurar scroll de la página y cola
-  document.body.style.overflow = '';
-  const mainArea = document.getElementById('adminMainArea');
-  if (mainArea) mainArea.style.overflow = '';
-
   const portal = document.getElementById('castDropPortal');
   if (portal) portal.classList.add('-translate-y-full');
 
@@ -735,11 +781,13 @@ function onWindowTouchEnd(e) {
   touchCastState.active = false;
 
   if (isDraggingUp && clone) {
-    // Si arrastró suficiente hacia arriba (> 65px)
-    if (deltaY < -65) {
-      // Disparo supersónico hacia arriba fuera de la pantalla
-      clone.style.transition = 'all 0.38s cubic-bezier(0.16, 1, 0.3, 1)';
-      clone.style.transform = `translate(${deltaX * 0.35}px, -150vh) scale(0.3) rotate(-12deg)`;
+    // Evitar que el click fantasma dispare botones debajo al soltar el arrastre
+    if (e && e.cancelable) e.preventDefault();
+
+    // Umbral cómodo de -38px hacia arriba: disparo supersónico directo al TV
+    if (deltaY < -38) {
+      clone.style.transition = 'all 0.36s cubic-bezier(0.16, 1, 0.3, 1)';
+      clone.style.transform = `translate3d(${deltaX * 0.35}px, -140vh, 0) scale(0.25) rotate(-10deg)`;
       clone.style.opacity = '0';
 
       setTimeout(() => {
@@ -747,34 +795,41 @@ function onWindowTouchEnd(e) {
         if (card) {
           card.style.opacity = '';
           card.style.filter = '';
+          card.style.borderStyle = '';
         }
-      }, 380);
+      }, 360);
 
       castSongDirect(index);
       return;
     }
 
-    // Si no superó el umbral, regresa suavemente a su lugar original
-    clone.style.transition = 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
-    clone.style.transform = 'translate(0, 0) scale(1) rotate(0deg)';
+    // Si apenas la levantó (< 38px), regresa suavemente a su ranura fija
+    clone.style.transition = 'all 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
+    clone.style.transform = 'translate3d(0, 0, 0) scale(1) rotate(0deg)';
     setTimeout(() => {
       clone.remove();
       if (card) {
         card.style.opacity = '';
         card.style.filter = '';
+        card.style.borderStyle = '';
       }
-    }, 250);
+    }, 220);
   } else if (card) {
     card.style.opacity = '';
     card.style.filter = '';
+    card.style.borderStyle = '';
   }
 }
 
 function initCardTouchCast(e, index) {
-  if (e.target.closest('button, input, select, a')) return;
+  // Ignorar solo botones de reordenar (▲ ▼), VIP o eliminar (✕)
+  if (e.target.closest('.no-cast-drag, input, select, a')) return;
   const touch = e.touches[0];
   const card = document.getElementById(`queue-row-${index}`);
   if (!card) return;
+
+  // Si toca la carátula o el botón Sonar, o si está activo el Modo Cola Fija, bloqueamos el scroll desde el Frame 0
+  const isForceZone = Boolean(e.target.closest('.cast-force-lock'));
 
   touchCastState = {
     active: true,
@@ -783,15 +838,16 @@ function initCardTouchCast(e, index) {
     index,
     startY: touch.clientY,
     startX: touch.clientX,
+    lastY: touch.clientY,
     deltaY: 0,
     deltaX: 0,
     isDraggingUp: false,
+    lockScroll: touchCastLockMode || isForceZone,
     rect: null
   };
 
-  // Registrar listeners en window con { passive: false } para poder cancelar el scroll nativo de Safari/Chrome
   window.addEventListener('touchmove', onWindowTouchMove, { passive: false });
-  window.addEventListener('touchend', onWindowTouchEnd);
+  window.addEventListener('touchend', onWindowTouchEnd, { passive: false });
   window.addEventListener('touchcancel', onWindowTouchEnd);
 }
 
