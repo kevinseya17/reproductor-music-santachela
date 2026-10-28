@@ -464,8 +464,6 @@ function renderQueueList(queue) {
            ondrop="handleQueueDrop(event, ${i})"
            ondragend="handleQueueDragEnd(event)"
            ontouchstart="initCardTouchCast(event, ${i})"
-           ontouchmove="handleCardTouchMove(event, ${i})"
-           ontouchend="endCardTouchCast(event, ${i})"
            class="queue-row flex items-center justify-between p-2 sm:p-3 rounded-2xl ${rowBorderClass} gap-1.5 sm:gap-3 group select-none cursor-grab active:cursor-grabbing transition-all relative overflow-hidden">
         
         <!-- Izquierda: Agarre (Grip Handle), Botones de Reordenar ▲ ▼ y Número 1., 2., 3. -->
@@ -642,12 +640,135 @@ function playMobileWhooshSound() {
 let touchCastState = {
   active: false,
   card: null,
+  clone: null,
   index: -1,
   startY: 0,
   startX: 0,
   deltaY: 0,
-  isDraggingUp: false
+  deltaX: 0,
+  isDraggingUp: false,
+  rect: null
 };
+
+function onWindowTouchMove(e) {
+  if (!touchCastState.active) return;
+  const touch = e.touches[0];
+  const deltaY = touch.clientY - touchCastState.startY;
+  const deltaX = touch.clientX - touchCastState.startX;
+  touchCastState.deltaY = deltaY;
+  touchCastState.deltaX = deltaX;
+
+  // Si el usuario mueve hacia arriba más de 12px y el movimiento es más vertical que horizontal
+  if (!touchCastState.isDraggingUp && deltaY < -12 && Math.abs(deltaY) > Math.abs(deltaX)) {
+    touchCastState.isDraggingUp = true;
+
+    // 1. Congelar completamente el scroll de la página y cola para que NO se muevan
+    document.body.style.overflow = 'hidden';
+    const mainArea = document.getElementById('adminMainArea');
+    if (mainArea) mainArea.style.overflow = 'hidden';
+
+    // 2. Mostrar portal superior en el teléfono
+    const portal = document.getElementById('castDropPortal');
+    if (portal) portal.classList.remove('-translate-y-full');
+
+    // 3. Crear clon flotante desacoplado de la lista con position: fixed
+    const card = touchCastState.card;
+    const rect = card.getBoundingClientRect();
+    touchCastState.rect = rect;
+
+    const clone = card.cloneNode(true);
+    clone.id = 'activeCastClone';
+    clone.style.position = 'fixed';
+    clone.style.left = `${rect.left}px`;
+    clone.style.top = `${rect.top}px`;
+    clone.style.width = `${rect.width}px`;
+    clone.style.height = `${rect.height}px`;
+    clone.style.margin = '0';
+    clone.style.zIndex = '9999';
+    clone.style.pointerEvents = 'none';
+    clone.style.boxShadow = '0 0 50px rgba(245, 158, 11, 0.95), 0 15px 40px rgba(0,0,0,0.8)';
+    clone.style.border = '2px solid rgba(245, 158, 11, 1)';
+    clone.style.background = '#0e1118';
+    clone.style.borderRadius = '1.25rem';
+    clone.style.transition = 'none';
+    document.body.appendChild(clone);
+    touchCastState.clone = clone;
+
+    // 4. Atenuar la tarjeta original fija en la lista para que sirva de guía
+    card.style.opacity = '0.2';
+    card.style.filter = 'grayscale(0.7)';
+  }
+
+  // Si ya estamos arrastrando la tarjeta flotante
+  if (touchCastState.isDraggingUp) {
+    if (e.cancelable) e.preventDefault();
+
+    const clone = touchCastState.clone;
+    if (clone) {
+      const progress = Math.min(1, Math.abs(deltaY) / 220);
+      const scale = Math.max(0.78, 1 - (progress * 0.15));
+      const tilt = Math.max(-10, Math.min(10, deltaX * 0.06));
+
+      clone.style.transform = `translate(${deltaX * 0.35}px, ${deltaY}px) scale(${scale}) rotate(${tilt}deg)`;
+      clone.style.boxShadow = `0 0 ${30 + progress * 40}px rgba(245, 158, 11, ${0.6 + progress * 0.4}), 0 20px 50px rgba(0,0,0,0.9)`;
+    }
+  }
+}
+
+function onWindowTouchEnd(e) {
+  if (!touchCastState.active) return;
+
+  // Remover listeners de ventana
+  window.removeEventListener('touchmove', onWindowTouchMove, { passive: false });
+  window.removeEventListener('touchend', onWindowTouchEnd);
+  window.removeEventListener('touchcancel', onWindowTouchEnd);
+
+  // Restaurar scroll de la página y cola
+  document.body.style.overflow = '';
+  const mainArea = document.getElementById('adminMainArea');
+  if (mainArea) mainArea.style.overflow = '';
+
+  const portal = document.getElementById('castDropPortal');
+  if (portal) portal.classList.add('-translate-y-full');
+
+  const { card, clone, deltaY, deltaX, isDraggingUp, index } = touchCastState;
+  touchCastState.active = false;
+
+  if (isDraggingUp && clone) {
+    // Si arrastró suficiente hacia arriba (> 65px)
+    if (deltaY < -65) {
+      // Disparo supersónico hacia arriba fuera de la pantalla
+      clone.style.transition = 'all 0.38s cubic-bezier(0.16, 1, 0.3, 1)';
+      clone.style.transform = `translate(${deltaX * 0.35}px, -150vh) scale(0.3) rotate(-12deg)`;
+      clone.style.opacity = '0';
+
+      setTimeout(() => {
+        clone.remove();
+        if (card) {
+          card.style.opacity = '';
+          card.style.filter = '';
+        }
+      }, 380);
+
+      castSongDirect(index);
+      return;
+    }
+
+    // Si no superó el umbral, regresa suavemente a su lugar original
+    clone.style.transition = 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+    clone.style.transform = 'translate(0, 0) scale(1) rotate(0deg)';
+    setTimeout(() => {
+      clone.remove();
+      if (card) {
+        card.style.opacity = '';
+        card.style.filter = '';
+      }
+    }, 250);
+  } else if (card) {
+    card.style.opacity = '';
+    card.style.filter = '';
+  }
+}
 
 function initCardTouchCast(e, index) {
   if (e.target.closest('button, input, select, a')) return;
@@ -658,64 +779,20 @@ function initCardTouchCast(e, index) {
   touchCastState = {
     active: true,
     card,
+    clone: null,
     index,
     startY: touch.clientY,
     startX: touch.clientX,
     deltaY: 0,
-    isDraggingUp: false
+    deltaX: 0,
+    isDraggingUp: false,
+    rect: null
   };
-}
 
-function handleCardTouchMove(e, index) {
-  if (!touchCastState.active || touchCastState.index !== index) return;
-  const touch = e.touches[0];
-  const deltaY = touch.clientY - touchCastState.startY;
-  const deltaX = touch.clientX - touchCastState.startX;
-  touchCastState.deltaY = deltaY;
-
-  // Si se mueve hacia arriba más de 12px y el movimiento vertical supera el horizontal
-  if (deltaY < -12 && Math.abs(deltaY) > Math.abs(deltaX)) {
-    touchCastState.isDraggingUp = true;
-    e.preventDefault(); // Prevenir scroll nativo
-
-    // Mostrar portal en el tope de la pantalla
-    const portal = document.getElementById('castDropPortal');
-    if (portal) portal.classList.remove('-translate-y-full');
-
-    const card = touchCastState.card;
-    const progress = Math.min(1, Math.abs(deltaY) / 180);
-    const scale = 1 - (progress * 0.12);
-    const tilt = (deltaX * 0.05);
-
-    card.style.transition = 'none';
-    card.style.transform = `translate(${deltaX * 0.25}px, ${deltaY}px) scale(${scale}) rotate(${tilt}deg)`;
-    card.style.boxShadow = `0 0 ${20 + progress * 35}px rgba(245, 158, 11, ${0.4 + progress * 0.5})`;
-    card.style.zIndex = '100';
-    card.style.borderColor = 'rgba(245, 158, 11, 0.9)';
-  }
-}
-
-function endCardTouchCast(e, index) {
-  if (!touchCastState.active || touchCastState.index !== index) return;
-  const portal = document.getElementById('castDropPortal');
-  if (portal) portal.classList.add('-translate-y-full');
-
-  const card = touchCastState.card;
-  const deltaY = touchCastState.deltaY;
-  const wasDraggingUp = touchCastState.isDraggingUp;
-  touchCastState.active = false;
-
-  // Umbral de lanzamiento: si arrastró hacia arriba más de 75px
-  if (wasDraggingUp && deltaY < -75) {
-    castSongDirect(index);
-  } else if (card) {
-    // Devolver suavemente a su lugar
-    card.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
-    card.style.transform = '';
-    card.style.boxShadow = '';
-    card.style.zIndex = '';
-    card.style.borderColor = '';
-  }
+  // Registrar listeners en window con { passive: false } para poder cancelar el scroll nativo de Safari/Chrome
+  window.addEventListener('touchmove', onWindowTouchMove, { passive: false });
+  window.addEventListener('touchend', onWindowTouchEnd);
+  window.addEventListener('touchcancel', onWindowTouchEnd);
 }
 
 function castSongDirect(index) {
