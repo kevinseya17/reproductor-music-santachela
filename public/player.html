@@ -156,17 +156,35 @@
     <p class="text-sm text-gray-400 max-w-sm mb-8 leading-relaxed">
       Esta pantalla reproduce el video oficial y sonido de Santa Chela. No se puede abrir desde celulares para evitar desconectar o interrumpir la música del bar.
     </p>
-    <a href="/" class="w-full max-w-xs bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold py-4 px-6 rounded-2xl text-sm shadow-xl shadow-amber-500/25 transition-all flex items-center justify-center gap-2">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+    <button onclick="returnToOriginPanel()" class="w-full max-w-xs bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold py-4 px-6 rounded-2xl text-sm shadow-xl shadow-amber-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
       </svg>
-      Pedir Música desde mi Celular
-    </a>
+      <span id="mobileBlockBackText">Volver al Panel de Control</span>
+    </button>
     <p class="text-[11px] text-gray-600 mt-6">
       Santa Chela Music Bar • Reproductor Protegido
     </p>
   </div>
   <script>
+    function returnToOriginPanel() {
+      var params = new URLSearchParams(window.location.search);
+      var ref = document.referrer || '';
+      if (window.history.length > 1 && ref) {
+        window.history.back();
+        return;
+      }
+      if (ref) {
+        window.location.href = ref;
+        return;
+      }
+      if (params.get('from') === 'client') {
+        window.location.href = '/';
+        return;
+      }
+      window.location.href = '/admin.html';
+    }
+
     if (window.__IS_MOBILE_BLOCKED__) {
       var modal = document.getElementById('mobileBlockModal');
       if (modal) {
