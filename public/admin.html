@@ -39,6 +39,9 @@
         <span id="micModeIcon" class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>
         <span id="micModeText" class="hidden sm:inline">Modo Micrófono</span>
       </button>
+      <button id="btnTopRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark text-xs py-1.5 px-3 flex items-center gap-1.5 text-amber-300 hover:text-amber-200 border border-amber-500/30" title="Activar o desactivar Pantalla Completa en la TV">
+        <span id="topFullscreenIcon">⛶</span> <span id="topFullscreenText" class="hidden sm:inline">TV Fullscreen</span>
+      </button>
       <a href="/player.html" target="_blank" class="tactile-btn-dark text-xs py-1.5 px-3 flex items-center gap-1.5" title="Abrir pantalla para la TV">
         <span>📺</span> <span class="hidden sm:inline">Pantalla TV</span>
       </a>
@@ -217,6 +220,14 @@
                 <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">NEXT</span>
                 <button onclick="skipCurrentSong()" class="tactile-btn-dark px-4 sm:px-5 py-2 text-xs sm:text-sm hover:border-amber-400/60" title="Saltar a la siguiente canción">
                   ⏭️ Saltar
+                </button>
+              </div>
+
+              <!-- PANTALLA COMPLETA TV -->
+              <div class="flex flex-col items-center gap-1">
+                <span class="text-[9px] font-black uppercase text-amber-400 tracking-wider">PANTALLA TV</span>
+                <button id="btnDeckRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark px-3.5 sm:px-4 py-2 text-xs sm:text-sm hover:border-amber-400/60 flex items-center gap-1.5 text-amber-300" title="Activar o desactivar Pantalla Completa en el televisor">
+                  <span id="deckFullscreenIcon">⛶</span> <span id="deckFullscreenText" class="font-bold">Pantalla Completa</span>
                 </button>
               </div>
 
@@ -572,6 +583,34 @@
     <!-- PESTAÑA: CONTROL DE MESAS, HORARIOS & TV -->
     <!-- ============================================== -->
     <div id="tabContentControl" class="hidden space-y-6">
+      
+      <!-- Panel Destacado: Control de Pantalla TV & Modo Pantalla Completa -->
+      <div class="glass-card p-5 sm:p-6 space-y-4 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-black/40 to-black/40 shadow-xl">
+        <div class="border-b border-white/10 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              <span>📺</span> Control de Pantalla TV & Pantalla Completa
+            </h3>
+            <p class="text-xs text-gray-400">Controla la visualización del televisor de forma remota desde este panel de administración.</p>
+          </div>
+          <span id="tabTvStatusBadge" class="text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 w-fit">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> TV Conectada
+          </span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="remoteToggleFullscreen()" class="tactile-btn-gold text-xs sm:text-sm px-5 py-2.5 flex items-center gap-2 font-black shadow-lg">
+            <span id="tabFullscreenIcon">⛶</span> <span id="tabFullscreenText">Alternar Pantalla Completa en TV</span>
+          </button>
+          <a href="/player.html" target="_blank" class="tactile-btn-dark text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2 font-bold hover:border-amber-400/50">
+            <span>📺</span> <span>Abrir Pantalla TV en Nueva Ventana</span>
+          </a>
+        </div>
+        <p class="text-[11px] text-gray-400 leading-relaxed">
+          💡 <strong>Tip pro:</strong> Al presionar este botón, el televisor alternará automáticamente a modo cine en pantalla completa. También puedes presionar la tecla <strong>F</strong> o hacer doble clic directamente sobre la pantalla de la TV.
+        </p>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <!-- 1. Control de Mesas & Anti-Spam -->

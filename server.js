@@ -1309,6 +1309,11 @@ io.on('connection', (socket) => {
     io.emit('player-control', data);
   });
 
+  // Estado de pantalla completa del TV reportado a la consola DJ
+  socket.on('player-fullscreen-status', (data) => {
+    io.emit('tv-fullscreen-status', data);
+  });
+
   // Progreso en tiempo real desde el reproductor TV hacia la consola DJ
   socket.on('player-progress', (data) => {
     io.emit('player-telemetry', data);

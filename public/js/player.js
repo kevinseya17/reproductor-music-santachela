@@ -203,20 +203,92 @@ function toggleFullscreen() {
     const el = document.documentElement;
     const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
     if (req) {
-      req.call(el).catch(err => console.log('Error activando pantalla completa:', err));
+      req.call(el).catch(err => {
+        console.warn('Error activando pantalla completa:', err);
+        showFullscreenClickPrompt();
+      });
     }
   } else {
     const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
     if (exit) {
-      exit.call(document).catch(err => console.log('Error saliendo de pantalla completa:', err));
+      exit.call(document).catch(err => console.warn('Error saliendo de pantalla completa:', err));
     }
   }
 }
 
-// Interceptar si el iframe de YouTube entra en pantalla completa de forma aislada
+let fullscreenPromptTimeout = null;
+
+function showFullscreenClickPrompt() {
+  let promptEl = document.getElementById('remoteFullscreenPrompt');
+  if (!promptEl) {
+    promptEl = document.createElement('div');
+    promptEl.id = 'remoteFullscreenPrompt';
+    promptEl.className = 'fixed top-10 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-black px-8 py-4 rounded-3xl font-black text-base sm:text-xl shadow-[0_0_80px_rgba(245,158,11,0.95)] flex items-center gap-3.5 cursor-pointer animate-bounce border-2 border-white select-none';
+    promptEl.innerHTML = `
+      <span class="text-3xl">⛶</span>
+      <span>Toca la pantalla para activar Pantalla Completa</span>
+    `;
+    promptEl.onclick = (e) => {
+      e.stopPropagation();
+      toggleFullscreen();
+      promptEl.remove();
+    };
+    document.body.appendChild(promptEl);
+  }
+
+  clearTimeout(fullscreenPromptTimeout);
+  fullscreenPromptTimeout = setTimeout(() => {
+    if (promptEl && promptEl.parentNode) promptEl.remove();
+  }, 12000);
+
+  const oneClickFullscreen = (e) => {
+    if (e.target.closest('button, input, select, a')) return;
+    toggleFullscreen();
+    if (promptEl && promptEl.parentNode) promptEl.remove();
+    document.removeEventListener('click', oneClickFullscreen);
+  };
+  setTimeout(() => {
+    document.addEventListener('click', oneClickFullscreen, { once: true });
+  }, 100);
+}
+
+function handleRemoteFullscreen() {
+  const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  if (isFull) {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    if (exit) {
+      exit.call(document).catch(err => console.warn('Error saliendo de pantalla completa:', err));
+    }
+  } else {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (req) {
+      try {
+        const promise = req.call(el);
+        if (promise && typeof promise.catch === 'function') {
+          promise.catch((err) => {
+            console.warn('Pantalla completa remota requiere interacción de usuario:', err);
+            showFullscreenClickPrompt();
+          });
+        }
+      } catch (err) {
+        showFullscreenClickPrompt();
+      }
+    }
+  }
+}
+
+// Interceptar cambios de pantalla completa y reportar a la consola de DJ
 ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
   document.addEventListener(evt, () => {
     const cur = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+    const isFull = !!cur;
+    
+    // Notificar al server / admin panel
+    if (typeof socket !== 'undefined' && socket.connected) {
+      socket.emit('player-fullscreen-status', { isFullscreen: isFull });
+    }
+
     // Si el elemento maximizado es el iframe de YouTube, corregirlo para que sea toda la página web
     if (cur && cur.tagName === 'IFRAME') {
       const exit = document.exitFullscreen || document.webkitExitFullscreen;
@@ -227,6 +299,12 @@ function toggleFullscreen() {
       }
     }
   });
+});
+
+// Reportar estado inicial al conectarse el socket
+socket.on('connect', () => {
+  const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  socket.emit('player-fullscreen-status', { isFullscreen: isFull });
 });
 
 // Doble clic en cualquier parte de la pantalla para alternar pantalla completa limpia
@@ -357,8 +435,15 @@ function startProgressMonitor() {
 
 // 4. Control Remoto desde la Consola de DJ (Comandos en vivo)
 socket.on('player-control', (data) => {
-  if (!ytPlayer || !isPlayerReady) return;
   const { command, value } = data || {};
+
+  // Comando de Pantalla Completa (independiente de si YouTube está listo o reproduciendo)
+  if (command === 'fullscreen' || command === 'toggleFullscreen') {
+    handleRemoteFullscreen();
+    return;
+  }
+
+  if (!ytPlayer || !isPlayerReady) return;
 
   try {
     if (command === 'play') {

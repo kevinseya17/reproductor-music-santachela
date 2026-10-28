@@ -29,6 +29,9 @@ function setupSocket() {
   socket.on('player-telemetry', (data) => {
     updatePlayerTelemetry(data);
   });
+  socket.on('tv-fullscreen-status', (data) => {
+    updateTvFullscreenUI(data?.isFullscreen);
+  });
 }
 
 async function loadInitialData() {
@@ -241,6 +244,43 @@ function onVolumeChange(val) {
   const volDisplay = document.getElementById('adminVolumeDisplay');
   if (volDisplay) volDisplay.textContent = `${vol}%`;
   socket.emit('player-command', { command: 'volume', value: vol });
+}
+
+// Control Remoto de Pantalla Completa para la TV
+let isTvFullscreen = false;
+
+function remoteToggleFullscreen() {
+  socket.emit('player-command', { command: 'fullscreen' });
+  const actionText = isTvFullscreen ? 'Saliendo de pantalla completa...' : 'Activando pantalla completa en TV...';
+  showAdminToast(actionText, '⛶');
+}
+
+function updateTvFullscreenUI(isFullscreen) {
+  isTvFullscreen = !!isFullscreen;
+
+  // Actualizar botón del header
+  const topIcon = document.getElementById('topFullscreenIcon');
+  const topText = document.getElementById('topFullscreenText');
+  if (topIcon && topText) {
+    topIcon.textContent = isTvFullscreen ? '🗗' : '⛶';
+    topText.textContent = isTvFullscreen ? 'Salir Fullscreen' : 'TV Fullscreen';
+  }
+
+  // Actualizar botón del deck
+  const deckIcon = document.getElementById('deckFullscreenIcon');
+  const deckText = document.getElementById('deckFullscreenText');
+  if (deckIcon && deckText) {
+    deckIcon.textContent = isTvFullscreen ? '🗗' : '⛶';
+    deckText.textContent = isTvFullscreen ? 'Salir Fullscreen' : 'Pantalla Completa';
+  }
+
+  // Actualizar botón de la pestaña control
+  const tabIcon = document.getElementById('tabFullscreenIcon');
+  const tabText = document.getElementById('tabFullscreenText');
+  if (tabIcon && tabText) {
+    tabIcon.textContent = isTvFullscreen ? '🗗' : '⛶';
+    tabText.textContent = isTvFullscreen ? 'Salir de Pantalla Completa en TV' : 'Alternar Pantalla Completa en TV';
+  }
 }
 
 // Modo Micrófono / Ducking
