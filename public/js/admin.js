@@ -271,7 +271,7 @@ function updateTvFullscreenUI(isFullscreen) {
   const deckText = document.getElementById('deckFullscreenText');
   if (deckIcon && deckText) {
     deckIcon.textContent = isTvFullscreen ? '🗗' : '⛶';
-    deckText.textContent = isTvFullscreen ? 'Salir Fullscreen' : 'Pantalla Completa';
+    deckText.textContent = isTvFullscreen ? 'Salir Full' : 'TV Full';
   }
 
   // Actualizar botón de la pestaña control

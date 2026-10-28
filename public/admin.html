@@ -25,42 +25,43 @@
     </div>
   </div>
 
-  <!-- Topbar Minimalista -->
-  <header class="glass-header px-4 lg:px-6 py-2.5 flex items-center justify-between border-b border-white/10 z-30 shrink-0">
-    <div class="flex items-center gap-3">
+  <!-- Topbar Minimalista (1 sola línea limpia en móvil y PC) -->
+  <header class="glass-header px-3 sm:px-4 lg:px-6 py-2.5 flex items-center justify-between gap-2 border-b border-white/10 z-30 shrink-0">
+    <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
       <!-- Botón móvil para abrir sidebar -->
-      <button onclick="toggleSidebarMobile()" class="lg:hidden text-gray-300 hover:text-white p-1.5 rounded-xl bg-white/5 border border-white/10" aria-label="Abrir Menú">
+      <button onclick="toggleSidebarMobile()" class="lg:hidden text-gray-300 hover:text-white p-1.5 rounded-xl bg-white/5 border border-white/10 shrink-0" aria-label="Abrir Menú">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
 
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-extrabold text-sm shadow-[0_0_12px_rgba(245,158,11,0.3)]">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-extrabold text-xs sm:text-sm shadow-[0_0_12px_rgba(245,158,11,0.3)] shrink-0">
           ⚡
         </div>
-        <div>
-          <h1 class="text-sm sm:text-base font-extrabold text-white tracking-wider flex items-center gap-2">
-            <span id="adminBarName">Santa Chela Music Bar</span>
-            <span class="text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-pulse">
-              EN VIVO
-            </span>
+        <div class="min-w-0 flex items-center gap-1.5 sm:gap-2">
+          <h1 id="adminBarName" class="text-xs sm:text-base font-extrabold text-white tracking-wide truncate">
+            Santa Chela Music Bar
           </h1>
+          <span class="shrink-0 inline-flex items-center gap-1 text-[8.5px] sm:text-[9px] uppercase tracking-wider font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 whitespace-nowrap">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>EN VIVO</span>
+          </span>
         </div>
       </div>
     </div>
 
     <!-- Accesos Rápidos Header -->
-    <div class="flex items-center gap-2">
-      <button id="btnMicMode" onclick="toggleMicMode()" class="btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3 transition" title="Atenuar música para hablar">
+    <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+      <button id="btnMicMode" onclick="toggleMicMode()" class="btn-secondary text-xs flex items-center justify-center gap-1.5 py-1.5 px-2 sm:px-3 transition" title="Atenuar música para hablar">
         <span id="micModeIcon" class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>
         <span id="micModeText" class="hidden sm:inline">Modo Micrófono</span>
       </button>
-      <button id="btnTopRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark text-xs py-1.5 px-3 flex items-center gap-1.5 text-amber-300 hover:text-amber-200 border border-amber-500/30" title="Activar o desactivar Pantalla Completa en la TV">
+      <button id="btnTopRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark text-xs py-1.5 px-2 sm:px-3 flex items-center justify-center gap-1.5 text-amber-300 hover:text-amber-200 border border-amber-500/30" title="Activar o desactivar Pantalla Completa en la TV">
         <span id="topFullscreenIcon">⛶</span> <span id="topFullscreenText" class="hidden sm:inline">TV Fullscreen</span>
       </button>
-      <a href="/player.html" target="_blank" class="tactile-btn-dark text-xs py-1.5 px-3 flex items-center gap-1.5" title="Abrir pantalla para la TV">
+      <a href="/player.html" target="_blank" class="tactile-btn-dark text-xs py-1.5 px-2 sm:px-3 flex items-center justify-center gap-1.5" title="Abrir pantalla para la TV">
         <span>📺</span> <span class="hidden sm:inline">Pantalla TV</span>
       </a>
-      <a href="/qrs.html" target="_blank" class="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5" title="Ver e imprimir códigos QR">
+      <a href="/qrs.html" target="_blank" class="btn-secondary text-xs py-1.5 px-2 sm:px-3 flex items-center justify-center gap-1.5" title="Ver e imprimir códigos QR">
         <span>🖨️</span> <span class="hidden sm:inline">QRs</span>
       </a>
     </div>
@@ -145,17 +146,17 @@
         <!-- ============================================================ -->
         <!-- REPRODUCTOR PRO HARDWARE DECK (ESTILO DARK GOLD TRAKTOR/DJ) -->
         <!-- ============================================================ -->
-        <div class="relative bg-gradient-to-b from-[#181b24] via-[#12141c] to-[#0e1017] rounded-3xl p-4 sm:p-7 border border-amber-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.6),0_0_25px_rgba(245,158,11,0.08)] space-y-4 sm:space-y-5">
+        <div class="relative bg-gradient-to-b from-[#181b24] via-[#12141c] to-[#0e1017] rounded-3xl p-4 sm:p-7 border border-amber-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.6),0_0_25px_rgba(245,158,11,0.08)] space-y-3.5 sm:space-y-5">
           
-          <!-- Header del Deck -->
-          <div class="flex items-center justify-between border-b border-white/10 pb-2.5 sm:pb-3">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#facc15] animate-pulse"></span>
-              <span class="text-[10px] sm:text-xs font-black tracking-[0.2em] text-amber-400 uppercase">NOW PLAYING • CONSOLA DJ</span>
+          <!-- Header del Deck (1 sola línea limpia) -->
+          <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5 sm:pb-3">
+            <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#facc15] animate-pulse shrink-0"></span>
+              <span class="text-[9.5px] sm:text-xs font-black tracking-[0.12em] sm:tracking-[0.2em] text-amber-400 uppercase whitespace-nowrap truncate">NOW PLAYING • CONSOLA DJ</span>
             </div>
-            <div class="flex items-center gap-1.5 sm:gap-2">
-              <span id="adminNowGenre" class="genre-badge genre-Salsa text-[9px] sm:text-[10px]">Salsa</span>
-              <span id="adminNowRequested" class="text-[10px] sm:text-[11px] text-gray-400"></span>
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <span id="adminNowGenre" class="genre-badge genre-Salsa text-[9px] sm:text-[10px] shrink-0">Salsa</span>
+              <span id="adminNowRequested" class="text-[9.5px] sm:text-[11px] text-gray-400 whitespace-nowrap truncate max-w-[105px] sm:max-w-none"></span>
             </div>
           </div>
 
@@ -180,7 +181,7 @@
             </div>
 
             <!-- Tiempo Numérico Grande (Estilo Display Digital) -->
-            <div class="bg-black/60 border border-white/10 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-right shrink-0 w-full sm:w-auto flex sm:flex-col items-center sm:items-end justify-between sm:justify-center">
+            <div class="bg-black/60 border border-white/10 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-right shrink-0 w-full sm:w-auto flex sm:flex-col items-center sm:items-end justify-between sm:justify-center">
               <div class="text-[9px] sm:text-[10px] uppercase tracking-widest text-gray-400 font-bold sm:mb-0.5">TIEMPO TRANSCURRIDO</div>
               <div class="font-mono text-lg sm:text-2xl font-black tracking-wider text-amber-400">
                 <span id="adminCurrentTime">00:00</span> <span class="text-gray-500 text-sm sm:text-base">/</span> <span id="adminTotalDuration" class="text-gray-300">00:00</span>
@@ -189,7 +190,7 @@
           </div>
 
           <!-- Barra de Progreso / Scrubber Interactivo -->
-          <div class="space-y-1.5 pt-1">
+          <div class="space-y-1.5 pt-0.5">
             <div class="relative flex items-center">
               <input type="range" id="adminPlayerScrubber" min="0" max="100" value="0" class="scrubber-slider" oninput="onScrubberInput(this.value)" onchange="onScrubberChange(this.value)">
             </div>
@@ -200,71 +201,76 @@
             </div>
           </div>
 
-          <!-- Botonera Táctil Neomórfica de Transporte (Estilo Hardware Físico) -->
-          <div class="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+          <!-- Botonera Táctil Simétrica (Grid Pro en Móvil / Hardware Deck en PC) -->
+          <div class="pt-3 border-t border-white/10 flex flex-col lg:flex-row lg:items-end justify-between gap-3">
             
-            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <!-- FILA 1: Controles de Pista [ ⏪ -10s ] [ ⏸ PAUSAR ] [ +10s ⏩ ] [ ⏭ Saltar ] -->
+            <div class="grid grid-cols-[1fr_1.35fr_1fr_1fr] gap-2 w-full sm:w-auto sm:flex sm:items-end sm:gap-3">
               
               <!-- REWIND -->
-              <div class="flex flex-col items-center gap-1">
-                <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">REWIND</span>
-                <button onclick="remoteSeek(-10)" class="tactile-btn-dark px-3.5 sm:px-4 py-2 text-xs sm:text-sm" title="Retroceder 10 segundos">
-                  ⏪ -10s
+              <div class="flex flex-col items-center gap-1 min-w-0">
+                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-gray-400 tracking-wider whitespace-nowrap">REWIND</span>
+                <button onclick="remoteSeek(-10)" class="tactile-btn-dark w-full sm:w-auto justify-center px-2 sm:px-4 py-2.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1 whitespace-nowrap" title="Retroceder 10 segundos">
+                  <span>⏪</span> <span>-10s</span>
                 </button>
               </div>
 
-              <!-- PLAY / PAUSE (GRANDE Y DORADO AL CENTRO) -->
-              <div class="flex flex-col items-center gap-1">
-                <span class="text-[9px] font-black uppercase text-amber-400 tracking-wider">PLAY / PAUSE</span>
-                <button id="btnPlayPause" onclick="togglePlayPauseRemote()" class="tactile-btn-gold px-7 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg flex items-center gap-2" title="Pausar o Reanudar">
+              <!-- PLAY / PAUSE (DESTACADO DORADO AL CENTRO) -->
+              <div class="flex flex-col items-center gap-1 min-w-0">
+                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-amber-400 tracking-wider whitespace-nowrap">PLAY / PAUSE</span>
+                <button id="btnPlayPause" onclick="togglePlayPauseRemote()" class="tactile-btn-gold w-full sm:w-auto justify-center px-3 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-lg flex items-center gap-1.5 whitespace-nowrap" title="Pausar o Reanudar">
                   <span id="btnPlayPauseIcon">⏸️</span>
-                  <span id="btnPlayPauseText" class="text-xs sm:text-sm uppercase tracking-wider font-black">PAUSAR</span>
+                  <span id="btnPlayPauseText" class="text-[11px] sm:text-sm uppercase tracking-wider font-black">PAUSAR</span>
                 </button>
               </div>
 
               <!-- FAST FORWARD -->
-              <div class="flex flex-col items-center gap-1">
-                <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">FAST FORWARD</span>
-                <button onclick="remoteSeek(10)" class="tactile-btn-dark px-3.5 sm:px-4 py-2 text-xs sm:text-sm" title="Adelantar 10 segundos">
-                  +10s ⏩
+              <div class="flex flex-col items-center gap-1 min-w-0">
+                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-gray-400 tracking-wider whitespace-nowrap">FAST FWD</span>
+                <button onclick="remoteSeek(10)" class="tactile-btn-dark w-full sm:w-auto justify-center px-2 sm:px-4 py-2.5 sm:py-2 text-xs sm:text-sm flex items-center gap-1 whitespace-nowrap" title="Adelantar 10 segundos">
+                  <span>+10s</span> <span>⏩</span>
                 </button>
               </div>
 
               <!-- NEXT / SALTAR -->
-              <div class="flex flex-col items-center gap-1">
-                <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">NEXT</span>
-                <button onclick="skipCurrentSong()" class="tactile-btn-dark px-4 sm:px-5 py-2 text-xs sm:text-sm hover:border-amber-400/60" title="Saltar a la siguiente canción">
-                  ⏭️ Saltar
-                </button>
-              </div>
-
-              <!-- PANTALLA COMPLETA TV -->
-              <div class="flex flex-col items-center gap-1">
-                <span class="text-[9px] font-black uppercase text-amber-400 tracking-wider">PANTALLA TV</span>
-                <button id="btnDeckRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark px-3.5 sm:px-4 py-2 text-xs sm:text-sm hover:border-amber-400/60 flex items-center gap-1.5 text-amber-300" title="Activar o desactivar Pantalla Completa en el televisor">
-                  <span id="deckFullscreenIcon">⛶</span> <span id="deckFullscreenText" class="font-bold">Pantalla Completa</span>
+              <div class="flex flex-col items-center gap-1 min-w-0">
+                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-gray-400 tracking-wider whitespace-nowrap">NEXT</span>
+                <button onclick="skipCurrentSong()" class="tactile-btn-dark w-full sm:w-auto justify-center px-2 sm:px-5 py-2.5 sm:py-2 text-xs sm:text-sm hover:border-amber-400/60 flex items-center gap-1 whitespace-nowrap" title="Saltar a la siguiente canción">
+                  <span>⏭️</span> <span>Saltar</span>
                 </button>
               </div>
 
             </div>
 
-            <!-- Controles Secundarios: Micrófono y Volumen TV -->
-            <div class="flex items-center gap-3 sm:gap-4 ml-auto">
+            <!-- FILA 2: Audio y TV en Bloque Simétrico [ 🎙️ Mic ] + [ ⛶ TV Full ] + [ 🔊 Volumen TV ] -->
+            <div class="grid grid-cols-[auto_auto_1fr] gap-2 w-full lg:w-auto sm:flex sm:items-end sm:gap-3 lg:ml-auto items-end">
+              
+              <!-- VOZ / MIC -->
               <div class="flex flex-col items-center gap-1">
-                <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">VOZ / MIC</span>
-                <button onclick="toggleMicMode()" id="btnDeckMic" class="tactile-btn-dark px-3.5 py-2 text-xs flex items-center gap-1.5" title="Atenuar música para hablar">
-                  🎙️ <span id="deckMicLabel">Mic</span>
+                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-gray-400 tracking-wider whitespace-nowrap">VOZ / MIC</span>
+                <button onclick="toggleMicMode()" id="btnDeckMic" class="tactile-btn-dark h-[38px] px-3 sm:px-3.5 py-2 text-xs flex items-center justify-center gap-1.5 whitespace-nowrap" title="Atenuar música para hablar">
+                  <span>🎙️</span> <span id="deckMicLabel" class="font-bold">Mic</span>
                 </button>
               </div>
 
-              <div class="flex flex-col items-start gap-1 bg-black/40 px-3.5 py-1.5 rounded-xl border border-white/10">
-                <span class="text-[9px] font-black uppercase text-gray-400 tracking-wider">VOLUMEN TV</span>
-                <div class="flex items-center gap-2">
-                  <span class="text-xs text-gray-400">🔊</span>
-                  <input type="range" id="adminVolumeSlider" min="0" max="100" value="100" oninput="onVolumeChange(this.value)" class="w-20 sm:w-28 accent-amber-500 cursor-pointer h-1.5 bg-white/20 rounded-lg">
-                  <span id="adminVolumeDisplay" class="text-[10px] font-mono text-amber-400 font-bold w-7">100%</span>
+              <!-- PANTALLA COMPLETA TV -->
+              <div class="flex flex-col items-center gap-1">
+                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-amber-400 tracking-wider whitespace-nowrap">PANTALLA TV</span>
+                <button id="btnDeckRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark h-[38px] px-3 sm:px-4 py-2 text-xs hover:border-amber-400/60 flex items-center justify-center gap-1.5 text-amber-300 whitespace-nowrap" title="Activar o desactivar Pantalla Completa en el televisor">
+                  <span id="deckFullscreenIcon">⛶</span> <span id="deckFullscreenText" class="font-bold">TV Full</span>
+                </button>
+              </div>
+
+              <!-- VOLUMEN TV (Ocupa todo el resto de la fila sin dejar huecos) -->
+              <div class="flex flex-col items-start gap-1 w-full sm:w-auto">
+                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-gray-400 tracking-wider pl-1 whitespace-nowrap">VOLUMEN TV</span>
+                <div class="h-[38px] w-full sm:w-auto bg-black/50 px-3 rounded-xl border border-white/10 flex items-center justify-between gap-2">
+                  <span class="text-xs text-gray-400 shrink-0">🔊</span>
+                  <input type="range" id="adminVolumeSlider" min="0" max="100" value="100" oninput="onVolumeChange(this.value)" class="w-full sm:w-28 accent-amber-500 cursor-pointer h-1.5 bg-white/20 rounded-lg">
+                  <span id="adminVolumeDisplay" class="text-[10px] font-mono text-amber-400 font-bold w-8 text-right shrink-0">100%</span>
                 </div>
               </div>
+
             </div>
 
           </div>
