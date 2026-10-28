@@ -1,6 +1,8 @@
 const socket = io();
 
 let currentQueueState = [];
+let currentSettings = {};
+let currentPlayingTrack = null;
 let generatedTracksFromAI = [];
 let playerTelemetry = {
   currentTime: 0,
@@ -54,6 +56,10 @@ function renderAdminState(data) {
   const { currentlyPlaying, queue, settings } = data;
 
   currentQueueState = queue || [];
+  currentPlayingTrack = currentlyPlaying || null;
+  if (settings) {
+    currentSettings = settings;
+  }
 
   if (settings && settings.barName) {
     document.getElementById('adminBarName').textContent = settings.barName;
@@ -2693,7 +2699,8 @@ function escapeHtml(text) {
 // =========================================================================
 let adminRouletteState = {
   mode: 'tables', // 'tables' | 'prizes'
-  tableFilter: 'active', // 'active' | 'all'
+  tableFilter: 'active', // 'active' | 'all' | 'custom'
+  selectedTables: new Set(),
   items: ['Mesa 1', 'Mesa 2', 'Mesa 3', 'Mesa 4', 'Mesa 5', 'Mesa 6'],
   currentAngle: 0,
   spinning: false,
@@ -2716,31 +2723,135 @@ const ADMIN_ROULETTE_PALETTE = [
   ['#0f172a', '#1e293b', '#38bdf8']
 ];
 
+function getTotalBarTablesCount() {
+  const fromInput = Number(document.getElementById('settingTotalTables')?.value);
+  const fromSettings = Number(currentSettings?.totalTables) || Number(currentSettings?.tableCount);
+  const raw = fromInput || fromSettings || 10;
+  return Math.max(2, Math.min(24, raw));
+}
+
+function getActiveOrderTablesSet() {
+  const activeSet = new Set();
+  if (currentPlayingTrack && currentPlayingTrack.isBaseTrack !== true && currentPlayingTrack.requestedBy?.table) {
+    activeSet.add(`Mesa ${currentPlayingTrack.requestedBy.table}`);
+  }
+  (currentQueueState || []).forEach(s => {
+    if (s.isBaseTrack !== true && s.requestedBy?.table) {
+      activeSet.add(`Mesa ${s.requestedBy.table}`);
+    }
+  });
+  return activeSet;
+}
+
+function populateSelectedTablesFromFilter(filter) {
+  const totalTables = getTotalBarTablesCount();
+  const activeSet = getActiveOrderTablesSet();
+  const hintEl = document.getElementById('rouletteActiveTablesHint');
+
+  if (filter === 'active') {
+    if (activeSet.size >= 2) {
+      adminRouletteState.selectedTables = new Set(activeSet);
+      if (hintEl) {
+        hintEl.textContent = `🔥 Participando ${activeSet.size} mesas con pedidos activos (toca para agregar/quitar):`;
+      }
+      return;
+    }
+    // Si hay menos de 2 mesas con pedidos en este instante, cargamos las mesas del bar para que la ruleta funcione de inmediato
+    const defaultCount = Math.min(totalTables, 10);
+    const fallbackSet = new Set();
+    for (let t = 1; t <= defaultCount; t++) {
+      fallbackSet.add(`Mesa ${t}`);
+    }
+    adminRouletteState.selectedTables = fallbackSet;
+    if (hintEl) {
+      hintEl.textContent = `🪑 Mostrando ${defaultCount} mesas del bar (toca las mesas ocupadas para elegir quién juega):`;
+    }
+  } else {
+    const allSet = new Set();
+    for (let t = 1; t <= totalTables; t++) {
+      allSet.add(`Mesa ${t}`);
+    }
+    adminRouletteState.selectedTables = allSet;
+    if (hintEl) {
+      hintEl.textContent = `🪑 Todas las ${totalTables} mesas activas (toca cualquiera para quitarla del sorteo):`;
+    }
+  }
+}
+
+function renderRouletteTableChips() {
+  const container = document.getElementById('rouletteTablesChipsContainer');
+  if (!container) return;
+  const totalTables = getTotalBarTablesCount();
+  const activeSet = getActiveOrderTablesSet();
+
+  // Asegurar que cualquier mesa con pedido especial (ej. número mayor) también aparezca
+  const allTableLabels = [];
+  for (let t = 1; t <= totalTables; t++) {
+    allTableLabels.push(`Mesa ${t}`);
+  }
+  activeSet.forEach(lbl => {
+    if (!allTableLabels.includes(lbl)) allTableLabels.push(lbl);
+  });
+
+  container.innerHTML = allTableLabels.map(label => {
+    const isSelected = adminRouletteState.selectedTables.has(label);
+    const hasOrder = activeSet.has(label);
+    const fireIcon = hasOrder ? '🔥 ' : '';
+    const safeLabel = escapeHtml(label);
+    if (isSelected) {
+      return `<button type="button" onclick="toggleRouletteTableChip('${safeLabel}')" class="px-2.5 py-1 rounded-lg text-[11px] font-black bg-amber-500 text-black border border-amber-300 shadow-sm transition active:scale-95">${fireIcon}${safeLabel} ✓</button>`;
+    } else {
+      return `<button type="button" onclick="toggleRouletteTableChip('${safeLabel}')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white/5 text-gray-400 border border-white/10 hover:text-white transition active:scale-95">${fireIcon}${safeLabel}</button>`;
+    }
+  }).join('');
+}
+
+function toggleRouletteTableChip(tableName) {
+  if (adminRouletteState.selectedTables.has(tableName)) {
+    if (adminRouletteState.selectedTables.size <= 2) {
+      showAdminToast('Deben participar mínimo 2 mesas en la ruleta', '⚠️');
+      return;
+    }
+    adminRouletteState.selectedTables.delete(tableName);
+  } else {
+    adminRouletteState.selectedTables.add(tableName);
+  }
+  if (navigator.vibrate) {
+    try { navigator.vibrate(15); } catch (e) {}
+  }
+  const hintEl = document.getElementById('rouletteActiveTablesHint');
+  if (hintEl) {
+    hintEl.textContent = `🎯 Participando ${adminRouletteState.selectedTables.size} mesas seleccionadas:`;
+  }
+  renderRouletteTableChips();
+  resetAdminRouletteStatusPrompt();
+  syncRouletteConfigToTv();
+}
+
 function computeRouletteItems() {
   if (adminRouletteState.mode === 'tables') {
-    if (adminRouletteState.tableFilter === 'active') {
-      const activeSet = new Set();
-      (currentQueueState || []).forEach(s => {
-        if (s.isBaseTrack !== true && s.requestedBy?.table) {
-          activeSet.add(`Mesa ${s.requestedBy.table}`);
-        }
-      });
-      if (activeSet.size >= 2) {
-        adminRouletteState.items = Array.from(activeSet);
-        return;
-      }
+    if (!adminRouletteState.selectedTables || adminRouletteState.selectedTables.size < 2) {
+      populateSelectedTablesFromFilter(adminRouletteState.tableFilter);
     }
-    const totalTables = Math.max(2, Math.min(24, Number(currentSettings?.tableCount) || 10));
-    const arr = [];
-    for (let t = 1; t <= totalTables; t++) {
-      arr.push(`Mesa ${t}`);
-    }
-    adminRouletteState.items = arr;
+    adminRouletteState.items = Array.from(adminRouletteState.selectedTables);
+    renderRouletteTableChips();
   } else {
     const input = document.getElementById('rouletteCustomPrizesInput');
     const raw = input ? input.value : '';
     const list = raw.split(',').map(s => s.trim()).filter(Boolean);
     adminRouletteState.items = list.length >= 2 ? list : ['🥃 Shot Gratis', '🍺 2x1 Cerveza', '👑 Canción VIP', '😅 ¡Casi!'];
+  }
+}
+
+function resetAdminRouletteStatusPrompt() {
+  if (adminRouletteState.animFrame) {
+    cancelAnimationFrame(adminRouletteState.animFrame);
+    adminRouletteState.animFrame = null;
+  }
+  adminRouletteState.spinning = false;
+  const statusEl = document.getElementById('adminRouletteStatusText');
+  if (statusEl) {
+    statusEl.textContent = '👆 Desliza la rueda con tu dedo para darle impulso hacia el TV';
   }
 }
 
@@ -2827,6 +2938,8 @@ function openRouletteModal() {
     modal.classList.add('flex');
   }
 
+  populateSelectedTablesFromFilter(adminRouletteState.tableFilter);
+  resetAdminRouletteStatusPrompt();
   computeRouletteItems();
   drawAdminRouletteWheel();
   setupAdminRouletteTouch();
@@ -2860,6 +2973,7 @@ function switchRouletteMode(mode) {
     cfgTables?.classList.add('hidden');
   }
 
+  resetAdminRouletteStatusPrompt();
   syncRouletteConfigToTv();
 }
 
@@ -2876,6 +2990,8 @@ function setRouletteTableFilter(filter) {
     if (btnActive) btnActive.className = 'text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white/5 text-gray-400 border border-white/10 transition';
   }
 
+  populateSelectedTablesFromFilter(filter);
+  resetAdminRouletteStatusPrompt();
   syncRouletteConfigToTv();
 }
 
@@ -2968,6 +3084,11 @@ function triggerRouletteSpin(velocityBoost = 1) {
     } else {
       adminRouletteState.spinning = false;
       if (statusEl) statusEl.textContent = `🏆 ¡GANADOR EN TV: ${winnerLabel.toUpperCase()}!`;
+      // Si estábamos sorteando qué mesa gana, pre-cargar esa mesa ganadora para el Modo 2 ("¿Qué Premio Toca?")
+      if (adminRouletteState.mode === 'tables') {
+        const targetTableInput = document.getElementById('rouletteTargetTableInput');
+        if (targetTableInput) targetTableInput.value = winnerLabel.toUpperCase();
+      }
       showAdminToast(`🏆 ¡Ganador de la Ruleta: ${winnerLabel}!`, '🎉');
     }
   }

@@ -1098,6 +1098,16 @@
           </div>
         </div>
 
+        <!-- Chips interactivos para activar/desactivar mesas con 1 toque -->
+        <div class="bg-black/40 p-2.5 rounded-xl border border-white/10 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <p id="rouletteActiveTablesHint" class="text-[10.5px] text-amber-300/90 font-semibold">
+              Toca las mesas ocupadas para incluirlas o quitarlas de la ruleta:
+            </p>
+          </div>
+          <div id="rouletteTablesChipsContainer" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1"></div>
+        </div>
+
         <div>
           <label class="block text-[11px] font-bold text-amber-300 uppercase tracking-wider mb-1">Premio a sortear en pantalla:</label>
           <input type="text" id="roulettePrizeInput" value="🥃 Ronda de Shots Gratis" oninput="syncRouletteConfigToTv()" placeholder="Ej: 🥃 Ronda de Shots Gratis..." class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white font-bold outline-none focus:border-amber-400">
