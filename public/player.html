@@ -24,6 +24,8 @@
       if (isMobileUA || (isSmallScreen && isTouch)) {
         window.__IS_MOBILE_BLOCKED__ = true;
         document.documentElement.classList.add('mobile-blocked');
+        window.location.replace('/admin.html');
+        return;
       }
     })();
   </script>

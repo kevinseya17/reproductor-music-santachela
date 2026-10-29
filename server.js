@@ -22,6 +22,20 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+
+// Si se abre /player.html desde un celular móvil, redirigir directamente al Panel de Administrador (/admin.html)
+app.get('/player.html', (req, res, next) => {
+  if (req.query.force === '1' || req.query.preview === '1') return next();
+  const ua = req.headers['user-agent'] || '';
+  const isTV = /SmartTV|Tizen|Web0S|BRAVIA|NetCast|Android TV|GoogleTV|AFT[A-Z]|CrKey|AppleTV|Roku|HbbTV|Xbox|PlayStation/i.test(ua);
+  if (isTV) return next();
+  const isMobileUA = /iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || (/Android/i.test(ua) && /Mobile/i.test(ua));
+  if (isMobileUA) {
+    return res.redirect('/admin.html');
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Estado de reproducción en memoria y persistente
