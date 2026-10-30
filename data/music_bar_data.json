@@ -58,7 +58,8 @@
     "genrePlaybackStyle": "shuffle",
     "maxSongDuration": 0,
     "dynamicDurationOnQueue": false,
-    "fadeTransitionEnabled": true
+    "fadeTransitionEnabled": true,
+    "dragToCastEnabled": false
   },
   "playlists": [
     {

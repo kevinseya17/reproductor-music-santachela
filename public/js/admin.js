@@ -90,6 +90,10 @@ function renderAdminState(data) {
     if (document.getElementById('camModalAllowQrPhotosToggle')) {
       document.getElementById('camModalAllowQrPhotosToggle').checked = settings.allowClientPhotoDedication === true;
     }
+    if (document.getElementById('settingDragToCast')) {
+      document.getElementById('settingDragToCast').checked = settings.dragToCastEnabled === true;
+    }
+    updateQueueDragModeUI(settings.dragToCastEnabled === true);
 
     // Actualizar controles de Modo de Reproducción Base
     renderBasePlaybackModeControls(settings);
@@ -347,8 +351,40 @@ function toggleSidebarMobile() {
 // DRAG & DROP REORDENAMIENTO DE COLA EN VIVO
 // ============================================================
 let draggedQueueIndex = null;
+let touchReorderState = {
+  active: false,
+  sourceIndex: -1,
+  currentTargetIndex: -1,
+  startY: 0
+};
+
+function executeQueueReorder(fromIndex, targetIndex) {
+  if (fromIndex === null || fromIndex === undefined || isNaN(fromIndex)) return;
+  if (targetIndex === null || targetIndex === undefined || isNaN(targetIndex)) return;
+  if (fromIndex === targetIndex) return;
+
+  const newQueue = [...currentQueueState];
+  const [movedSong] = newQueue.splice(fromIndex, 1);
+  newQueue.splice(targetIndex, 0, movedSong);
+  currentQueueState = newQueue;
+  renderQueueList(currentQueueState);
+
+  fetch('/api/admin/reorder', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ queue: newQueue })
+  }).catch(err => {
+    console.error('Error guardando reorden de cola:', err);
+  });
+
+  showAdminToast(`Canción movida al turno #${targetIndex + 1}`, '⇅');
+}
 
 function handleQueueDragStart(e, index) {
+  if (currentSettings?.dragToCastEnabled === true) {
+    if (e) e.preventDefault();
+    return;
+  }
   draggedQueueIndex = index;
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', String(index));
@@ -359,11 +395,13 @@ function handleQueueDragStart(e, index) {
 }
 
 function handleQueueDragOver(e, index) {
+  if (currentSettings?.dragToCastEnabled === true) return;
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
 }
 
 function handleQueueDragEnter(e, index) {
+  if (currentSettings?.dragToCastEnabled === true) return;
   e.preventDefault();
   if (draggedQueueIndex === null || draggedQueueIndex === index) return;
   const row = document.getElementById(`queue-row-${index}`);
@@ -373,6 +411,7 @@ function handleQueueDragEnter(e, index) {
 }
 
 function handleQueueDragLeave(e, index) {
+  if (currentSettings?.dragToCastEnabled === true) return;
   const row = document.getElementById(`queue-row-${index}`);
   if (row) {
     row.classList.remove('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
@@ -380,6 +419,7 @@ function handleQueueDragLeave(e, index) {
 }
 
 function handleQueueDrop(e, targetIndex) {
+  if (currentSettings?.dragToCastEnabled === true) return;
   e.preventDefault();
   e.stopPropagation();
 
@@ -388,29 +428,9 @@ function handleQueueDrop(e, targetIndex) {
     targetRow.classList.remove('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
   }
 
-  if (draggedQueueIndex === null || draggedQueueIndex === targetIndex) {
-    draggedQueueIndex = null;
-    return;
-  }
-
   const fromIndex = draggedQueueIndex;
   draggedQueueIndex = null;
-
-  // Reordenar localmente de inmediato (0ms de latencia visual)
-  const newQueue = [...currentQueueState];
-  const [movedSong] = newQueue.splice(fromIndex, 1);
-  newQueue.splice(targetIndex, 0, movedSong);
-  currentQueueState = newQueue;
-  renderQueueList(currentQueueState);
-
-  // Persistir en el servidor
-  fetch('/api/admin/reorder', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ queue: newQueue })
-  }).catch(err => {
-    console.error('Error guardando reorden de cola:', err);
-  });
+  executeQueueReorder(fromIndex, targetIndex);
 }
 
 function handleQueueDragEnd(e) {
@@ -419,6 +439,73 @@ function handleQueueDragEnd(e) {
   rows.forEach(r => {
     r.classList.remove('opacity-50', 'scale-[0.99]', 'border-amber-400', 'bg-amber-500/10', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
   });
+}
+
+// Reordenamiento táctil para celulares (al arrastrar desde el handle ⋮⋮)
+function initTouchReorder(e, index) {
+  if (currentSettings?.dragToCastEnabled === true) return;
+  const touch = e.touches[0];
+  touchReorderState = {
+    active: true,
+    sourceIndex: index,
+    currentTargetIndex: index,
+    startY: touch.clientY
+  };
+
+  const row = document.getElementById(`queue-row-${index}`);
+  if (row) {
+    row.classList.add('opacity-50', 'scale-[0.99]', 'border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50');
+  }
+
+  window.addEventListener('touchmove', handleTouchReorderMove, { passive: false });
+  window.addEventListener('touchend', handleTouchReorderEnd, { passive: false });
+  window.addEventListener('touchcancel', handleTouchReorderEnd, { passive: false });
+}
+
+function handleTouchReorderMove(e) {
+  if (!touchReorderState.active) return;
+  if (e.cancelable) e.preventDefault();
+  const touch = e.touches[0];
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  const targetRow = el ? el.closest('.queue-row') : null;
+
+  if (targetRow) {
+    const targetIdx = Number(targetRow.getAttribute('data-queue-index'));
+    if (!isNaN(targetIdx) && targetIdx !== touchReorderState.currentTargetIndex) {
+      if (touchReorderState.currentTargetIndex !== -1 && touchReorderState.currentTargetIndex !== touchReorderState.sourceIndex) {
+        const prevTarget = document.getElementById(`queue-row-${touchReorderState.currentTargetIndex}`);
+        if (prevTarget) {
+          prevTarget.classList.remove('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+        }
+      }
+      touchReorderState.currentTargetIndex = targetIdx;
+      if (targetIdx !== touchReorderState.sourceIndex) {
+        targetRow.classList.add('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+        if (navigator.vibrate) {
+          try { navigator.vibrate(10); } catch(err){}
+        }
+      }
+    }
+  }
+}
+
+function handleTouchReorderEnd(e) {
+  if (!touchReorderState.active) return;
+  window.removeEventListener('touchmove', handleTouchReorderMove, { passive: false });
+  window.removeEventListener('touchend', handleTouchReorderEnd, { passive: false });
+  window.removeEventListener('touchcancel', handleTouchReorderEnd, { passive: false });
+
+  const { sourceIndex, currentTargetIndex } = touchReorderState;
+  touchReorderState.active = false;
+
+  const rows = document.querySelectorAll('.queue-row');
+  rows.forEach(r => {
+    r.classList.remove('opacity-50', 'scale-[0.99]', 'border-amber-400', 'bg-amber-500/10', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+  });
+
+  if (currentTargetIndex !== -1 && currentTargetIndex !== sourceIndex) {
+    executeQueueReorder(sourceIndex, currentTargetIndex);
+  }
 }
 
 // Renderizado de Lista UP NEXT / QUEUE (Estilo Referencia Pro con Arrastre y Cola Unificada 50+)
@@ -438,6 +525,8 @@ function renderQueueList(queue) {
     `;
     return;
   }
+
+  const isDragToCast = (currentSettings && currentSettings.dragToCastEnabled === true);
 
   container.innerHTML = queue.map((song, i) => {
     const isFirst = i === 0;
@@ -468,34 +557,48 @@ function renderQueueList(queue) {
       badgeHtml = `<span class="px-2 py-0.5 rounded-md bg-white/10 text-gray-300 text-[10px] font-medium">🎵 Base: ${escapeHtml(plName)}</span>`;
     }
 
-    const isArmed = (typeof armedSongIndex !== 'undefined' && armedSongIndex === i);
-    const hasAnyArmed = (typeof armedSongIndex !== 'undefined' && armedSongIndex !== -1);
+    const isArmed = isDragToCast && (typeof armedSongIndex !== 'undefined' && armedSongIndex === i);
+    const hasAnyArmed = isDragToCast && (typeof armedSongIndex !== 'undefined' && armedSongIndex !== -1);
     const rowTouchAction = isArmed ? 'none' : 'pan-y';
     const armedStyle = isArmed
       ? 'transform: scale(1.025) translateY(-3px); box-shadow: 0 14px 34px rgba(245, 158, 11, 0.5), 0 0 20px rgba(245, 158, 11, 0.35); border-color: #fbbf24; border-width: 2px; background: linear-gradient(90deg, rgba(245,158,11,0.22), #181d2c, rgba(245,158,11,0.18)); z-index: 20;'
       : (hasAnyArmed ? 'opacity: 0.5;' : '');
 
+    const armedBadgeHtml = isDragToCast ? `
+      <div id="armed-badge-${i}" class="${isArmed ? 'flex' : 'hidden'} absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-black text-[9.5px] font-black px-3 py-0.5 rounded-full shadow-[0_0_18px_rgba(245,158,11,0.95)] whitespace-nowrap uppercase tracking-wider items-center gap-1 z-30 pointer-events-none animate-bounce">
+        <span>🚀</span> <span>¡Enganchada! Arrástrala hacia arriba ↑</span>
+      </div>
+    ` : '';
+
+    const thumbIconHtml = isDragToCast ? `
+      <span id="armed-icon-${i}" class="md:hidden absolute -top-1 -right-1 text-[9px] ${isArmed ? 'bg-amber-400 scale-125' : 'bg-white/20 text-white'} text-black font-black rounded-full w-4 h-4 flex items-center justify-center shadow pointer-events-none transition-transform">${isArmed ? '🚀' : '👆'}</span>
+    ` : '';
+
+    const rowDraggableAttr = !isDragToCast ? 'draggable="true"' : 'draggable="false"';
+    const rowTouchStartAttr = isDragToCast ? `ontouchstart="this.draggable = false; initCardTouchCast(event, ${i})"` : '';
+    const cursorClass = !isDragToCast ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer';
+
     return `
       <div id="queue-row-${i}"
            data-queue-index="${i}"
-           onmousedown="if(!('ontouchstart' in window)) this.draggable = true;"
+           ${rowDraggableAttr}
            ondragstart="handleQueueDragStart(event, ${i})"
            ondragover="handleQueueDragOver(event, ${i})"
            ondragenter="handleQueueDragEnter(event, ${i})"
            ondragleave="handleQueueDragLeave(event, ${i})"
            ondrop="handleQueueDrop(event, ${i})"
            ondragend="handleQueueDragEnd(event)"
-           ontouchstart="this.draggable = false; initCardTouchCast(event, ${i})"
+           ${rowTouchStartAttr}
            style="touch-action: ${rowTouchAction}; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; ${armedStyle}"
-           class="queue-row flex items-center justify-between p-2 sm:p-2.5 rounded-2xl ${rowBorderClass} gap-1.5 sm:gap-2.5 group select-none cursor-pointer transition-all duration-200 relative ${isArmed ? 'overflow-visible' : 'overflow-hidden'}">
+           class="queue-row flex items-center justify-between p-2 sm:p-2.5 rounded-2xl ${rowBorderClass} gap-1.5 sm:gap-2.5 group select-none ${cursorClass} transition-all duration-150 relative ${isArmed ? 'overflow-visible' : 'overflow-hidden'}">
         
-        <div id="armed-badge-${i}" class="${isArmed ? 'flex' : 'hidden'} absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-black text-[9.5px] font-black px-3 py-0.5 rounded-full shadow-[0_0_18px_rgba(245,158,11,0.95)] whitespace-nowrap uppercase tracking-wider items-center gap-1 z-30 pointer-events-none animate-bounce">
-          <span>🚀</span> <span>¡Enganchada! Arrástrala hacia arriba ↑</span>
-        </div>
+        ${armedBadgeHtml}
 
         <!-- Izquierda: Reordenar ▲ ▼ y Número 1., 2., 3. -->
-        <div class="no-cast-drag flex items-center gap-1 sm:gap-1.5 shrink-0" style="touch-action: pan-y;">
-          <span class="text-gray-500 group-hover:text-amber-400 text-xs px-0.5 cursor-grab hidden md:inline-block" title="Arrastra para cambiar de posición">⋮⋮</span>
+        <div class="no-cast-drag flex items-center gap-1 sm:gap-1.5 shrink-0" style="touch-action: none;">
+          <span class="queue-drag-handle text-gray-400 hover:text-amber-400 text-xs px-1.5 py-1 cursor-grab active:cursor-grabbing select-none"
+                title="Arrastra para cambiar de posición"
+                ${!isDragToCast ? `ontouchstart="initTouchReorder(event, ${i})"` : ''}>⋮⋮</span>
           <div class="flex flex-col items-center">
             <button onclick="reorderQueueItem(${i}, 'up')" class="no-cast-drag text-[9px] sm:text-[10px] leading-none py-0.5 px-0.5 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isFirst ? 'opacity-20 cursor-not-allowed' : ''}" title="Subir turno" ${isFirst ? 'disabled' : ''}>▲</button>
             <button onclick="reorderQueueItem(${i}, 'down')" class="no-cast-drag text-[9px] sm:text-[10px] leading-none py-0.5 px-0.5 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isLast ? 'opacity-20 cursor-not-allowed' : ''}" title="Bajar turno" ${isLast ? 'disabled' : ''}>▼</button>
@@ -504,10 +607,10 @@ function renderQueueList(queue) {
         </div>
 
         <!-- Carátula + Info de la canción -->
-        <div class="cast-direct-zone flex items-center gap-2 sm:gap-3 min-w-0 flex-1" style="touch-action: ${rowTouchAction};">
+        <div class="cast-direct-zone flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pointer-events-none" style="touch-action: ${rowTouchAction};">
           <div class="relative shrink-0">
             <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover border ${isArmed ? 'border-amber-400' : 'border-white/10'} shrink-0 shadow-sm pointer-events-none">
-            <span id="armed-icon-${i}" class="md:hidden absolute -top-1 -right-1 text-[9px] ${isArmed ? 'bg-amber-400 scale-125' : 'bg-white/20 text-white'} text-black font-black rounded-full w-4 h-4 flex items-center justify-center shadow pointer-events-none transition-transform">${isArmed ? '🚀' : '👆'}</span>
+            ${thumbIconHtml}
           </div>
           <div class="min-w-0 flex-1 pointer-events-none">
             <div class="flex items-center gap-1.5">
@@ -706,6 +809,10 @@ function playArmCardSound(isArming = true) {
 
 // Enganchar o desenganchar una canción en el DOM sin destruir el nodo activo bajo el dedo
 function setArmedSong(index) {
+  if (currentSettings && currentSettings.dragToCastEnabled !== true && index !== -1) {
+    armedSongIndex = -1;
+    return;
+  }
   const prevArmed = armedSongIndex;
   armedSongIndex = index;
 
@@ -942,6 +1049,7 @@ function onWindowTouchEnd(e) {
 }
 
 function initCardTouchCast(e, index) {
+  if (currentSettings && currentSettings.dragToCastEnabled !== true) return;
   if (e.target.closest('.no-cast-drag, input, select, a')) return;
   const touch = e.touches[0];
   const card = document.getElementById(`queue-row-${index}`);
@@ -1904,6 +2012,7 @@ async function saveSettings() {
   const dynamicDurationOnQueue = document.getElementById('settingDynamicDuration')?.checked === true;
   const genreBatchSize = parseInt(document.getElementById('settingGenreBatchSize')?.value || 3);
   const allowClientPhotoDedication = document.getElementById('settingAllowClientPhoto')?.checked === true;
+  const dragToCastEnabled = document.getElementById('settingDragToCast')?.checked === true;
 
   await fetch('/api/settings', {
     method: 'POST',
@@ -1920,11 +2029,81 @@ async function saveSettings() {
       maxSongDuration,
       dynamicDurationOnQueue,
       genreBatchSize,
-      allowClientPhotoDedication
+      allowClientPhotoDedication,
+      dragToCastEnabled
     })
   });
 
+  currentSettings.dragToCastEnabled = dragToCastEnabled;
+  updateQueueDragModeUI(dragToCastEnabled);
+  renderQueueList(currentQueueState);
+
   alert('¡Ajustes guardados correctamente!');
+}
+
+async function toggleDragToCastSettingImmediate(checked) {
+  const isEnabled = !!checked;
+  currentSettings.dragToCastEnabled = isEnabled;
+  const setChk = document.getElementById('settingDragToCast');
+  if (setChk) setChk.checked = isEnabled;
+  if (!isEnabled && armedSongIndex !== -1) {
+    setArmedSong(-1);
+  }
+  updateQueueDragModeUI(isEnabled);
+  renderQueueList(currentQueueState);
+
+  try {
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dragToCastEnabled: isEnabled })
+    });
+    if (isEnabled) {
+      showAdminToast('🚀 Modo Show activado: Toca y arrastra al TV', '📺');
+    } else {
+      showAdminToast('⇅ Modo Reordenar cola activado (predeterminado)', '✓');
+    }
+  } catch (err) {
+    console.error('Error guardando ajuste de arrastre de cola:', err);
+  }
+}
+
+function setQueueDragMode(enabled) {
+  toggleDragToCastSettingImmediate(enabled);
+}
+
+function updateQueueDragModeUI(isCastMode) {
+  const btnReorder = document.getElementById('btnQueueDragReorder');
+  const btnCast = document.getElementById('btnQueueDragCast');
+  const helpBadge = document.getElementById('queueDragHelpBadge');
+  const dropPortal = document.getElementById('castDropPortal');
+
+  if (isCastMode) {
+    if (btnCast) {
+      btnCast.className = 'px-2.5 py-1 rounded-lg transition bg-amber-500 text-black font-black shadow';
+    }
+    if (btnReorder) {
+      btnReorder.className = 'px-2.5 py-1 rounded-lg transition text-gray-400 hover:text-white font-semibold';
+    }
+    if (helpBadge) {
+      helpBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/25 to-orange-500/25 border border-amber-400/60 text-[10px] sm:text-xs font-black text-amber-300 shadow';
+      helpBadge.innerHTML = '<span>👆</span> <span>Toca una canción para engancharla y arrástrala al TV 🚀</span>';
+    }
+  } else {
+    if (btnReorder) {
+      btnReorder.className = 'px-2.5 py-1 rounded-lg transition bg-amber-500 text-black font-black shadow';
+    }
+    if (btnCast) {
+      btnCast.className = 'px-2.5 py-1 rounded-lg transition text-gray-400 hover:text-white font-semibold';
+    }
+    if (helpBadge) {
+      helpBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-semibold text-gray-300 shadow';
+      helpBadge.innerHTML = '<span>⇅</span> <span>Arrastra para reordenar posiciones (o usa ▲ ▼)</span>';
+    }
+    if (dropPortal) {
+      dropPortal.classList.add('-translate-y-full');
+    }
+  }
 }
 
 async function toggleClientPhotoSettingImmediate(checked) {
