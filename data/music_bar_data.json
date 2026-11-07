@@ -59,7 +59,8 @@
     "maxSongDuration": 0,
     "dynamicDurationOnQueue": false,
     "fadeTransitionEnabled": true,
-    "dragToCastEnabled": false
+    "dragToCastEnabled": false,
+    "confirmBeforeSongChange": true
   },
   "playlists": [
     {

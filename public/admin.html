@@ -333,15 +333,15 @@
               <!-- Selector Rápido de Modo de Arrastre de Cola -->
               <div class="inline-flex items-center gap-1 p-0.5 rounded-xl bg-black/60 border border-white/10 text-[11px]">
                 <button type="button" id="btnQueueDragReorder" onclick="setQueueDragMode(false)" class="px-2.5 py-1 rounded-lg transition bg-amber-500 text-black font-black shadow" title="Arrastrar canciones para cambiar de posición en la cola">
-                  ⇅ Reordenar
+                  ⇅ Organizar Lista
                 </button>
                 <button type="button" id="btnQueueDragCast" onclick="setQueueDragMode(true)" class="px-2.5 py-1 rounded-lg transition text-gray-400 hover:text-white font-semibold" title="Tocar y arrastrar canciones hacia arriba para lanzarlas al TV">
-                  🚀 Lanzar a TV
+                  🚀 Lanzar a TV (Opcional)
                 </button>
               </div>
 
               <span id="queueDragHelpBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-semibold text-gray-300 shadow">
-                <span>⇅</span> <span>Arrastra para reordenar posiciones (o usa ▲ ▼)</span>
+                <span>⇅</span> <span>Arrastra para organizar la lista (o usa ▲ ▼)</span>
               </span>
 
               <button onclick="clearWaitingQueue()" class="btn-secondary text-[11px] py-1 px-2.5 flex items-center gap-1.5 text-rose-300 hover:text-rose-100 hover:bg-rose-500/20 border-rose-500/30 transition" title="Elimina todos los pedidos y canciones en espera para cambiar de tanda o empezar de cero">
@@ -880,10 +880,24 @@
               <span class="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">Opcional</span>
             </div>
             <p class="text-xs text-gray-300 mt-1">
-              Si activas esta opción, puedes tocar una canción de la cola y arrastrarla hacia arriba para lanzarla al televisor con animación 3D. <strong>Por defecto (desactivado)</strong>, arrastrar una canción reordena su posición en la lista de espera de un turno a otro como siempre.
+              Si activas esta opción, puedes tocar una canción de la cola y arrastrarla hacia arriba para lanzarla al televisor. <strong>Por defecto (desactivado)</strong>, arrastrar una canción reordena su posición en la lista de espera de un turno a otro como siempre.
             </p>
           </div>
           <input type="checkbox" id="settingDragToCast" onchange="toggleDragToCastSettingImmediate(this.checked)" class="w-5 h-5 accent-amber-500 shrink-0 cursor-pointer">
+        </div>
+
+        <!-- Opción de Seguridad: Confirmar antes de cambiar la canción que está sonando -->
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white/5 to-white/5 border border-amber-500/35">
+          <div class="pr-3">
+            <div class="flex items-center gap-2">
+              <p class="text-sm font-bold text-amber-300">🛡️ Confirmar antes de cambiar canción sonando</p>
+              <span class="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Seguridad</span>
+            </div>
+            <p class="text-xs text-gray-300 mt-1">
+              Muestra un letrero de confirmación (<em>"¿Realmente deseas cambiar la canción?"</em>) al pulsar Sonar, Saltar o cambiar temas, para evitar cortar la música del bar por error o equivocación al organizar la lista.
+            </p>
+          </div>
+          <input type="checkbox" id="settingConfirmBeforeSongChange" onchange="toggleConfirmSettingImmediate(this.checked)" class="w-5 h-5 accent-amber-500 shrink-0 cursor-pointer">
         </div>
 
         <!-- Transiciones y Duración de Canciones (Ritmo DJ) -->
@@ -1314,6 +1328,69 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación para Cambiar Canción que está Sonando -->
+  <div id="confirmChangeSongModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="relative bg-gradient-to-b from-[#181d2a] to-[#0e1118] border border-amber-500/40 rounded-3xl max-w-md w-full p-6 shadow-[0_20px_70px_rgba(0,0,0,0.9)] space-y-4 animate-scaleUp">
+      <!-- Encabezado con ícono de advertencia -->
+      <div class="flex items-center gap-3 border-b border-white/10 pb-3">
+        <div class="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-2xl shrink-0">
+          ⚠️
+        </div>
+        <div class="min-w-0 flex-1">
+          <h3 class="text-base sm:text-lg font-black text-white">¿Realmente deseas cambiar la canción?</h3>
+          <p class="text-[11px] text-gray-400">Se interrumpirá la música que está sonando en el bar</p>
+        </div>
+      </div>
+
+      <!-- Tarjeta: Sonando Ahora -->
+      <div class="p-3 rounded-2xl bg-black/50 border border-white/5 space-y-1">
+        <div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Sonando ahora en el bar</span>
+          <span id="confirmModalCurrentTime" class="text-gray-400 font-mono text-[10px]">EN VIVO</span>
+        </div>
+        <div class="flex items-center gap-3 pt-1">
+          <img id="confirmModalCurrentThumb" src="" class="w-11 h-11 rounded-xl object-cover border border-white/10 shrink-0">
+          <div class="min-w-0 flex-1">
+            <p id="confirmModalCurrentTitle" class="text-xs sm:text-sm font-bold text-white truncate">Canción actual</p>
+            <p id="confirmModalCurrentArtist" class="text-[11px] text-gray-400 truncate">Artista actual</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta: Nueva Canción que va a sonar -->
+      <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-1">
+        <div class="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+          <span>▶</span> <span>Vas a poner a sonar de inmediato:</span>
+        </div>
+        <div class="flex items-center gap-3 pt-1">
+          <img id="confirmModalTargetThumb" src="" class="w-11 h-11 rounded-xl object-cover border border-amber-500/40 shrink-0">
+          <div class="min-w-0 flex-1">
+            <p id="confirmModalTargetTitle" class="text-xs sm:text-sm font-bold text-amber-300 truncate">Canción nueva</p>
+            <p id="confirmModalTargetArtist" class="text-[11px] text-gray-300 truncate">Artista nuevo</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Casilla de verificación de protección -->
+      <div class="flex items-center gap-2 pt-1 text-xs text-gray-300">
+        <input type="checkbox" id="chkModalConfirmChangeSetting" checked onchange="toggleConfirmSettingFromModal(this.checked)" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+        <label for="chkModalConfirmChangeSetting" class="cursor-pointer select-none text-[11px] text-gray-300">
+          Avisarme siempre antes de interrumpir la música actual
+        </label>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <button type="button" onclick="cancelSongChangeConfirmation()" class="btn-secondary py-3 text-xs sm:text-sm font-bold text-gray-300 hover:text-white justify-center">
+          ✕ Cancelar
+        </button>
+        <button type="button" id="btnConfirmSongChangeProceed" onclick="proceedSongChangeConfirmation()" class="tactile-btn-gold py-3 text-xs sm:text-sm font-black justify-center shadow-lg shadow-amber-500/30">
+          ▶ Sí, Cambiar Canción
+        </button>
+      </div>
     </div>
   </div>
 

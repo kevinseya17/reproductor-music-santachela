@@ -69,103 +69,24 @@ function getDjAudioContext() {
 }
 
 function playDjWarpSweep() {
-  try {
-    const ctx = getDjAudioContext();
-    if (!ctx) return;
-    const now = ctx.currentTime;
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
-
-    osc.type = 'sawtooth';
-    filter.type = 'lowpass';
-
-    // Rápida subida de tono y luego caída con filtro
-    osc.frequency.setValueAtTime(120, now);
-    osc.frequency.exponentialRampToValueAtTime(1400, now + 0.6);
-    osc.frequency.exponentialRampToValueAtTime(80, now + 1.4);
-
-    filter.frequency.setValueAtTime(400, now);
-    filter.frequency.exponentialRampToValueAtTime(7000, now + 0.5);
-    filter.frequency.exponentialRampToValueAtTime(300, now + 1.4);
-
-    gain.gain.setValueAtTime(0.01, now);
-    gain.gain.linearRampToValueAtTime(0.35, now + 0.3);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 1.5);
-  } catch (e) {
-    console.warn('Audio FX no disponible:', e);
-  }
+  // Transición sutil y limpia: desactivado sonido de sintetizador estridente
+  return;
 }
 
 let castOverlayTimeout = null;
 
 function showCastIncomingOverlay(song, senderName) {
-  const overlay = document.getElementById('castIncomingOverlay');
-  const vortexBg = document.getElementById('castVortexBg');
-  const card = document.getElementById('castIncomingCard');
-  const thumb = document.getElementById('castIncomingThumb');
-  const title = document.getElementById('castIncomingTitle');
-  const artist = document.getElementById('castIncomingArtist');
-  const sender = document.getElementById('castIncomingSender');
-
-  if (!overlay || !card) return;
-
-  clearTimeout(castOverlayTimeout);
-
-  if (thumb) thumb.src = song.thumbnail || `https://i.ytimg.com/vi/${song.videoId}/hqdefault.jpg`;
-  if (title) title.textContent = song.title || 'Canción';
-  if (artist) artist.textContent = song.artist || 'Artista';
-  if (sender) sender.textContent = `Lanzada por: ${senderName || 'DJ / Celular'}`;
-
-  // Reset visual inicial (fuera de la pantalla abajo)
-  overlay.classList.remove('hidden');
-  if (vortexBg) {
-    vortexBg.classList.remove('opacity-100');
-    vortexBg.classList.add('opacity-0');
-  }
-  card.classList.remove('translate-y-0', 'scale-100', 'opacity-100');
-  card.classList.add('translate-y-[120%]', 'scale-50', 'opacity-0');
-
-  // Disparo supersónico hacia el centro (en 50ms)
-  setTimeout(() => {
-    if (vortexBg) {
-      vortexBg.classList.remove('opacity-0');
-      vortexBg.classList.add('opacity-100');
-    }
-    card.classList.remove('translate-y-[120%]', 'scale-50', 'opacity-0');
-    card.classList.add('translate-y-0', 'scale-100', 'opacity-100');
-  }, 50);
-
-  // Ocultar suavemente después de 3.2 segundos
-  castOverlayTimeout = setTimeout(() => {
-    if (vortexBg) {
-      vortexBg.classList.remove('opacity-100');
-      vortexBg.classList.add('opacity-0');
-    }
-    card.classList.remove('translate-y-0', 'scale-100', 'opacity-100');
-    card.classList.add('-translate-y-12', 'scale-105', 'opacity-0');
-
-    setTimeout(() => {
-      overlay.classList.add('hidden');
-    }, 600);
-  }, 3200);
+  // En lugar de una animación invasiva de pantalla completa, mostramos el HUD elegante en la parte inferior
+  showSongOverlay(7000);
 }
 
 // Escuchar animación de impacto: Canción lanzada desde el celular
 socket.on('tv-song-casted', (data) => {
-  const { song, senderName } = data || {};
+  const { song } = data || {};
   if (!song) return;
 
-  playDjWarpSweep();
-  showCastIncomingOverlay(song, senderName);
+  // Transición sutil y discreta hacia el nuevo tema
+  showSongOverlay(7000);
 });
 
 // 1. YouTube IFrame API Callback global
@@ -214,10 +135,17 @@ function onPlayerStateChange(event) {
   } else if (event.data === YT.PlayerState.PLAYING) {
     if (playPauseIcon) playPauseIcon.textContent = '⏸️';
 
+    // Desvanecer sutilmente la cortina de transición para un cambio visual limpio
+    const curtain = document.getElementById('videoTransitionCurtain');
+    if (curtain) {
+      curtain.classList.remove('opacity-90');
+      curtain.classList.add('opacity-0');
+    }
+
     // Si requiere Fade-In suave al iniciar la canción
     if (isFadingInNewSong && currentSettings.fadeTransitionEnabled !== false) {
       isFadingInNewSong = false;
-      fadeVolume(0, masterVolume, 1800);
+      fadeVolume(0, masterVolume, 1400);
     }
 
     // Mostrar mensaje/dedicatoria (o foto QR) al inicio del tema
@@ -242,43 +170,62 @@ function onPlayerError(event) {
 
 function loadAndPlay(videoId) {
   if (!videoId) return;
-  currentVideoId = videoId;
-  hasReportedSongEnded = false;
-  isFading = false;
-  hasShownMidSongPromo = false;
-  hasShownStartDedication = false;
-  hasShownEndDedication = false;
-  currentTrackInitializedId = videoId;
 
-  // Limpiar anuncios o dedicatorias previos inmediatamente sin timeouts residuales
-  if (typeof hidePromoBanner === 'function') hidePromoBanner(true);
-  if (typeof hideDedicationBanner === 'function') hideDedicationBanner(true);
+  const curtain = document.getElementById('videoTransitionCurtain');
+  const isPlayingNow = isPlayerReady && ytPlayer && ytPlayer.getPlayerState && ytPlayer.getPlayerState() === YT.PlayerState.PLAYING;
 
-  if (activeFadeInterval) {
-    clearInterval(activeFadeInterval);
-    activeFadeInterval = null;
-  }
+  const doLoadVideo = () => {
+    currentVideoId = videoId;
+    hasReportedSongEnded = false;
+    isFading = false;
+    hasShownMidSongPromo = false;
+    hasShownStartDedication = false;
+    hasShownEndDedication = false;
+    currentTrackInitializedId = videoId;
 
-  // Preparar volumen para inicio suave (Fade In)
-  if (currentSettings.fadeTransitionEnabled !== false) {
-    isFadingInNewSong = true;
-    if (isPlayerReady && ytPlayer && ytPlayer.setVolume) {
-      ytPlayer.setVolume(0);
+    // Limpiar anuncios o dedicatorias previos inmediatamente sin timeouts residuales
+    if (typeof hidePromoBanner === 'function') hidePromoBanner(true);
+    if (typeof hideDedicationBanner === 'function') hideDedicationBanner(true);
+
+    if (activeFadeInterval) {
+      clearInterval(activeFadeInterval);
+      activeFadeInterval = null;
     }
-  } else {
-    isFadingInNewSong = false;
-    if (isPlayerReady && ytPlayer && ytPlayer.setVolume) {
-      ytPlayer.setVolume(masterVolume);
-    }
-  }
 
-  if (isPlayerReady && ytPlayer && ytPlayer.loadVideoById) {
-    ytPlayer.loadVideoById({
-      videoId: videoId,
-      suggestedQuality: 'hd1080'
+    // Preparar volumen para inicio suave (Fade In)
+    if (currentSettings.fadeTransitionEnabled !== false) {
+      isFadingInNewSong = true;
+      if (isPlayerReady && ytPlayer && ytPlayer.setVolume) {
+        ytPlayer.setVolume(0);
+      }
+    } else {
+      isFadingInNewSong = false;
+      if (isPlayerReady && ytPlayer && ytPlayer.setVolume) {
+        ytPlayer.setVolume(masterVolume);
+      }
+    }
+
+    if (isPlayerReady && ytPlayer && ytPlayer.loadVideoById) {
+      ytPlayer.loadVideoById({
+        videoId: videoId,
+        suggestedQuality: 'hd1080'
+      });
+    } else {
+      pendingVideoId = videoId;
+    }
+  };
+
+  // Si otra canción aún está sonando, hacemos fade out rápido y sutil en 350ms para evitar cortes bruscos
+  if (isPlayingNow && currentSettings.fadeTransitionEnabled !== false && ytPlayer && ytPlayer.getVolume) {
+    if (curtain) {
+      curtain.classList.remove('opacity-0');
+      curtain.classList.add('opacity-90');
+    }
+    fadeVolume(ytPlayer.getVolume(), 0, 350, () => {
+      doLoadVideo();
     });
   } else {
-    pendingVideoId = videoId;
+    doLoadVideo();
   }
 }
 
@@ -895,21 +842,9 @@ socket.on('mic-mode', ({ active }) => {
   }
 });
 
-// Alerta animada en pantalla cuando entra una petición
+// Alerta cuando entra una petición: Desactivado en la pantalla del TV para no mostrar qué canción viene ni interrumpir el video
 socket.on('new-request-alert', (data) => {
-  const notif = document.getElementById('newRequestNotification');
-  const text = document.getElementById('newRequestText');
-
-  if (notif && text && data.song) {
-    const tableStr = data.song.requestedBy?.table ? `Mesa ${data.song.requestedBy.table}` : 'un cliente';
-    const dedicationStr = data.song.requestedBy?.dedication ? ` — "${data.song.requestedBy.dedication}"` : '';
-    text.textContent = `¡Nuevo pedido de ${tableStr}: "${data.song.title}"${dedicationStr}!`;
-    notif.classList.remove('hidden');
-
-    setTimeout(() => {
-      notif.classList.add('hidden');
-    }, 6000);
-  }
+  // En el TV se mantiene limpia la pantalla; las alertas de pedidos se gestionan en la consola del DJ
 });
 
 // Cargar QR para la esquina de la pantalla

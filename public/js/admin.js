@@ -34,6 +34,13 @@ function setupSocket() {
   socket.on('tv-fullscreen-status', (data) => {
     updateTvFullscreenUI(data?.isFullscreen);
   });
+  socket.on('new-request-alert', (data) => {
+    if (data && data.song) {
+      const tableStr = data.song.requestedBy?.table ? `Mesa ${data.song.requestedBy.table}` : 'un cliente';
+      const ded = data.song.requestedBy?.dedication ? ` — "${data.song.requestedBy.dedication}"` : '';
+      showAdminToast(`🎵 Nuevo pedido de ${tableStr}: "${data.song.title}"${ded}`, '🎉');
+    }
+  });
 }
 
 async function loadInitialData() {
@@ -92,6 +99,12 @@ function renderAdminState(data) {
     }
     if (document.getElementById('settingDragToCast')) {
       document.getElementById('settingDragToCast').checked = settings.dragToCastEnabled === true;
+    }
+    if (document.getElementById('settingConfirmBeforeSongChange')) {
+      document.getElementById('settingConfirmBeforeSongChange').checked = settings.confirmBeforeSongChange !== false;
+    }
+    if (document.getElementById('chkModalConfirmChangeSetting')) {
+      document.getElementById('chkModalConfirmChangeSetting').checked = settings.confirmBeforeSongChange !== false;
     }
     updateQueueDragModeUI(settings.dragToCastEnabled === true);
 
@@ -689,8 +702,93 @@ async function clearWaitingQueue() {
 }
 
 // 2. Control de la Cola
-async function skipCurrentSong() {
-  await fetch('/api/admin/skip', { method: 'POST' });
+let pendingSongChangeAction = null;
+
+function requestSongChangeConfirmation({ targetTitle, targetArtist, targetThumb, onConfirm }) {
+  const isPlayingNow = currentPlayingTrack && currentPlayingTrack.videoId;
+  const isConfirmEnabled = currentSettings && currentSettings.confirmBeforeSongChange !== false;
+
+  if (!isPlayingNow || !isConfirmEnabled) {
+    if (typeof onConfirm === 'function') onConfirm();
+    return;
+  }
+
+  pendingSongChangeAction = onConfirm;
+
+  const modal = document.getElementById('confirmChangeSongModal');
+  if (!modal) {
+    if (typeof onConfirm === 'function') onConfirm();
+    return;
+  }
+
+  // Datos del tema actualmente sonando
+  const curTitleEl = document.getElementById('confirmModalCurrentTitle');
+  const curArtistEl = document.getElementById('confirmModalCurrentArtist');
+  const curThumbEl = document.getElementById('confirmModalCurrentThumb');
+  const curTimeEl = document.getElementById('confirmModalCurrentTime');
+
+  if (curTitleEl) curTitleEl.textContent = currentPlayingTrack.title || 'Música del bar';
+  if (curArtistEl) curArtistEl.textContent = currentPlayingTrack.artist || 'Santa Chela';
+  if (curThumbEl) {
+    curThumbEl.src = currentPlayingTrack.thumbnail || (currentPlayingTrack.videoId ? `https://i.ytimg.com/vi/${currentPlayingTrack.videoId}/hqdefault.jpg` : '');
+  }
+  if (curTimeEl) {
+    if (playerTelemetry && typeof playerTelemetry.currentTime === 'number' && playerTelemetry.currentTime > 0) {
+      const min = Math.floor(playerTelemetry.currentTime / 60);
+      const sec = Math.floor(playerTelemetry.currentTime % 60).toString().padStart(2, '0');
+      curTimeEl.textContent = `${min}:${sec}`;
+    } else {
+      curTimeEl.textContent = 'EN VIVO';
+    }
+  }
+
+  // Datos del nuevo tema que va a sonar
+  const targetTitleEl = document.getElementById('confirmModalTargetTitle');
+  const targetArtistEl = document.getElementById('confirmModalTargetArtist');
+  const targetThumbEl = document.getElementById('confirmModalTargetThumb');
+
+  if (targetTitleEl) targetTitleEl.textContent = targetTitle || 'Nueva canción';
+  if (targetArtistEl) targetArtistEl.textContent = targetArtist || '';
+  if (targetThumbEl) targetThumbEl.src = targetThumb || '';
+
+  const chk = document.getElementById('chkModalConfirmChangeSetting');
+  if (chk) chk.checked = isConfirmEnabled;
+
+  modal.classList.remove('hidden');
+}
+
+function cancelSongChangeConfirmation() {
+  pendingSongChangeAction = null;
+  const modal = document.getElementById('confirmChangeSongModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function proceedSongChangeConfirmation() {
+  const action = pendingSongChangeAction;
+  pendingSongChangeAction = null;
+  const modal = document.getElementById('confirmChangeSongModal');
+  if (modal) modal.classList.add('hidden');
+  if (typeof action === 'function') {
+    action();
+  }
+}
+
+function skipCurrentSong() {
+  const nextSong = currentQueueState && currentQueueState.length > 0 ? currentQueueState[0] : null;
+
+  requestSongChangeConfirmation({
+    targetTitle: nextSong ? nextSong.title : 'Siguiente tema en la lista',
+    targetArtist: nextSong ? nextSong.artist : 'Lista base',
+    targetThumb: nextSong ? (nextSong.thumbnail || (nextSong.videoId ? `https://i.ytimg.com/vi/${nextSong.videoId}/hqdefault.jpg` : '')) : '',
+    onConfirm: async () => {
+      try {
+        await fetch('/api/admin/skip', { method: 'POST' });
+        showAdminToast('⏭️ Saltando a la siguiente canción', '✓');
+      } catch (err) {
+        console.error('Error saltando canción:', err);
+      }
+    }
+  });
 }
 
 async function removeQueueItem(songId) {
@@ -713,11 +811,23 @@ async function reorderQueueItem(index, direction) {
   }
 }
 
-async function playNowDirect(videoId, title, artist, genre) {
-  await fetch('/api/admin/play-now', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ videoId, title, artist, genre })
+function playNowDirect(videoId, title, artist, genre, thumbnail) {
+  requestSongChangeConfirmation({
+    targetTitle: title || 'Canción seleccionada',
+    targetArtist: artist || '',
+    targetThumb: thumbnail || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : ''),
+    onConfirm: async () => {
+      try {
+        await fetch('/api/admin/play-now', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoId, title, artist, genre })
+        });
+        showAdminToast(`▶ ¡"${title}" sonando ahora!`, '✓');
+      } catch (err) {
+        console.error('Error poniendo canción:', err);
+      }
+    }
   });
 }
 
@@ -1098,24 +1208,28 @@ function castSongDirect(index) {
   const song = currentQueueState[index];
   if (!song) return;
 
+  requestSongChangeConfirmation({
+    targetTitle: song.title,
+    targetArtist: song.artist,
+    targetThumb: song.thumbnail || (song.videoId ? `https://i.ytimg.com/vi/${song.videoId}/hqdefault.jpg` : ''),
+    onConfirm: () => {
+      executeCastSongToTv(song, index);
+    }
+  });
+}
+
+function executeCastSongToTv(song, index) {
   const card = document.getElementById(`queue-row-${index}`);
   if (card) {
-    // Animación de salida supersónica hacia arriba fuera de la pantalla
-    card.style.transition = 'all 0.45s cubic-bezier(0.16, 1, 0.3, 1)';
-    card.style.transform = 'translateY(-180%) scale(0.5) rotate(-5deg)';
+    card.style.transition = 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+    card.style.transform = 'translateY(-120%) scale(0.6)';
     card.style.opacity = '0';
-    card.style.boxShadow = '0 0 60px rgba(245, 158, 11, 1)';
   }
 
-  // Vibración háptica en celular
   if (navigator.vibrate) {
-    try { navigator.vibrate([40, 60, 100]); } catch(e){}
+    try { navigator.vibrate([30, 40]); } catch(e){}
   }
 
-  // Sonido de despegue
-  playMobileWhooshSound();
-
-  // Enviar orden de lanzamiento por socket
   socket.emit('cast-song-to-tv', {
     videoId: song.videoId,
     title: song.title,
@@ -1127,30 +1241,36 @@ function castSongDirect(index) {
     queueIndex: index
   });
 
-  showAdminToast(`▶ ¡"${song.title}" sonando en la TV!`, '🔥');
+  showAdminToast(`▶ ¡"${song.title}" sonando en la TV!`, '✓');
 }
 
 function adminCastSongFromSearch(idx) {
   const v = lastAdminSearchVideos[idx];
   if (!v) return;
 
-  if (navigator.vibrate) {
-    try { navigator.vibrate([40, 60, 100]); } catch(e){}
-  }
-  playMobileWhooshSound();
+  requestSongChangeConfirmation({
+    targetTitle: v.title,
+    targetArtist: v.artist,
+    targetThumb: v.thumbnail,
+    onConfirm: () => {
+      if (navigator.vibrate) {
+        try { navigator.vibrate([30, 40]); } catch(e){}
+      }
 
-  socket.emit('cast-song-to-tv', {
-    videoId: v.videoId,
-    title: v.title,
-    artist: v.artist,
-    genre: 'Crossover',
-    duration: v.duration,
-    thumbnail: v.thumbnail,
-    requestedBy: { name: 'DJ / Buscador' }
+      socket.emit('cast-song-to-tv', {
+        videoId: v.videoId,
+        title: v.title,
+        artist: v.artist,
+        genre: 'Crossover',
+        duration: v.duration,
+        thumbnail: v.thumbnail,
+        requestedBy: { name: 'DJ / Buscador' }
+      });
+
+      showAdminToast(`▶ ¡"${v.title}" sonando en la TV!`, '✓');
+      clearAdminSearch();
+    }
   });
-
-  showAdminToast(`▶ ¡"${v.title}" sonando en la TV!`, '🔥');
-  clearAdminSearch();
 }
 
 // 3. Búsqueda rápida de DJ con soporte para Enter, Debounce y caché
@@ -1288,7 +1408,7 @@ function adminAddSongFromSearch(idx) {
 function adminPlayNowFromSearch(idx) {
   const v = lastAdminSearchVideos[idx];
   if (!v) return;
-  playNowDirect(v.videoId, v.title, v.artist, 'Crossover');
+  playNowDirect(v.videoId, v.title, v.artist, 'Crossover', v.thumbnail);
   clearAdminSearch();
 }
 
@@ -2013,6 +2133,7 @@ async function saveSettings() {
   const genreBatchSize = parseInt(document.getElementById('settingGenreBatchSize')?.value || 3);
   const allowClientPhotoDedication = document.getElementById('settingAllowClientPhoto')?.checked === true;
   const dragToCastEnabled = document.getElementById('settingDragToCast')?.checked === true;
+  const confirmBeforeSongChange = document.getElementById('settingConfirmBeforeSongChange')?.checked !== false;
 
   await fetch('/api/settings', {
     method: 'POST',
@@ -2030,15 +2151,44 @@ async function saveSettings() {
       dynamicDurationOnQueue,
       genreBatchSize,
       allowClientPhotoDedication,
-      dragToCastEnabled
+      dragToCastEnabled,
+      confirmBeforeSongChange
     })
   });
 
   currentSettings.dragToCastEnabled = dragToCastEnabled;
+  currentSettings.confirmBeforeSongChange = confirmBeforeSongChange;
   updateQueueDragModeUI(dragToCastEnabled);
   renderQueueList(currentQueueState);
 
   alert('¡Ajustes guardados correctamente!');
+}
+
+async function toggleConfirmSettingImmediate(checked) {
+  const isEnabled = !!checked;
+  currentSettings.confirmBeforeSongChange = isEnabled;
+  const chk1 = document.getElementById('settingConfirmBeforeSongChange');
+  const chk2 = document.getElementById('chkModalConfirmChangeSetting');
+  if (chk1) chk1.checked = isEnabled;
+  if (chk2) chk2.checked = isEnabled;
+
+  try {
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confirmBeforeSongChange: isEnabled })
+    });
+    showAdminToast(
+      isEnabled ? '🛡️ Confirmación antes de cambiar activada' : 'Confirmación antes de cambiar desactivada',
+      isEnabled ? '✓' : 'ℹ️'
+    );
+  } catch (err) {
+    console.error('Error guardando ajuste de confirmación:', err);
+  }
+}
+
+function toggleConfirmSettingFromModal(checked) {
+  toggleConfirmSettingImmediate(checked);
 }
 
 async function toggleDragToCastSettingImmediate(checked) {
@@ -2061,7 +2211,7 @@ async function toggleDragToCastSettingImmediate(checked) {
     if (isEnabled) {
       showAdminToast('🚀 Modo Show activado: Toca y arrastra al TV', '📺');
     } else {
-      showAdminToast('⇅ Modo Reordenar cola activado (predeterminado)', '✓');
+      showAdminToast('⇅ Modo Organizar lista activado (predeterminado)', '✓');
     }
   } catch (err) {
     console.error('Error guardando ajuste de arrastre de cola:', err);
@@ -2081,9 +2231,11 @@ function updateQueueDragModeUI(isCastMode) {
   if (isCastMode) {
     if (btnCast) {
       btnCast.className = 'px-2.5 py-1 rounded-lg transition bg-amber-500 text-black font-black shadow';
+      btnCast.innerHTML = '🚀 Lanzar a TV (Opcional)';
     }
     if (btnReorder) {
       btnReorder.className = 'px-2.5 py-1 rounded-lg transition text-gray-400 hover:text-white font-semibold';
+      btnReorder.innerHTML = '⇅ Organizar Lista';
     }
     if (helpBadge) {
       helpBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/25 to-orange-500/25 border border-amber-400/60 text-[10px] sm:text-xs font-black text-amber-300 shadow';
@@ -2092,13 +2244,15 @@ function updateQueueDragModeUI(isCastMode) {
   } else {
     if (btnReorder) {
       btnReorder.className = 'px-2.5 py-1 rounded-lg transition bg-amber-500 text-black font-black shadow';
+      btnReorder.innerHTML = '⇅ Organizar Lista';
     }
     if (btnCast) {
       btnCast.className = 'px-2.5 py-1 rounded-lg transition text-gray-400 hover:text-white font-semibold';
+      btnCast.innerHTML = '🚀 Lanzar a TV (Opcional)';
     }
     if (helpBadge) {
       helpBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-semibold text-gray-300 shadow';
-      helpBadge.innerHTML = '<span>⇅</span> <span>Arrastra para reordenar posiciones (o usa ▲ ▼)</span>';
+      helpBadge.innerHTML = '<span>⇅</span> <span>Arrastra para organizar la lista (o usa ▲ ▼)</span>';
     }
     if (dropPortal) {
       dropPortal.classList.add('-translate-y-full');
@@ -2634,7 +2788,7 @@ function renderPlaylistTracksInModal(playlist) {
           <button onclick="adminAddTrackFromPlaylistModal(${idx})" class="btn-secondary text-[11px] py-1.5 px-2 text-amber-400 font-semibold border-amber-400/30 hover:bg-amber-400/10" title="Agregar a la cola de espera">
             + Cola
           </button>
-          <button onclick="playNowDirect('${t.videoId}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${currentGenre}'); closeViewPlaylistModal();" class="btn-primary text-[11px] py-1.5 px-2.5">
+          <button onclick="playNowDirect('${t.videoId}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${currentGenre}', '${t.thumbnail || ''}'); closeViewPlaylistModal();" class="btn-primary text-[11px] py-1.5 px-2.5">
             Sonar Ya
           </button>
           <button onclick="removeTrackFromPlaylist(${idx})" class="btn-secondary text-[11px] py-1.5 px-2 text-red-400 hover:text-red-300 border-red-500/20" title="Quitar de esta lista">
