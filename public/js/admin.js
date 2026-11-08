@@ -60,6 +60,25 @@ function setupPwaInstall() {
   });
 }
 
+function switchPwaGuideTab(os) {
+  const iosBox = document.getElementById('pwaIosInstructions');
+  const androidBox = document.getElementById('pwaAndroidInstructions');
+  const btnIos = document.getElementById('pwaTabBtnIos');
+  const btnAndroid = document.getElementById('pwaTabBtnAndroid');
+
+  if (os === 'android') {
+    if (androidBox) androidBox.classList.remove('hidden');
+    if (iosBox) iosBox.classList.add('hidden');
+    if (btnAndroid) btnAndroid.className = 'py-2 px-3 rounded-xl font-black transition bg-amber-500 text-black shadow';
+    if (btnIos) btnIos.className = 'py-2 px-3 rounded-xl font-bold transition text-gray-400 hover:text-white';
+  } else {
+    if (iosBox) iosBox.classList.remove('hidden');
+    if (androidBox) androidBox.classList.add('hidden');
+    if (btnIos) btnIos.className = 'py-2 px-3 rounded-xl font-black transition bg-amber-500 text-black shadow';
+    if (btnAndroid) btnAndroid.className = 'py-2 px-3 rounded-xl font-bold transition text-gray-400 hover:text-white';
+  }
+}
+
 async function triggerInstallPwa() {
   if (deferredPwaPrompt) {
     deferredPwaPrompt.prompt();
@@ -71,20 +90,10 @@ async function triggerInstallPwa() {
   }
 
   const modal = document.getElementById('pwaInstallGuideModal');
-  const iosBox = document.getElementById('pwaIosInstructions');
-  const androidBox = document.getElementById('pwaAndroidInstructions');
   if (!modal) return;
 
-  const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (iosBox && androidBox) {
-    if (isIos) {
-      iosBox.classList.remove('hidden');
-      androidBox.classList.add('hidden');
-    } else {
-      iosBox.classList.remove('hidden');
-      androidBox.classList.remove('hidden');
-    }
-  }
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  switchPwaGuideTab(isAndroid ? 'android' : 'ios');
 
   modal.classList.remove('hidden');
 }
