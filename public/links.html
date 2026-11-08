@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Directorio Oficial de Links | 4 Programas Independientes</title>
+  <meta name="theme-color" content="#090b10">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: radial-gradient(circle at top, #151924 0%, #090b10 65%);
+      color: #f3f4f6;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .bar-card {
+      background: linear-gradient(180deg, rgba(24, 28, 39, 0.92) 0%, rgba(13, 16, 23, 0.96) 100%);
+      backdrop-filter: blur(16px);
+    }
+  </style>
+</head>
+<body class="min-h-screen py-6 px-3 sm:px-6 lg:px-10">
+
+  <!-- Toast de confirmación de copiado -->
+  <div id="copyToast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-amber-500 text-black font-black text-xs sm:text-sm px-5 py-3 rounded-2xl shadow-[0_10px_40px_rgba(245,158,11,0.6)] flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+    <span>✅</span>
+    <span id="copyToastText">¡Enlace copiado al portapapeles!</span>
+  </div>
+
+  <div class="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+
+    <!-- Cabecera Principal -->
+    <header class="bar-card rounded-3xl p-5 sm:p-8 border border-amber-500/30 shadow-[0_15px_50px_rgba(0,0,0,0.7)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5 sm:gap-4">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 text-black flex items-center justify-center text-2xl sm:text-3xl font-black shadow-[0_0_30px_rgba(245,158,11,0.4)] shrink-0">
+          🔗
+        </div>
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-black uppercase tracking-widest mb-1">
+            <span>⚡ PANEL CENTRAL DE ACCESOS</span>
+          </div>
+          <h1 class="text-xl sm:text-3xl font-black text-white tracking-tight">
+            Directorio Oficial de Links (4 Programas)
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-400 mt-0.5">
+            Cada programa tiene su propia base de datos, listas, cola y pantalla de TV 100% independientes.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 w-full md:w-auto">
+        <button onclick="copyAllFourProgramsSummary()" class="w-full md:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs sm:text-sm px-4 py-3 rounded-2xl shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
+          <span>📋</span>
+          <span>Copiar Directorio Completo</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Grid de los 4 Programas Independientes -->
+    <div id="programsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+      <!-- Se renderiza dinámicamente con los nombres en vivo de cada programa -->
+    </div>
+
+    <!-- Pie de página informativo -->
+    <footer class="text-center text-xs text-gray-500 py-4 space-y-1">
+      <p>Guarda esta página en tus favoritos (<strong class="text-amber-400" id="footerSelfUrl">/links</strong>) para tener siempre a la mano todos tus enlaces.</p>
+    </footer>
+
+  </div>
+
+  <script>
+    const ORIGIN = window.location.origin;
+    document.getElementById('footerSelfUrl').textContent = ORIGIN + '/links';
+
+    const PROGRAMS_DEF = [
+      {
+        id: 'default',
+        number: 1,
+        defaultTitle: 'Santa Chela Music Bar',
+        badge: 'PROGRAMA 1 • OFICIAL PRINCIPAL',
+        icon: '🍺',
+        accentBorder: 'border-amber-500/45',
+        accentBadge: 'bg-amber-500 text-black',
+        accentGlow: 'shadow-[0_10px_40px_rgba(245,158,11,0.12)]',
+        prefix: '',
+        statusApi: '/api/status'
+      },
+      {
+        id: 'ambar',
+        number: 2,
+        defaultTitle: 'Ámbar Music Bar',
+        badge: 'PROGRAMA 2 • INDEPENDIENTE',
+        icon: '🍸',
+        accentBorder: 'border-purple-500/45',
+        accentBadge: 'bg-purple-500 text-white',
+        accentGlow: 'shadow-[0_10px_40px_rgba(168,85,247,0.12)]',
+        prefix: '/ambar',
+        statusApi: '/ambar/api/status'
+      },
+      {
+        id: 'bar3',
+        number: 3,
+        defaultTitle: 'Music Bar 3',
+        badge: 'PROGRAMA 3 • INDEPENDIENTE',
+        icon: '🎶',
+        accentBorder: 'border-emerald-500/45',
+        accentBadge: 'bg-emerald-500 text-black',
+        accentGlow: 'shadow-[0_10px_40px_rgba(16,185,129,0.12)]',
+        prefix: '/bar3',
+        statusApi: '/bar3/api/status'
+      },
+      {
+        id: 'bar4',
+        number: 4,
+        defaultTitle: 'Music Bar 4',
+        badge: 'PROGRAMA 4 • INDEPENDIENTE',
+        icon: '🔥',
+        accentBorder: 'border-sky-500/45',
+        accentBadge: 'bg-sky-400 text-black',
+        accentGlow: 'shadow-[0_10px_40px_rgba(56,189,248,0.12)]',
+        prefix: '/bar4',
+        statusApi: '/bar4/api/status'
+      }
+    ];
+
+    const liveNames = {};
+    const liveSongs = {};
+
+    function getLinksForProgram(prog) {
+      const p = prog.prefix;
+      return [
+        {
+          key: 'admin',
+          icon: '🎛️',
+          label: 'Consola DJ / App Celular',
+          desc: 'Control musical, listas, cola y ajustes del bar',
+          url: `${ORIGIN}${p}/admin.html`
+        },
+        {
+          key: 'player',
+          icon: '📺',
+          label: 'Pantalla TV (Reproductor)',
+          desc: 'Video oficial y sonido exclusivo para Televisor o PC',
+          url: `${ORIGIN}${p}/player.html`
+        },
+        {
+          key: 'client',
+          icon: '📱',
+          label: 'Vista Clientes (Mesas)',
+          desc: 'Página para que las mesas pidan música',
+          url: `${ORIGIN}${p}/`
+        },
+        {
+          key: 'qrs',
+          icon: '🖨️',
+          label: 'Códigos QR de Mesas',
+          desc: 'Generador de tarjetas QR listas para imprimir',
+          url: `${ORIGIN}${p}/qrs.html`
+        }
+      ];
+    }
+
+    function renderCards() {
+      const container = document.getElementById('programsContainer');
+      container.innerHTML = PROGRAMS_DEF.map((prog) => {
+        const barTitle = liveNames[prog.id] || prog.defaultTitle;
+        const nowPlaying = liveSongs[prog.id] || 'Listo para reproducir';
+        const links = getLinksForProgram(prog);
+
+        const linksHtml = links.map((lnk) => `
+          <div class="p-3 sm:p-3.5 rounded-2xl bg-black/55 border border-white/10 hover:border-white/20 transition space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-lg shrink-0">${lnk.icon}</span>
+                <div class="min-w-0">
+                  <p class="text-xs sm:text-sm font-extrabold text-white truncate">${lnk.label}</p>
+                  <p class="text-[10.5px] text-gray-400 truncate">${lnk.desc}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button onclick="copySingleLink('${lnk.url}', '${barTitle} - ${lnk.label}')" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-black text-gray-200 text-[11px] font-extrabold transition cursor-pointer flex items-center gap-1" title="Copiar este link">
+                  <span>📋</span> <span>Copiar</span>
+                </button>
+                <a href="${lnk.url}" target="_blank" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black border border-amber-500/40 text-[11px] font-black transition flex items-center gap-1" title="Abrir en nueva pestaña">
+                  <span>Abrir</span> <span>↗</span>
+                </a>
+              </div>
+            </div>
+            <div class="bg-[#07090d] px-3 py-1.5 rounded-xl border border-white/5 font-mono text-[11px] text-amber-300/90 break-all select-all">
+              ${lnk.url}
+            </div>
+          </div>
+        `).join('');
+
+        return `
+          <section class="bar-card rounded-3xl p-5 sm:p-6 border-2 ${prog.accentBorder} ${prog.accentGlow} flex flex-col justify-between space-y-4">
+            <div class="space-y-4">
+              <!-- Encabezado de la Tarjeta del Bar -->
+              <div class="flex items-start justify-between gap-3 border-b border-white/10 pb-3.5">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/15 flex items-center justify-center text-2xl shrink-0">
+                    ${prog.icon}
+                  </div>
+                  <div class="min-w-0">
+                    <span class="inline-block text-[9.5px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full ${prog.accentBadge} mb-1">
+                      ${prog.badge}
+                    </span>
+                    <h2 class="text-lg sm:text-xl font-black text-white truncate">${barTitle}</h2>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Canción sonando actualmente en este programa -->
+              <div class="px-3.5 py-2 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between gap-2 text-xs">
+                <span class="text-gray-400 font-semibold flex items-center gap-1.5 shrink-0">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>Sonando:</span>
+                </span>
+                <span class="text-gray-200 font-bold truncate">${nowPlaying}</span>
+              </div>
+
+              <!-- Lista de los 4 Links del Programa -->
+              <div class="space-y-2.5">
+                ${linksHtml}
+              </div>
+            </div>
+
+            <!-- Botones inferiores para copiar o enviar todos los links de este bar -->
+            <div class="pt-3 border-t border-white/10 grid grid-cols-2 gap-2.5">
+              <button onclick="copyBarPack('${prog.id}')" class="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer">
+                <span>📋</span> <span>Copiar los 4 Links</span>
+              </button>
+              <button onclick="shareBarWhatsApp('${prog.id}')" class="py-2.5 px-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-extrabold flex items-center justify-center gap-1.5 transition cursor-pointer">
+                <span>📲</span> <span>Enviar por WhatsApp</span>
+              </button>
+            </div>
+          </section>
+        `;
+      }).join('');
+    }
+
+    function buildBarTextBlock(prog) {
+      const barTitle = liveNames[prog.id] || prog.defaultTitle;
+      const links = getLinksForProgram(prog);
+      return [
+        `${prog.icon} *${barTitle.toUpperCase()} (${prog.badge})*`,
+        ...links.map(l => `${l.icon} *${l.label}:*\n${l.url}`)
+      ].join('\n\n');
+    }
+
+    async function copyTextToClipboard(text, toastMsg) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      const toast = document.getElementById('copyToast');
+      const toastText = document.getElementById('copyToastText');
+      if (toast && toastText) {
+        toastText.textContent = toastMsg || '¡Copiado al portapapeles!';
+        toast.classList.remove('opacity-0', 'translate-y-4');
+        toast.classList.add('opacity-100', 'translate-y-0');
+        clearTimeout(window.__toastTimer);
+        window.__toastTimer = setTimeout(() => {
+          toast.classList.remove('opacity-100', 'translate-y-0');
+          toast.classList.add('opacity-0', 'translate-y-4');
+        }, 2600);
+      }
+    }
+
+    function copySingleLink(url, label) {
+      copyTextToClipboard(url, `✅ Copiado: ${label}`);
+    }
+
+    function copyBarPack(progId) {
+      const prog = PROGRAMS_DEF.find(p => p.id === progId);
+      if (!prog) return;
+      const barTitle = liveNames[prog.id] || prog.defaultTitle;
+      copyTextToClipboard(buildBarTextBlock(prog), `✅ Copiados los 4 links de ${barTitle}`);
+    }
+
+    function shareBarWhatsApp(progId) {
+      const prog = PROGRAMS_DEF.find(p => p.id === progId);
+      if (!prog) return;
+      const text = buildBarTextBlock(prog);
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function copyAllFourProgramsSummary() {
+      const fullText = PROGRAMS_DEF.map(p => buildBarTextBlock(p)).join('\n\n────────────────────────\n\n');
+      copyTextToClipboard(fullText, '✅ ¡Directorio completo de los 4 programas copiado!');
+    }
+
+    async function loadLiveStatuses() {
+      await Promise.all(PROGRAMS_DEF.map(async (prog) => {
+        try {
+          const res = await fetch(prog.statusApi);
+          const data = await res.json();
+          if (data?.settings?.barName) {
+            liveNames[prog.id] = data.settings.barName;
+          }
+          if (data?.currentlyPlaying?.title) {
+            liveSongs[prog.id] = `${data.currentlyPlaying.title} - ${data.currentlyPlaying.artist || ''}`;
+          }
+        } catch (e) {}
+      }));
+      renderCards();
+    }
+
+    renderCards();
+    loadLiveStatuses();
+  </script>
+</body>
+</html>

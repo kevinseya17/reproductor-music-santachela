@@ -48,6 +48,10 @@ app.get(['/tv', '/player'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'player.html'));
 });
 
+app.get(['/links', '/bares', '/central'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'links.html'));
+});
+
 function createBarProgram(instanceId = 'default', routePrefix = '') {
   const db = dbFactory.getInstance(instanceId);
   const router = express.Router();
