@@ -3,9 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#000000">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
   <title>Reproductor Bar & TV | Santa Chela</title>
   <script>
     // Detección inmediata de teléfonos celulares para evitar que interfieran con la pantalla del bar
@@ -326,10 +323,7 @@
 
       <!-- Barra de Controles Rápidos para el Barman / Encargado -->
       <div id="playerControlsBar" class="tv-hud-element flex items-center justify-between pt-1 text-xs text-gray-400 interactive">
-        <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
-          <a href="/admin.html" class="bg-amber-500/20 hover:bg-amber-500/35 text-amber-300 border border-amber-500/40 px-3 py-1 rounded-xl flex items-center gap-1.5 font-extrabold transition">
-            <span>🎛️</span> <span>Consola DJ</span>
-          </a>
+        <div class="flex items-center gap-4">
           <button id="playPauseBtn" onclick="togglePlayPause()" class="hover:text-amber-400 flex items-center gap-1.5 font-bold">
             <span id="playPauseIcon">⏸️</span> Pausar
           </button>

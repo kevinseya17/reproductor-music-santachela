@@ -38,15 +38,6 @@ app.get('/player.html', (req, res, next) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Atajos cortos adicionales (sin afectar los enlaces existentes)
-app.get(['/dj', '/admin'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-app.get(['/tv', '/player'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'player.html'));
-});
-
 // Estado de reproducción en memoria y persistente
 let currentlyPlaying = db.getCurrentlyPlaying();
 let currentPlaylistIndex = 0;
