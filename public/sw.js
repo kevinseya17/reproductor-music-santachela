@@ -1,10 +1,9 @@
-const CACHE_NAME = 'santachela-pwa-v1';
+const CACHE_NAME = 'santachela-pwa-v2';
 const STATIC_ASSETS = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/apple-touch-icon.png',
-  '/icons/icon.svg',
-  '/manifest.json'
+  '/icons/icon.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -33,7 +32,7 @@ self.addEventListener('fetch', (event) => {
   if (
     req.method !== 'GET' ||
     url.origin !== self.location.origin ||
-    url.pathname.startsWith('/api/') ||
+    url.pathname.includes('/api/') ||
     url.pathname.startsWith('/socket.io/')
   ) {
     return;

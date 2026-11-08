@@ -5,7 +5,8 @@ const path = require('path');
 const cors = require('cors');
 const { Server } = require('socket.io');
 
-const db = require('./lib/db');
+const fs = require('fs');
+const dbFactory = require('./lib/db');
 const youtube = require('./lib/youtube');
 const aiDj = require('./lib/ai-dj');
 const qrService = require('./lib/qr');
@@ -47,6 +48,14 @@ app.get(['/tv', '/player'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'player.html'));
 });
 
+function createBarProgram(instanceId = 'default', routePrefix = '') {
+  const db = dbFactory.getInstance(instanceId);
+  const router = express.Router();
+  const roomName = 'instance:' + instanceId;
+  const roomIo = {
+    emit: (...args) => io.to(roomName).emit(...args)
+  };
+
 // Estado de reproducción en memoria y persistente
 let currentlyPlaying = db.getCurrentlyPlaying();
 let currentPlaylistIndex = 0;
@@ -81,7 +90,7 @@ function checkSchedule() {
     if (match && block.playlistId && settings.activePlaylistId !== block.playlistId) {
       console.log(`🕒 Cambio de horario automático: Activando lista "${block.name}" (${block.playlistId})`);
       db.updateSettings({ activePlaylistId: block.playlistId });
-      io.emit('state-changed', {
+      roomIo.emit('state-changed', {
         currentlyPlaying,
         queue: db.getQueue(),
         settings: db.getSettings()
@@ -438,7 +447,7 @@ function regenerateBaseTracksInQueue(targetCount = 50) {
   db.setQueue(clientRequests);
   replenishPlaybackQueue(targetCount);
 
-  io.emit('state-changed', {
+  roomIo.emit('state-changed', {
     currentlyPlaying,
     queue: db.getQueue(),
     settings: db.getSettings()
@@ -477,7 +486,7 @@ function advanceToNextSong() {
   }
 
   // Notificar a todos los clientes conectados
-  io.emit('state-changed', {
+  roomIo.emit('state-changed', {
     currentlyPlaying,
     queue: db.getQueue(),
     settings: db.getSettings()
@@ -502,7 +511,7 @@ function ensurePlaying() {
 // ==========================================
 
 // Estado general del sistema
-app.get('/api/status', (req, res) => {
+router.get('/api/status', (req, res) => {
   ensurePlaying();
   res.json({
     currentlyPlaying,
@@ -514,7 +523,7 @@ app.get('/api/status', (req, res) => {
 });
 
 // Búsqueda en YouTube para clientes y admin
-app.get('/api/search', async (req, res) => {
+router.get('/api/search', async (req, res) => {
   const query = req.query.q;
   if (!query) return res.json({ results: [] });
 
@@ -523,7 +532,7 @@ app.get('/api/search', async (req, res) => {
 });
 
 // Pedir canción (Cliente desde la mesa)
-app.post('/api/request', async (req, res) => {
+router.post('/api/request', async (req, res) => {
   try {
     const { videoId, title, artist, duration, thumbnail, table, customerName, dedication, photo } = req.body;
     const tableClean = table ? String(table).trim() : 'Mesa';
@@ -598,12 +607,12 @@ app.post('/api/request', async (req, res) => {
     if (!currentlyPlaying) {
       currentlyPlaying = { ...song, startedAt: Date.now() };
       if (!isDJOrAdmin) db.recordTableRequest(tableClean);
-      io.emit('state-changed', {
+      roomIo.emit('state-changed', {
         currentlyPlaying,
         queue: db.getQueue(),
         settings: db.getSettings()
       });
-      io.emit('new-request-alert', {
+      roomIo.emit('new-request-alert', {
         song,
         position: 1
       });
@@ -643,13 +652,13 @@ app.post('/api/request', async (req, res) => {
     const displayPosition = slotIndex + 1;
 
     // Avisar en tiempo real a la pantalla del bar y a los demás usuarios
-    io.emit('state-changed', {
+    roomIo.emit('state-changed', {
       currentlyPlaying,
       queue: db.getQueue(),
       settings: currentSettings
     });
 
-    io.emit('new-request-alert', {
+    roomIo.emit('new-request-alert', {
       song,
       position: displayPosition
     });
@@ -674,12 +683,12 @@ app.post('/api/request', async (req, res) => {
 });
 
 // Obtener todas las listas
-app.get('/api/playlists', (req, res) => {
+router.get('/api/playlists', (req, res) => {
   res.json({ playlists: db.getPlaylists() });
 });
 
 // Guardar / Crear lista
-app.post('/api/playlists', (req, res) => {
+router.post('/api/playlists', (req, res) => {
   const { name, description, tracks, id: customId } = req.body;
   if (!name) return res.status(400).json({ error: 'El nombre es obligatorio' });
 
@@ -714,7 +723,7 @@ app.post('/api/playlists', (req, res) => {
 });
 
 // Restaurar listas desde copia de seguridad
-app.post('/api/playlists/restore', (req, res) => {
+router.post('/api/playlists/restore', (req, res) => {
   const { playlists } = req.body;
   if (!Array.isArray(playlists)) return res.status(400).json({ error: 'Formato no válido' });
   const updated = db.restorePlaylists(playlists);
@@ -722,7 +731,7 @@ app.post('/api/playlists/restore', (req, res) => {
 });
 
 // Importar lista completa pegando enlace de YouTube
-app.post('/api/playlists/import-youtube', async (req, res) => {
+router.post('/api/playlists/import-youtube', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: 'Falta el enlace de la lista de YouTube' });
 
@@ -736,7 +745,7 @@ app.post('/api/playlists/import-youtube', async (req, res) => {
 });
 
 // Importación masiva de múltiples playlists (varios links a la vez)
-app.post('/api/playlists/import-multiple', async (req, res) => {
+router.post('/api/playlists/import-multiple', async (req, res) => {
   const { urls } = req.body;
   if (!urls || !Array.isArray(urls) || urls.length === 0) {
     return res.status(400).json({ error: 'Debes ingresar al menos un enlace de lista.' });
@@ -771,7 +780,7 @@ app.post('/api/playlists/import-multiple', async (req, res) => {
 });
 
 // Buscar playlists en YouTube por nombre de canal o tema
-app.get('/api/playlists/search-youtube', async (req, res) => {
+router.get('/api/playlists/search-youtube', async (req, res) => {
   const query = req.query.q;
   if (!query) return res.json({ playlists: [] });
 
@@ -795,7 +804,7 @@ app.get('/api/playlists/search-youtube', async (req, res) => {
 });
 
 // Activar lista base activa
-app.post('/api/playlists/:id/activate', (req, res) => {
+router.post('/api/playlists/:id/activate', (req, res) => {
   const playlist = db.getPlaylist(req.params.id);
   if (!playlist) return res.status(404).json({ error: 'Lista no encontrada' });
 
@@ -842,7 +851,7 @@ app.post('/api/playlists/:id/activate', (req, res) => {
   if (!currentlyPlaying || currentlyPlaying.isBaseTrack) {
     advanceToNextSong();
   } else {
-    io.emit('state-changed', {
+    roomIo.emit('state-changed', {
       currentlyPlaying,
       queue: db.getQueue(),
       settings: db.getSettings()
@@ -853,7 +862,7 @@ app.post('/api/playlists/:id/activate', (req, res) => {
 });
 
 // Actualizar información o temas de una lista
-app.put('/api/playlists/:id', (req, res) => {
+router.put('/api/playlists/:id', (req, res) => {
   const { name, description, tracks } = req.body;
   const updated = db.updatePlaylist(req.params.id, {
     ...(name !== undefined ? { name } : {}),
@@ -866,7 +875,7 @@ app.put('/api/playlists/:id', (req, res) => {
 });
 
 // Eliminar lista
-app.delete('/api/playlists/:id', (req, res) => {
+router.delete('/api/playlists/:id', (req, res) => {
   const playlist = db.getPlaylist(req.params.id);
   if (!playlist) return res.status(404).json({ error: 'Lista no encontrada' });
 
@@ -875,7 +884,7 @@ app.delete('/api/playlists/:id', (req, res) => {
 });
 
 // Agregar canción a una lista existente
-app.post('/api/playlists/:id/tracks', (req, res) => {
+router.post('/api/playlists/:id/tracks', (req, res) => {
   const playlist = db.getPlaylist(req.params.id);
   if (!playlist) return res.status(404).json({ error: 'Lista no encontrada' });
 
@@ -905,7 +914,7 @@ app.post('/api/playlists/:id/tracks', (req, res) => {
 });
 
 // Quitar canción de una lista por su índice
-app.delete('/api/playlists/:id/tracks/:index', (req, res) => {
+router.delete('/api/playlists/:id/tracks/:index', (req, res) => {
   const playlist = db.getPlaylist(req.params.id);
   if (!playlist) return res.status(404).json({ error: 'Lista no encontrada' });
 
@@ -921,7 +930,7 @@ app.delete('/api/playlists/:id/tracks/:index', (req, res) => {
 });
 
 // Modificar género de una canción específica en una lista
-app.put('/api/playlists/:id/tracks/:index/genre', (req, res) => {
+router.put('/api/playlists/:id/tracks/:index/genre', (req, res) => {
   const { genre } = req.body;
   const index = parseInt(req.params.index, 10);
   const updated = db.updateTrackGenre(req.params.id, index, genre);
@@ -930,7 +939,7 @@ app.put('/api/playlists/:id/tracks/:index/genre', (req, res) => {
 });
 
 // Auto-clasificar géneros de todas las canciones de una lista específica
-app.post('/api/playlists/:id/auto-classify', (req, res) => {
+router.post('/api/playlists/:id/auto-classify', (req, res) => {
   const playlist = db.getPlaylist(req.params.id);
   if (!playlist) return res.status(404).json({ error: 'Lista no encontrada' });
 
@@ -950,13 +959,13 @@ app.post('/api/playlists/:id/auto-classify', (req, res) => {
 });
 
 // Auto-clasificar géneros de TODAS las listas existentes del bar
-app.post('/api/playlists/auto-classify-all', (req, res) => {
+router.post('/api/playlists/auto-classify-all', (req, res) => {
   const updatedCount = db.autoClassifyAllTracks();
   res.json({ success: true, updatedCount, playlists: db.getPlaylists() });
 });
 
 // Generar lista con IA (Gemini con fallback automático inteligente de YouTube)
-app.post('/api/playlists/ai-generate', async (req, res) => {
+router.post('/api/playlists/ai-generate', async (req, res) => {
   const { prompt } = req.body;
   if (!prompt || !prompt.trim()) {
     return res.status(400).json({ error: 'Por favor escribe qué tipo de música quieres para la lista.' });
@@ -1009,15 +1018,15 @@ app.post('/api/playlists/ai-generate', async (req, res) => {
 });
 
 // Acciones de administración de la cola
-app.post('/api/admin/skip', (req, res) => {
+router.post('/api/admin/skip', (req, res) => {
   const next = advanceToNextSong();
   res.json({ success: true, currentlyPlaying: next });
 });
 
-app.post('/api/admin/remove-queued', (req, res) => {
+router.post('/api/admin/remove-queued', (req, res) => {
   const { songId } = req.body;
   db.removeFromQueue(songId);
-  io.emit('state-changed', {
+  roomIo.emit('state-changed', {
     currentlyPlaying,
     queue: db.getQueue(),
     settings: db.getSettings()
@@ -1025,11 +1034,11 @@ app.post('/api/admin/remove-queued', (req, res) => {
   res.json({ success: true });
 });
 
-app.post('/api/admin/reorder', (req, res) => {
+router.post('/api/admin/reorder', (req, res) => {
   const { queue } = req.body;
   if (Array.isArray(queue)) {
     db.setQueue(queue);
-    io.emit('state-changed', {
+    roomIo.emit('state-changed', {
       currentlyPlaying,
       queue: db.getQueue(),
       settings: db.getSettings()
@@ -1039,7 +1048,7 @@ app.post('/api/admin/reorder', (req, res) => {
 });
 
 // Agregar canción a la cola de reproducción como DJ / Bar (Sin límites ni restricciones)
-app.post('/api/admin/add-queue', async (req, res) => {
+router.post('/api/admin/add-queue', async (req, res) => {
   try {
     const { videoId, title, artist, duration, thumbnail, genre: customGenre } = req.body;
     if (!videoId || !title) {
@@ -1080,13 +1089,13 @@ app.post('/api/admin/add-queue', async (req, res) => {
       }
     }
 
-    io.emit('state-changed', {
+    roomIo.emit('state-changed', {
       currentlyPlaying,
       queue: db.getQueue(),
       settings: db.getSettings()
     });
 
-    io.emit('new-request-alert', {
+    roomIo.emit('new-request-alert', {
       song,
       position: db.getQueue().length
     });
@@ -1103,7 +1112,7 @@ app.post('/api/admin/add-queue', async (req, res) => {
 });
 
 // Asignar Prioridad VIP a una canción (subir directamente a turno #1 para sonar a continuación)
-app.post('/api/admin/queue/priority', (req, res) => {
+router.post('/api/admin/queue/priority', (req, res) => {
   const { songId } = req.body;
   const queue = db.getQueue();
   const idx = queue.findIndex(s => s.id === songId);
@@ -1111,7 +1120,7 @@ app.post('/api/admin/queue/priority', (req, res) => {
     const [song] = queue.splice(idx, 1);
     queue.unshift(song);
     db.setQueue(queue);
-    io.emit('state-changed', {
+    roomIo.emit('state-changed', {
       currentlyPlaying,
       queue: db.getQueue(),
       settings: db.getSettings()
@@ -1122,16 +1131,16 @@ app.post('/api/admin/queue/priority', (req, res) => {
 });
 
 // Regenerar la mezcla de 50 temas base a solicitud del DJ
-app.post('/api/admin/queue/refresh', (req, res) => {
+router.post('/api/admin/queue/refresh', (req, res) => {
   regenerateBaseTracksInQueue(50);
   res.json({ success: true, queue: db.getQueue() });
 });
 
 // Vaciar la lista de espera a solicitud del DJ (elimina turnos/pedidos acumulados y refresca base)
-app.post('/api/admin/queue/clear', (req, res) => {
+router.post('/api/admin/queue/clear', (req, res) => {
   db.setQueue([]);
   replenishPlaybackQueue(50);
-  io.emit('state-changed', {
+  roomIo.emit('state-changed', {
     currentlyPlaying,
     queue: db.getQueue(),
     settings: db.getSettings()
@@ -1139,7 +1148,7 @@ app.post('/api/admin/queue/clear', (req, res) => {
   res.json({ success: true, message: 'Lista de espera despejada', queue: db.getQueue() });
 });
 
-app.post('/api/admin/play-now', async (req, res) => {
+router.post('/api/admin/play-now', async (req, res) => {
   const { videoId, title, artist, genre, duration, thumbnail } = req.body;
   if (!videoId) return res.status(400).json({ error: 'Falta videoId' });
 
@@ -1160,7 +1169,7 @@ app.post('/api/admin/play-now', async (req, res) => {
     startedAt: Date.now()
   };
 
-  io.emit('state-changed', {
+  roomIo.emit('state-changed', {
     currentlyPlaying,
     queue: db.getQueue(),
     settings: db.getSettings()
@@ -1170,55 +1179,55 @@ app.post('/api/admin/play-now', async (req, res) => {
 });
 
 // Modo Micrófono / Anuncio (baja volumen suavemente en la TV)
-app.post('/api/admin/mic-mode', (req, res) => {
+router.post('/api/admin/mic-mode', (req, res) => {
   micModeActive = !micModeActive;
-  io.emit('mic-mode', { active: micModeActive });
+  roomIo.emit('mic-mode', { active: micModeActive });
   res.json({ success: true, micModeActive });
 });
 
 // Baneo y desbaneo de mesas problemáticas
-app.post('/api/admin/ban-table', (req, res) => {
+router.post('/api/admin/ban-table', (req, res) => {
   const { table, minutes } = req.body;
   db.banTable(table, minutes || 30);
   const banned = db.getBannedTables();
-  io.emit('banned-tables-updated', banned);
+  roomIo.emit('banned-tables-updated', banned);
   res.json({ success: true, bannedTables: banned });
 });
 
-app.post('/api/admin/unban-table', (req, res) => {
+router.post('/api/admin/unban-table', (req, res) => {
   const { table } = req.body;
   db.unbanTable(table);
   const banned = db.getBannedTables();
-  io.emit('banned-tables-updated', banned);
+  roomIo.emit('banned-tables-updated', banned);
   res.json({ success: true, bannedTables: banned });
 });
 
-app.get('/api/admin/banned-tables', (req, res) => {
+router.get('/api/admin/banned-tables', (req, res) => {
   res.json({ bannedTables: db.getBannedTables() });
 });
 
 // Códigos QR
-app.get('/api/qrs', async (req, res) => {
+router.get('/api/qrs', async (req, res) => {
   const protocol = req.headers['x-forwarded-proto'] || req.protocol;
   const host = req.get('host');
-  const baseUrl = `${protocol}://${host}`;
+  const baseUrl = `${protocol}://${host}${routePrefix}`;
   const settings = db.getSettings();
   const qrs = await qrService.generateBatch(baseUrl, settings.totalTables || 20);
   res.json({ baseUrl, qrs });
 });
 
 // Ajustes del bar
-app.get('/api/settings', (req, res) => {
+router.get('/api/settings', (req, res) => {
   res.json({ settings: db.getSettings() });
 });
 
-app.post('/api/settings', (req, res) => {
+router.post('/api/settings', (req, res) => {
   const updated = db.updateSettings(req.body);
   // Regenerar la cola visible de 50 temas si cambiaron modos de reproducción, listas o porcentajes
   if (req.body.basePlaybackMode !== undefined || req.body.focusGenre !== undefined || req.body.crossoverPlaylists !== undefined || req.body.crossoverBatchSize !== undefined || req.body.crossoverDistributionType !== undefined || req.body.crossoverPercentages !== undefined || req.body.activePlaylistId !== undefined) {
     regenerateBaseTracksInQueue(50);
   } else {
-    io.emit('state-changed', {
+    roomIo.emit('state-changed', {
       currentlyPlaying,
       queue: db.getQueue(),
       settings: updated
@@ -1228,11 +1237,11 @@ app.post('/api/settings', (req, res) => {
 });
 
 // Historial y tendencias
-app.get('/api/history', (req, res) => {
+router.get('/api/history', (req, res) => {
   res.json({ history: db.getHistory() });
 });
 
-app.get('/api/trends', (req, res) => {
+router.get('/api/trends', (req, res) => {
   const history = db.getHistory(100);
   const songCounts = {};
   const genreCounts = {};
@@ -1258,7 +1267,7 @@ app.get('/api/trends', (req, res) => {
 });
 
 // Reordenar canciones en la cola (subir o bajar prioridad con flechas ▲ ▼)
-app.post('/api/queue/reorder', (req, res) => {
+router.post('/api/queue/reorder', (req, res) => {
   const { index, direction } = req.body;
   const queue = [...db.getQueue()];
   const idx = parseInt(index, 10);
@@ -1280,7 +1289,7 @@ app.post('/api/queue/reorder', (req, res) => {
   }
 
   db.setQueue(queue);
-  io.emit('state-changed', {
+  roomIo.emit('state-changed', {
     currentlyPlaying,
     queue: db.getQueue(),
     settings: db.getSettings()
@@ -1290,7 +1299,7 @@ app.post('/api/queue/reorder', (req, res) => {
 });
 
 // Eliminar canción específica de la cola
-app.delete('/api/queue/:index', (req, res) => {
+router.delete('/api/queue/:index', (req, res) => {
   const queue = [...db.getQueue()];
   const idx = parseInt(req.params.index, 10);
   if (isNaN(idx) || idx < 0 || idx >= queue.length) {
@@ -1298,7 +1307,7 @@ app.delete('/api/queue/:index', (req, res) => {
   }
   const removed = queue.splice(idx, 1);
   db.setQueue(queue);
-  io.emit('state-changed', {
+  roomIo.emit('state-changed', {
     currentlyPlaying,
     queue: db.getQueue(),
     settings: db.getSettings()
@@ -1311,7 +1320,7 @@ app.delete('/api/queue/:index', (req, res) => {
 // ==========================================
 let lastSongEndedTimestamp = 0;
 
-io.on('connection', (socket) => {
+function handleSocket(socket) {
   // Enviar estado actual al cliente recién conectado
   socket.emit('state-changed', {
     currentlyPlaying,
@@ -1332,17 +1341,17 @@ io.on('connection', (socket) => {
 
   // El reproductor reporta cambios de estado
   socket.on('player-status', (data) => {
-    io.emit('player-broadcast', data);
+    roomIo.emit('player-broadcast', data);
   });
 
   // Comandos remotos desde la consola de DJ hacia la pantalla de TV
   socket.on('player-command', (data) => {
-    io.emit('player-control', data);
+    roomIo.emit('player-control', data);
   });
 
   // Estado de pantalla completa del TV reportado a la consola DJ
   socket.on('player-fullscreen-status', (data) => {
-    io.emit('tv-fullscreen-status', data);
+    roomIo.emit('tv-fullscreen-status', data);
   });
 
   // Efecto Drag-to-Cast: Canción lanzada desde el celular / consola hacia el TV
@@ -1377,13 +1386,13 @@ io.on('connection', (socket) => {
     };
 
     // 1. Emitir animación de impacto supersónico en la pantalla del TV
-    io.emit('tv-song-casted', {
+    roomIo.emit('tv-song-casted', {
       song: currentlyPlaying,
       senderName: requestedBy?.name || (requestedBy?.table ? `Mesa ${requestedBy.table}` : 'DJ / Celular')
     });
 
     // 2. Transmitir actualización de estado a todas las vistas
-    io.emit('state-changed', {
+    roomIo.emit('state-changed', {
       currentlyPlaying,
       queue: db.getQueue(),
       settings: db.getSettings()
@@ -1392,26 +1401,26 @@ io.on('connection', (socket) => {
 
   // Progreso en tiempo real desde el reproductor TV hacia la consola DJ
   socket.on('player-progress', (data) => {
-    io.emit('player-telemetry', data);
+    roomIo.emit('player-telemetry', data);
   });
 
   // ==========================================================
   // RULETA 3D INTERACTIVA EN VIVO (DESDE CELULAR DJ HACIA TV)
   // ==========================================================
   socket.on('roulette-show', (data) => {
-    io.emit('tv-roulette-show', data);
+    roomIo.emit('tv-roulette-show', data);
   });
 
   socket.on('roulette-drag', (data) => {
-    socket.broadcast.emit('tv-roulette-drag', data);
+    socket.to(roomName).emit('tv-roulette-drag', data);
   });
 
   socket.on('roulette-spin', (data) => {
-    io.emit('tv-roulette-spin', data);
+    roomIo.emit('tv-roulette-spin', data);
   });
 
   socket.on('roulette-hide', () => {
-    io.emit('tv-roulette-hide');
+    roomIo.emit('tv-roulette-hide');
   });
 
   // ==========================================================
@@ -1419,7 +1428,7 @@ io.on('connection', (socket) => {
   // ==========================================================
   socket.on('cast-photo-to-tv', (data) => {
     if (!data || !data.photo || typeof data.photo !== 'string') return;
-    io.emit('tv-photo-casted', {
+    roomIo.emit('tv-photo-casted', {
       photo: data.photo,
       caption: (data.caption || '').trim().slice(0, 120),
       senderLabel: (data.senderLabel || '📸 SANTA CHELA CAM • EN VIVO').trim().slice(0, 80),
@@ -1428,19 +1437,192 @@ io.on('connection', (socket) => {
   });
 
   socket.on('hide-photo-from-tv', () => {
-    io.emit('tv-photo-hide');
+    roomIo.emit('tv-photo-hide');
   });
+}
+
+  return {
+    instanceId,
+    routePrefix,
+    roomName,
+    db,
+    router,
+    ensurePlaying,
+    handleSocket
+  };
+}
+
+// ==========================================
+// 4 PROGRAMAS COMPLETAMENTE INDEPENDIENTES
+// 1. default (Santa Chela Oficial): / , /admin.html , /player.html , /qrs.html
+// 2. ambar (Ámbar):                 /ambar/ , /ambar/admin.html , /ambar/player.html , /ambar/qrs.html
+// 3. bar3 (Programa 3):             /bar3/ , /bar3/admin.html , /bar3/player.html , /bar3/qrs.html
+// 4. bar4 (Programa 4):             /bar4/ , /bar4/admin.html , /bar4/player.html , /bar4/qrs.html
+// ==========================================
+const programs = {
+  default: createBarProgram('default', ''),
+  ambar: createBarProgram('ambar', '/ambar'),
+  bar3: createBarProgram('bar3', '/bar3'),
+  bar4: createBarProgram('bar4', '/bar4')
+};
+
+// Montar API de Santa Chela (raíz original intacta)
+app.use('/', programs.default.router);
+
+// Función para servir páginas HTML aisladas para /ambar, /bar3 y /bar4
+function renderIsolatedHtmlPage(filePath, instanceId, routePrefix) {
+  let html = fs.readFileSync(filePath, 'utf8');
+
+  const bootstrapScript = `
+  <script>
+    (function() {
+      var INSTANCE = '${instanceId}';
+      var PREFIX = '${routePrefix}';
+      window.__BAR_INSTANCE__ = INSTANCE;
+      window.__BAR_PREFIX__ = PREFIX;
+
+      // 1. Aislar localStorage por programa para que no compartan ni mezclen datos en el navegador
+      try {
+        var origGetItem = Storage.prototype.getItem;
+        var origSetItem = Storage.prototype.setItem;
+        var origRemoveItem = Storage.prototype.removeItem;
+        Storage.prototype.getItem = function(k) { return origGetItem.call(this, INSTANCE + '_' + k); };
+        Storage.prototype.setItem = function(k, v) { return origSetItem.call(this, INSTANCE + '_' + k, v); };
+        Storage.prototype.removeItem = function(k) { return origRemoveItem.call(this, INSTANCE + '_' + k); };
+      } catch (e) {}
+
+      // 2. Redirigir todas las llamadas fetch('/api/...') al backend exclusivo de este programa
+      var origFetch = window.fetch;
+      if (origFetch) {
+        window.fetch = function(input, init) {
+          if (typeof input === 'string' && input.indexOf('/api/') === 0) {
+            input = PREFIX + input;
+          }
+          return origFetch.call(this, input, init);
+        };
+      }
+    })();
+  </script>`;
+
+  const socketWrapScript = `<script src="/socket.io/socket.io.js"></script>
+  <script>
+    (function() {
+      var origIo = window.io;
+      if (origIo) {
+        window.io = function(url, opts) {
+          if (typeof url === 'object' || !url) {
+            opts = Object.assign({}, url, { query: Object.assign({}, url && url.query, { instance: '${instanceId}' }) });
+            return origIo(opts);
+          }
+          opts = Object.assign({}, opts, { query: Object.assign({}, opts && opts.query, { instance: '${instanceId}' }) });
+          return origIo(url, opts);
+        };
+        Object.assign(window.io, origIo);
+      }
+    })();
+  </script>`;
+
+  html = html.replace('<head>', '<head>' + bootstrapScript);
+  html = html.replace('<script src="/socket.io/socket.io.js"></script>', socketWrapScript);
+
+  // Ajustar enlaces internos para que apunten siempre dentro de su propio programa (/ambar/..., /bar3/..., /bar4/...)
+  html = html.replace(/href="\/player\.html"/g, 'href="' + routePrefix + '/player.html"');
+  html = html.replace(/href="\/admin\.html"/g, 'href="' + routePrefix + '/admin.html"');
+  html = html.replace(/href="\/qrs\.html"/g, 'href="' + routePrefix + '/qrs.html"');
+  html = html.replace(/href="\/manifest\.json"/g, 'href="' + routePrefix + '/manifest.json"');
+  html = html.replace(/window\.location\.replace\('\/admin\.html'\)/g, "window.location.replace('" + routePrefix + "/admin.html')");
+  html = html.replace(/window\.location\.href = '\/admin\.html'/g, "window.location.href = '" + routePrefix + "/admin.html'");
+  html = html.replace(/window\.location\.href = '\/'/g, "window.location.href = '" + routePrefix + "/'");
+
+  return html;
+}
+
+['ambar', 'bar3', 'bar4'].forEach((instId) => {
+  const prefix = '/' + instId;
+  const prog = programs[instId];
+
+  // Montar API independiente (/ambar/api/..., /bar3/api/..., /bar4/api/...)
+  app.use(prefix, prog.router);
+
+  // Manifest PWA independiente para poder instalar la App de cada bar por separado
+  app.get(prefix + '/manifest.json', (req, res) => {
+    const barName = prog.db.getSettings()?.barName || instId.toUpperCase();
+    res.json({
+      id: prefix + '/admin.html',
+      name: barName + ' | Consola DJ',
+      short_name: barName,
+      description: 'Consola DJ y Control Musical Independiente • ' + barName,
+      start_url: prefix + '/admin.html',
+      scope: prefix + '/',
+      display: 'standalone',
+      display_override: ['standalone', 'fullscreen'],
+      background_color: '#0c0e12',
+      theme_color: '#0c0e12',
+      orientation: 'portrait',
+      icons: [
+        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+      ]
+    });
+  });
+
+  // Protección móvil para la pantalla TV del programa independiente
+  app.get([prefix + '/player.html', prefix + '/tv', prefix + '/player'], (req, res) => {
+    if (req.query.force !== '1' && req.query.preview !== '1') {
+      const ua = req.headers['user-agent'] || '';
+      const isTV = /SmartTV|Tizen|Web0S|BRAVIA|NetCast|Android TV|GoogleTV|AFT[A-Z]|CrKey|AppleTV|Roku|HbbTV|Xbox|PlayStation/i.test(ua);
+      const isMobileUA = !isTV && (/iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || (/Android/i.test(ua) && /Mobile/i.test(ua)));
+      if (isMobileUA) {
+        return res.redirect(prefix + '/admin.html');
+      }
+    }
+    res.type('html').send(renderIsolatedHtmlPage(path.join(__dirname, 'public', 'player.html'), instId, prefix));
+  });
+
+  // Consola DJ del programa independiente
+  app.get([prefix + '/admin.html', prefix + '/dj', prefix + '/admin'], (req, res) => {
+    res.type('html').send(renderIsolatedHtmlPage(path.join(__dirname, 'public', 'admin.html'), instId, prefix));
+  });
+
+  // Códigos QR para Mesas del programa independiente
+  app.get(prefix + '/qrs.html', (req, res) => {
+    res.type('html').send(renderIsolatedHtmlPage(path.join(__dirname, 'public', 'qrs.html'), instId, prefix));
+  });
+
+  // Vista Cliente (Mesas) del programa independiente
+  app.get([prefix, prefix + '/', prefix + '/index.html'], (req, res) => {
+    if (req.path === prefix) {
+      const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+      return res.redirect(prefix + '/' + qs);
+    }
+    res.type('html').send(renderIsolatedHtmlPage(path.join(__dirname, 'public', 'index.html'), instId, prefix));
+  });
+});
+
+// Enrutador central de Socket.io: conecta cada cliente exclusivamente a la sala de su programa
+io.on('connection', (socket) => {
+  let instId = String(socket.handshake.query?.instance || '').toLowerCase().trim();
+  if (!instId || !programs[instId]) {
+    const ref = socket.handshake.headers?.referer || '';
+    if (ref.includes('/ambar/') || ref.endsWith('/ambar')) instId = 'ambar';
+    else if (ref.includes('/bar3/') || ref.endsWith('/bar3')) instId = 'bar3';
+    else if (ref.includes('/bar4/') || ref.endsWith('/bar4')) instId = 'bar4';
+    else instId = 'default';
+  }
+  const targetProgram = programs[instId] || programs.default;
+  socket.join(targetProgram.roomName);
+  targetProgram.handleSocket(socket);
 });
 
 // Iniciar servidor
 server.listen(PORT, () => {
   console.log(`\n======================================================`);
-  console.log(`🎵 Asistente Music Bar - Rockola Digital con DJ IA`);
+  console.log(`🎵 Asistente Music Bar - 4 Programas Independientes`);
   console.log(`======================================================`);
-  console.log(`📱 Vista Cliente (Mesas):   http://localhost:${PORT}`);
-  console.log(`📺 Vista Reproductor (TV):  http://localhost:${PORT}/player.html`);
-  console.log(`🎛️ Vista Admin / DJ:        http://localhost:${PORT}/admin.html`);
-  console.log(`🖨️ Códigos QR para Mesas:   http://localhost:${PORT}/qrs.html`);
+  console.log(`🍺 1. Santa Chela:  http://localhost:${PORT}/admin.html`);
+  console.log(`🍸 2. Ámbar:        http://localhost:${PORT}/ambar/admin.html`);
+  console.log(`🎶 3. Bar 3:        http://localhost:${PORT}/bar3/admin.html`);
+  console.log(`🎶 4. Bar 4:        http://localhost:${PORT}/bar4/admin.html`);
   console.log(`======================================================\n`);
-  ensurePlaying();
+  Object.values(programs).forEach(p => p.ensurePlaying());
 });
