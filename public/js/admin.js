@@ -11,12 +11,88 @@ let playerTelemetry = {
   volume: 100
 };
 let isUserDraggingScrubber = false;
+let deferredPwaPrompt = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   setupSocket();
   loadInitialData();
   setupAdminSearchInput();
+  setupPwaInstall();
 });
+
+function isRunningStandalonePwa() {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  );
+}
+
+function updatePwaInstallButtonsVisibility() {
+  const isStandalone = isRunningStandalonePwa();
+  const topBtn = document.getElementById('btnTopInstallPwa');
+  const sideBtn = document.getElementById('btnSidebarInstallPwa');
+
+  if (isStandalone) {
+    if (topBtn) topBtn.classList.add('hidden');
+    if (sideBtn) sideBtn.classList.add('hidden');
+  }
+}
+
+function setupPwaInstall() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('SW registro:', err);
+    });
+  }
+
+  updatePwaInstallButtonsVisibility();
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPwaPrompt = e;
+    updatePwaInstallButtonsVisibility();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredPwaPrompt = null;
+    updatePwaInstallButtonsVisibility();
+    showAdminToast('📲 ¡App Santa Chela instalada con éxito!', '⚡');
+  });
+}
+
+async function triggerInstallPwa() {
+  if (deferredPwaPrompt) {
+    deferredPwaPrompt.prompt();
+    const { outcome } = await deferredPwaPrompt.userChoice;
+    if (outcome === 'accepted') {
+      deferredPwaPrompt = null;
+    }
+    return;
+  }
+
+  const modal = document.getElementById('pwaInstallGuideModal');
+  const iosBox = document.getElementById('pwaIosInstructions');
+  const androidBox = document.getElementById('pwaAndroidInstructions');
+  if (!modal) return;
+
+  const isIos = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (iosBox && androidBox) {
+    if (isIos) {
+      iosBox.classList.remove('hidden');
+      androidBox.classList.add('hidden');
+    } else {
+      iosBox.classList.remove('hidden');
+      androidBox.classList.remove('hidden');
+    }
+  }
+
+  modal.classList.remove('hidden');
+}
+
+function closePwaInstallModal() {
+  const modal = document.getElementById('pwaInstallGuideModal');
+  if (modal) modal.classList.add('hidden');
+}
 
 function setupSocket() {
   socket.on('state-changed', (data) => {

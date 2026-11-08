@@ -1,0 +1,47 @@
+{
+  "name": "Santa Chela DJ Console",
+  "short_name": "Santa Chela",
+  "description": "Consola DJ y Panel de Control Musical en Vivo • Santa Chela Music Bar",
+  "start_url": "/admin.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0c0e12",
+  "theme_color": "#0c0e12",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Consola DJ En Vivo",
+      "short_name": "Consola DJ",
+      "description": "Abrir el panel de control musical",
+      "url": "/admin.html",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Códigos QR de Mesas",
+      "short_name": "Códigos QR",
+      "description": "Ver e imprimir QRs de las mesas",
+      "url": "/qrs.html",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
