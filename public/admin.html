@@ -2,8 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Control & DJ | Music Bar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0e12">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Santa Chela">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <title>Santa Chela DJ | Consola de Control</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/css/style.css">
   <script src="/socket.io/socket.io.js"></script>
@@ -51,6 +59,9 @@
 
     <!-- Accesos Rápidos Header -->
     <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+      <button id="btnTopInstallPwa" onclick="triggerInstallPwa()" class="tactile-btn-gold text-[11px] sm:text-xs py-1.5 px-2.5 sm:px-3 flex items-center justify-center gap-1 font-black shadow-[0_0_12px_rgba(245,158,11,0.3)]" title="Instalar Consola como App en tu iPhone o Celular">
+        <span>📲</span> <span class="hidden xs:inline">Instalar App</span>
+      </button>
       <button id="btnMicMode" onclick="toggleMicMode()" class="btn-secondary text-xs flex items-center justify-center gap-1.5 py-1.5 px-2 sm:px-3 transition" title="Atenuar música para hablar">
         <span id="micModeIcon" class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>
         <span id="micModeText" class="hidden sm:inline">Modo Micrófono</span>
@@ -112,6 +123,13 @@
           <span class="text-base">⚙️</span>
           <span>Ajustes del Bar</span>
         </button>
+
+        <div id="btnSidebarInstallPwa" class="pt-2">
+          <button onclick="triggerInstallPwa()" class="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition shadow">
+            <span>📲</span>
+            <span>Instalar como App</span>
+          </button>
+        </div>
       </div>
 
       <!-- Mini Tarjeta Persistente al Fondo del Sidebar -->
@@ -1391,6 +1409,78 @@
           ▶ Sí, Cambiar Canción
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal de Instalación de App Nativa (PWA / WebAPK para iPhone y Android) -->
+  <div id="pwaInstallGuideModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="relative bg-gradient-to-b from-[#181d2a] to-[#0e1118] border border-amber-500/40 rounded-3xl max-w-md w-full p-6 shadow-[0_20px_70px_rgba(0,0,0,0.95)] space-y-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-3">
+          <img src="/icons/icon-192.png" alt="Santa Chela App" class="w-12 h-12 rounded-2xl border border-amber-400/50 shadow-lg">
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-white">Instalar App Santa Chela</h3>
+            <p class="text-[11px] text-amber-400 font-semibold">App directa para iPhone y Android</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePwaInstallModal()" class="text-gray-400 hover:text-white p-1.5 rounded-xl bg-white/5">✕</button>
+      </div>
+
+      <!-- Selector de Sistema: iPhone vs Android -->
+      <div class="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/60 border border-white/10 text-xs">
+        <button type="button" id="pwaTabBtnIos" onclick="switchPwaGuideTab('ios')" class="py-2 px-3 rounded-xl font-black transition bg-amber-500 text-black shadow">
+          🍎 iPhone / iPad
+        </button>
+        <button type="button" id="pwaTabBtnAndroid" onclick="switchPwaGuideTab('android')" class="py-2 px-3 rounded-xl font-bold transition text-gray-400 hover:text-white">
+          🤖 Android (WebAPK)
+        </button>
+      </div>
+
+      <!-- Instrucciones para iPhone / iPad (Safari) -->
+      <div id="pwaIosInstructions" class="space-y-3 text-xs sm:text-sm text-gray-200">
+        <p class="text-xs text-gray-300 leading-relaxed">
+          Instala la consola en tu <strong>iPhone</strong> para abrirla con 1 toque a pantalla completa (sin barra de Safari ni links):
+        </p>
+        <div class="p-3.5 rounded-2xl bg-black/60 border border-white/10 space-y-3">
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">1</span>
+            <p class="text-xs sm:text-sm">Toca el botón <strong>Compartir</strong> <span class="inline-block px-2 py-0.5 rounded bg-white/10 text-amber-300 font-mono text-xs border border-white/15">📤 [↑]</span> en la barra de abajo de Safari.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">2</span>
+            <p class="text-xs sm:text-sm">Desliza hacia abajo y toca en <strong class="text-amber-300">"Agregar a inicio"</strong> <em>(Add to Home Screen)</em> <span class="inline-block px-1.5 py-0.5 rounded bg-white/10 text-white font-bold text-xs">➕</span>.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">3</span>
+            <p class="text-xs sm:text-sm">Toca <strong>"Agregar"</strong> arriba a la derecha ¡y listo! Tendrás el ícono dorado de <strong>Santa Chela</strong> en tu celular.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instrucciones para Android (Chrome WebAPK) -->
+      <div id="pwaAndroidInstructions" class="hidden space-y-3 text-xs sm:text-sm text-gray-200">
+        <p class="text-xs text-gray-300 leading-relaxed">
+          En <strong>Android</strong> no necesitas descargar archivos <code>.apk</code> inseguros. Chrome instala automáticamente el <strong>WebAPK oficial</strong> en tu cajón de aplicaciones:
+        </p>
+        <div class="p-3.5 rounded-2xl bg-black/60 border border-white/10 space-y-3">
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">1</span>
+            <p class="text-xs sm:text-sm">Toca los <strong>3 puntos (⋮)</strong> arriba a la derecha en Google Chrome.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">2</span>
+            <p class="text-xs sm:text-sm">Selecciona <strong class="text-amber-300">"Instalar aplicación"</strong> (o <em>"Agregar a la pantalla principal"</em>).</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">3</span>
+            <p class="text-xs sm:text-sm">Confirma en <strong>"Instalar"</strong> y aparecerá como una App nativa junto a tus demás aplicaciones.</p>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" onclick="closePwaInstallModal()" class="tactile-btn-gold w-full py-3 text-xs sm:text-sm font-black justify-center">
+        ¡Entendido!
+      </button>
     </div>
   </div>
 

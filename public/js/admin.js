@@ -11,12 +11,97 @@ let playerTelemetry = {
   volume: 100
 };
 let isUserDraggingScrubber = false;
+let deferredPwaPrompt = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   setupSocket();
   loadInitialData();
   setupAdminSearchInput();
+  setupPwaInstall();
 });
+
+function isRunningStandalonePwa() {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  );
+}
+
+function updatePwaInstallButtonsVisibility() {
+  const isStandalone = isRunningStandalonePwa();
+  const topBtn = document.getElementById('btnTopInstallPwa');
+  const sideBtn = document.getElementById('btnSidebarInstallPwa');
+
+  if (isStandalone) {
+    if (topBtn) topBtn.classList.add('hidden');
+    if (sideBtn) sideBtn.classList.add('hidden');
+  }
+}
+
+function setupPwaInstall() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('SW registro:', err);
+    });
+  }
+
+  updatePwaInstallButtonsVisibility();
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPwaPrompt = e;
+    updatePwaInstallButtonsVisibility();
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredPwaPrompt = null;
+    updatePwaInstallButtonsVisibility();
+    showAdminToast('📲 ¡App Santa Chela instalada con éxito!', '⚡');
+  });
+}
+
+function switchPwaGuideTab(os) {
+  const iosBox = document.getElementById('pwaIosInstructions');
+  const androidBox = document.getElementById('pwaAndroidInstructions');
+  const btnIos = document.getElementById('pwaTabBtnIos');
+  const btnAndroid = document.getElementById('pwaTabBtnAndroid');
+
+  if (os === 'android') {
+    if (androidBox) androidBox.classList.remove('hidden');
+    if (iosBox) iosBox.classList.add('hidden');
+    if (btnAndroid) btnAndroid.className = 'py-2 px-3 rounded-xl font-black transition bg-amber-500 text-black shadow';
+    if (btnIos) btnIos.className = 'py-2 px-3 rounded-xl font-bold transition text-gray-400 hover:text-white';
+  } else {
+    if (iosBox) iosBox.classList.remove('hidden');
+    if (androidBox) androidBox.classList.add('hidden');
+    if (btnIos) btnIos.className = 'py-2 px-3 rounded-xl font-black transition bg-amber-500 text-black shadow';
+    if (btnAndroid) btnAndroid.className = 'py-2 px-3 rounded-xl font-bold transition text-gray-400 hover:text-white';
+  }
+}
+
+async function triggerInstallPwa() {
+  if (deferredPwaPrompt) {
+    deferredPwaPrompt.prompt();
+    const { outcome } = await deferredPwaPrompt.userChoice;
+    if (outcome === 'accepted') {
+      deferredPwaPrompt = null;
+    }
+    return;
+  }
+
+  const modal = document.getElementById('pwaInstallGuideModal');
+  if (!modal) return;
+
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  switchPwaGuideTab(isAndroid ? 'android' : 'ios');
+
+  modal.classList.remove('hidden');
+}
+
+function closePwaInstallModal() {
+  const modal = document.getElementById('pwaInstallGuideModal');
+  if (modal) modal.classList.add('hidden');
+}
 
 function setupSocket() {
   socket.on('state-changed', (data) => {
