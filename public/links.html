@@ -302,7 +302,7 @@
         try {
           const res = await fetch(prog.statusApi);
           const data = await res.json();
-          if (data?.settings?.barName) {
+          if (data?.settings?.barName && (prog.id === 'bar3' || prog.id === 'bar4')) {
             liveNames[prog.id] = data.settings.barName;
           }
           if (data?.currentlyPlaying?.title) {
