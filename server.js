@@ -23,6 +23,17 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// Ruta directa /tv para abrir la pantalla del televisor en modo Vinculación con QR Gigante
+app.get('/tv', (req, res) => {
+  const ua = req.headers['user-agent'] || '';
+  const isTV = /SmartTV|Tizen|Web0S|BRAVIA|NetCast|Android TV|GoogleTV|AFT[A-Z]|CrKey|AppleTV|Roku|HbbTV|Xbox|PlayStation/i.test(ua);
+  const isMobileUA = !isTV && (/iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || (/Android/i.test(ua) && /Mobile/i.test(ua)));
+  if (isMobileUA) {
+    return res.redirect('/admin.html');
+  }
+  return res.redirect('/player.html?pair=1');
+});
+
 // Si se abre /player.html desde un celular móvil, redirigir directamente al Panel de Administrador (/admin.html)
 app.get('/player.html', (req, res, next) => {
   if (req.query.force === '1' || req.query.preview === '1') return next();
@@ -1198,6 +1209,151 @@ app.get('/api/qrs', async (req, res) => {
   res.json({ baseUrl, qrs });
 });
 
+// ==========================================
+// PERFILES DE BAR (SANTA CHELA OFICIAL / ÁMBAR PRUEBA) Y VINCULACIÓN QR DE TV
+// ==========================================
+const tvPairingSessions = new Map(); // code -> { code, createdAt, socketId, deviceLabel }
+
+function cleanupExpiredTvSessions() {
+  const now = Date.now();
+  for (const [code, session] of tvPairingSessions.entries()) {
+    if (now - session.createdAt > 45 * 60 * 1000) {
+      tvPairingSessions.delete(code);
+    }
+  }
+}
+
+function getActiveWaitingTvs() {
+  cleanupExpiredTvSessions();
+  return Array.from(tvPairingSessions.values()).map(s => ({
+    code: s.code,
+    createdAt: s.createdAt,
+    deviceLabel: s.deviceLabel || 'Televisor Smart TV'
+  }));
+}
+
+function generateFourDigitCode() {
+  let code = '';
+  for (let i = 0; i < 15; i++) {
+    code = String(Math.floor(1000 + Math.random() * 9000));
+    if (!tvPairingSessions.has(code)) return code;
+  }
+  return String(Math.floor(1000 + Math.random() * 9000));
+}
+
+// Obtener perfiles disponibles (Santa Chela Oficial y Ámbar Prueba)
+app.get('/api/bar-profiles', (req, res) => {
+  const settings = db.getSettings();
+  res.json({
+    profiles: db.getBarProfiles(),
+    activeProfileId: settings.activeBarProfileId || 'santa-chela',
+    waitingTvs: getActiveWaitingTvs(),
+    settings
+  });
+});
+
+// Cambiar el programa de bar activo (sin perder ninguna lista de Santa Chela)
+app.post('/api/bar-profiles/activate', (req, res) => {
+  const { profileId } = req.body || {};
+  const profiles = db.getBarProfiles();
+  const target = profiles.find(p => p.id === profileId);
+  if (!target) {
+    return res.status(400).json({ error: 'Perfil de bar no encontrado' });
+  }
+
+  const updatedSettings = db.activateBarProfile(profileId);
+  io.emit('bar-profile-changed', {
+    profileId: target.id,
+    profile: target,
+    settings: updatedSettings
+  });
+  io.emit('state-changed', {
+    currentlyPlaying,
+    queue: db.getQueue(),
+    settings: updatedSettings
+  });
+
+  res.json({
+    success: true,
+    activeProfileId: target.id,
+    profile: target,
+    settings: updatedSettings
+  });
+});
+
+// Crear o refrescar sesión de QR Gigante para el Televisor
+app.get('/api/tv-pair/session', async (req, res) => {
+  cleanupExpiredTvSessions();
+  const existingCode = (req.query.code || '').trim();
+  const socketId = (req.query.socketId || '').trim();
+  let code = (existingCode && /^\d{4}$/.test(existingCode)) ? existingCode : generateFourDigitCode();
+
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+  const host = req.get('host');
+  const baseUrl = `${protocol}://${host}`;
+  // IMPORTANTE: El QR apunta siempre a /admin.html (App del celular), NUNCA a /player.html
+  const pairUrl = `${baseUrl}/admin.html?pair=${encodeURIComponent(code)}`;
+  const qrDataUrl = await qrService.generateCustomQR(pairUrl, 440);
+
+  tvPairingSessions.set(code, {
+    code,
+    createdAt: Date.now(),
+    socketId: socketId || null,
+    deviceLabel: 'Pantalla Smart TV'
+  });
+
+  io.emit('tv-waiting-list', { waitingTvs: getActiveWaitingTvs() });
+
+  res.json({
+    code,
+    pairUrl,
+    qrDataUrl,
+    activeProfileId: db.getSettings().activeBarProfileId || 'santa-chela',
+    profiles: db.getBarProfiles()
+  });
+});
+
+// Confirmar vinculación de TV desde la App del Celular (por escaneo QR, código de 4 dígitos o 1-toque)
+app.post('/api/tv-pair/confirm', (req, res) => {
+  const rawCode = String(req.body?.code || '').trim();
+  const profileId = String(req.body?.profileId || db.getSettings().activeBarProfileId || 'santa-chela').trim();
+  const profiles = db.getBarProfiles();
+  const targetProfile = profiles.find(p => p.id === profileId) || profiles[0];
+
+  const updatedSettings = db.activateBarProfile(targetProfile.id);
+
+  if (rawCode && rawCode !== 'ALL') {
+    tvPairingSessions.delete(rawCode);
+  } else {
+    tvPairingSessions.clear();
+  }
+
+  // Emitir orden inmediata al Televisor para abrir el programa del bar elegido y reproducir
+  io.emit('tv-paired-confirmed', {
+    code: rawCode || 'ALL',
+    profileId: targetProfile.id,
+    profile: targetProfile,
+    settings: updatedSettings,
+    currentlyPlaying,
+    queue: db.getQueue()
+  });
+
+  io.emit('tv-waiting-list', { waitingTvs: getActiveWaitingTvs() });
+  io.emit('state-changed', {
+    currentlyPlaying,
+    queue: db.getQueue(),
+    settings: updatedSettings
+  });
+
+  res.json({
+    success: true,
+    code: rawCode || 'ALL',
+    profileId: targetProfile.id,
+    profile: targetProfile,
+    settings: updatedSettings
+  });
+});
+
 // Ajustes del bar
 app.get('/api/settings', (req, res) => {
   res.json({ settings: db.getSettings() });
@@ -1420,6 +1576,34 @@ io.on('connection', (socket) => {
 
   socket.on('hide-photo-from-tv', () => {
     io.emit('tv-photo-hide');
+  });
+
+  // ==========================================================
+  // VINCULACIÓN DE PANTALLA TV CON QR GIGANTE Y PERFILES DE BAR
+  // ==========================================================
+  socket.on('tv-pair-closed', (data) => {
+    const code = String(data?.code || '').trim();
+    if (code && tvPairingSessions.has(code)) {
+      tvPairingSessions.delete(code);
+      io.emit('tv-waiting-list', { waitingTvs: getActiveWaitingTvs() });
+    }
+  });
+
+  socket.on('admin-show-tv-qr', () => {
+    io.emit('tv-open-pair-qr');
+  });
+
+  socket.on('disconnect', () => {
+    let removed = false;
+    for (const [code, session] of tvPairingSessions.entries()) {
+      if (session.socketId === socket.id) {
+        tvPairingSessions.delete(code);
+        removed = true;
+      }
+    }
+    if (removed) {
+      io.emit('tv-waiting-list', { waitingTvs: getActiveWaitingTvs() });
+    }
   });
 });
 

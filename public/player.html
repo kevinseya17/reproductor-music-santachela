@@ -237,7 +237,7 @@
           <div class="text-6xl sm:text-8xl md:text-9xl animate-bounce shrink-0" id="promoIcon">🍻</div>
           <div class="min-w-0 flex-1 space-y-3">
             <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-              <span class="bg-amber-500 text-black text-xs sm:text-base font-black uppercase tracking-widest px-4 sm:px-5 py-1.5 rounded-full shadow-lg">
+              <span id="promoBarBadge" class="bg-amber-500 text-black text-xs sm:text-base font-black uppercase tracking-widest px-4 sm:px-5 py-1.5 rounded-full shadow-lg">
                 🔥 PROMOCIÓN SANTA CHELA
               </span>
               <span class="text-xs sm:text-base text-amber-200 font-bold hidden sm:inline">Pide en barra o desde tu mesa</span>
@@ -274,7 +274,7 @@
           </div>
 
           <p class="text-xs sm:text-sm font-black uppercase tracking-widest text-amber-300/80 flex items-center justify-center gap-2">
-            <span>✨</span> <span>Canción pedida desde la mesa • Santa Chela Music Bar</span> <span>✨</span>
+            <span>✨</span> <span id="dedicationBarFooter">Canción pedida desde la mesa • Santa Chela Music Bar</span> <span>✨</span>
           </p>
         </div>
       </div>
@@ -323,7 +323,7 @@
 
       <!-- Barra de Controles Rápidos para el Barman / Encargado -->
       <div id="playerControlsBar" class="tv-hud-element flex items-center justify-between pt-1 text-xs text-gray-400 interactive">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 flex-wrap">
           <button id="playPauseBtn" onclick="togglePlayPause()" class="hover:text-amber-400 flex items-center gap-1.5 font-bold">
             <span id="playPauseIcon">⏸️</span> Pausar
           </button>
@@ -332,6 +332,9 @@
           </button>
           <button onclick="toggleFullscreen()" class="hover:text-amber-400 flex items-center gap-1.5">
             <span>⛶</span> Pantalla Completa
+          </button>
+          <button onclick="openTvPairingOverlay()" class="hover:text-amber-300 text-amber-400/90 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-full flex items-center gap-1.5 font-bold transition">
+            <span>📡</span> <span>Vincular TV (QR Gigante)</span>
           </button>
         </div>
 
@@ -488,6 +491,93 @@
           </p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PANTALLA DE VINCULACIÓN SMART TV CON QR GIGANTE (CONECTAR CON LA APP DJ)  -->
+  <!-- ========================================================================= -->
+  <div id="tvPairingOverlay" class="fixed inset-0 z-[80] bg-[#080a0f]/95 backdrop-blur-2xl hidden items-center justify-center p-4 sm:p-8 select-none">
+    <!-- Vista 1: QR Gigante + Código de 4 Dígitos Esperando Escaneo desde la App del Celular -->
+    <div id="tvPairingWaitingView" class="max-w-5xl w-full bg-gradient-to-br from-[#131722] via-[#0e1118] to-[#090b10] border-2 border-amber-500/40 rounded-[36px] p-6 sm:p-10 shadow-[0_0_120px_rgba(245,158,11,0.25)] flex flex-col lg:flex-row items-center gap-8 sm:gap-12">
+      
+      <!-- Columna Izquierda: QR Gigante de Alto Contraste -->
+      <div class="flex flex-col items-center shrink-0">
+        <div class="relative p-4 sm:p-5 bg-white rounded-[28px] shadow-[0_0_70px_rgba(245,158,11,0.55)] border-4 border-amber-400">
+          <img id="tvGiantPairQrImg" src="" alt="QR Gigante de Vinculación TV" class="w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 object-contain block">
+          <div class="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-black text-[11px] sm:text-xs uppercase tracking-widest px-4 py-1 rounded-full shadow-lg whitespace-nowrap">
+            📷 ESCANEA CON TU CELULAR
+          </div>
+        </div>
+
+        <!-- Código numérico de 4 dígitos para vinculación rápida -->
+        <div class="mt-6 bg-black/70 border border-white/15 rounded-2xl px-6 py-3 text-center">
+          <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400">O ingresa este código en tu App:</p>
+          <p id="tvPairingPinCode" class="text-2xl sm:text-4xl font-black tracking-[0.35em] text-amber-400 font-mono mt-1">----</p>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Instrucciones y Programas Disponibles (Santa Chela / Ámbar) -->
+      <div class="flex-1 text-center lg:text-left space-y-5">
+        <div class="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>VINCULACIÓN INTELIGENTE DE PANTALLA TV</span>
+        </div>
+
+        <h2 class="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight">
+          Conecta este TV con la App de tu Celular
+        </h2>
+
+        <p class="text-sm sm:text-base text-gray-300 leading-relaxed">
+          Escanea el código QR gigante con la cámara desde la <strong class="text-amber-300">App de Control DJ</strong> de tu celular y elige qué programa de bar deseas abrir en este televisor:
+        </p>
+
+        <!-- Tarjetas de Programas Disponibles -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/35 flex items-center gap-3.5 text-left">
+            <span class="text-3xl shrink-0">🍺</span>
+            <div class="min-w-0">
+              <p class="text-xs sm:text-sm font-black text-amber-300 truncate">Santa Chela Music Bar</p>
+              <p class="text-[11px] text-gray-400">Programa Oficial • Listas Sagradas</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-purple-500/10 border border-purple-400/30 flex items-center gap-3.5 text-left">
+            <span class="text-3xl shrink-0">🍸</span>
+            <div class="min-w-0">
+              <p class="text-xs sm:text-sm font-black text-purple-300 truncate">Ámbar Music Bar</p>
+              <p class="text-[11px] text-gray-400">Programa Modo Prueba</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de Acción Directa en el TV por si se desea continuar o cerrar el QR -->
+        <div class="pt-3 flex flex-wrap items-center justify-center lg:justify-start gap-3">
+          <button onclick="closeTvPairingOverlay()" class="bg-white/10 hover:bg-white/15 text-white font-bold text-xs sm:text-sm px-5 py-3 rounded-2xl border border-white/15 transition cursor-pointer flex items-center gap-2">
+            <span>▶</span> <span>Continuar al Reproductor Actual</span>
+          </button>
+          <button onclick="refreshTvPairingQr()" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-bold text-xs sm:text-sm px-4 py-3 rounded-2xl border border-amber-500/30 transition cursor-pointer flex items-center gap-1.5">
+            <span>🔄</span> <span>Nuevo Código QR</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Vista 2: Confirmación Exitosa cuando el Celular conecta el TV -->
+    <div id="tvPairingSuccessView" class="hidden max-w-2xl w-full bg-gradient-to-b from-[#151a26] to-[#0a0d14] border-2 border-emerald-400/60 rounded-[36px] p-8 sm:p-12 text-center shadow-[0_0_120px_rgba(16,185,129,0.4)] space-y-5">
+      <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-4xl sm:text-5xl mx-auto shadow-[0_0_40px_rgba(16,185,129,0.5)]">
+        ✅
+      </div>
+      <div class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 text-xs sm:text-sm font-black uppercase tracking-widest px-5 py-1.5 rounded-full border border-emerald-400/40">
+        <span>⚡ PANTALLA CONECTADA DESDE TU CELULAR</span>
+      </div>
+      <h2 id="tvPairSuccessBarName" class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+        Santa Chela Music Bar
+      </h2>
+      <p id="tvPairSuccessSub" class="text-sm sm:text-lg text-amber-300 font-bold">
+        Abriendo el programa musical del bar en esta pantalla...
+      </p>
     </div>
   </div>
 

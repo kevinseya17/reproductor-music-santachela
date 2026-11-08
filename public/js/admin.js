@@ -70,6 +70,9 @@ function renderAdminState(data) {
 
   if (settings && settings.barName) {
     document.getElementById('adminBarName').textContent = settings.barName;
+    if (typeof updateAdminProfileHeaderBadge === 'function') {
+      updateAdminProfileHeaderBadge(settings.activeBarProfileId || 'santa-chela', settings.barName);
+    }
     document.getElementById('settingBarName').value = settings.barName;
     document.getElementById('settingMaxRequests').value = settings.maxRequestsPerTable || 2;
     document.getElementById('settingWindow').value = settings.smartSlottingWindow || 3;
@@ -3697,5 +3700,365 @@ function setupDjCamPolaroidDrag() {
     }
   });
 }
+
+// =========================================================================
+// VINCULACIÓN DE PANTALLA TV CON QR GIGANTE, ESCÁNER DE CÁMARA Y PERFILES (SANTA CHELA / ÁMBAR)
+// =========================================================================
+let selectedBarProfileInModal = 'santa-chela';
+let activeWaitingTvsList = [];
+let qrScannerStream = null;
+let qrScannerRafId = null;
+let qrScannerActive = false;
+let deferredPwaPrompt = null;
+
+function updateAdminProfileHeaderBadge(profileId, barName) {
+  const badge = document.getElementById('adminActiveProfileBadge');
+  const icon = document.getElementById('adminActiveProfileIcon');
+  const label = document.getElementById('adminActiveProfileLabel');
+  const isAmbar = profileId === 'ambar' || (barName || '').toLowerCase().includes('ámbar') || (barName || '').toLowerCase().includes('ambar');
+
+  selectedBarProfileInModal = isAmbar ? 'ambar' : 'santa-chela';
+
+  if (badge && icon && label) {
+    if (isAmbar) {
+      icon.textContent = '🍸';
+      label.textContent = 'ÁMBAR (PRUEBA)';
+      badge.className = 'shrink-0 inline-flex items-center gap-1 text-[8.5px] sm:text-[9.5px] uppercase tracking-wider font-black px-2 py-0.5 rounded-full bg-purple-500/25 text-purple-200 border border-purple-400/50 whitespace-nowrap hover:bg-purple-500/35 transition cursor-pointer';
+    } else {
+      icon.textContent = '🍺';
+      label.textContent = 'SANTA CHELA';
+      badge.className = 'shrink-0 inline-flex items-center gap-1 text-[8.5px] sm:text-[9.5px] uppercase tracking-wider font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 whitespace-nowrap hover:bg-amber-500/30 transition cursor-pointer';
+    }
+  }
+  highlightSelectedProfileCardUI(selectedBarProfileInModal);
+}
+
+function highlightSelectedProfileCardUI(profileId) {
+  const cardSanta = document.getElementById('profileCardSantaChela');
+  const cardAmbar = document.getElementById('profileCardAmbar');
+  if (cardSanta && cardAmbar) {
+    if (profileId === 'ambar') {
+      cardAmbar.className = 'p-3.5 rounded-2xl border-2 border-purple-400 bg-purple-500/20 cursor-pointer transition flex items-start gap-3 shadow-[0_0_25px_rgba(168,85,247,0.25)]';
+      cardSanta.className = 'p-3.5 rounded-2xl border-2 border-white/15 bg-white/5 hover:border-amber-400/50 cursor-pointer transition flex items-start gap-3';
+    } else {
+      cardSanta.className = 'p-3.5 rounded-2xl border-2 border-amber-400 bg-amber-500/15 cursor-pointer transition flex items-start gap-3 shadow-[0_0_25px_rgba(245,158,11,0.2)]';
+      cardAmbar.className = 'p-3.5 rounded-2xl border-2 border-white/15 bg-white/5 hover:border-purple-400/50 cursor-pointer transition flex items-start gap-3';
+    }
+  }
+}
+
+async function selectAdminBarProfile(profileId) {
+  selectedBarProfileInModal = profileId === 'ambar' ? 'ambar' : 'santa-chela';
+  highlightSelectedProfileCardUI(selectedBarProfileInModal);
+
+  try {
+    const res = await fetch('/api/bar-profiles/activate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId: selectedBarProfileInModal })
+    });
+    const data = await res.json();
+    if (data && data.success) {
+      updateAdminProfileHeaderBadge(data.activeProfileId, data.settings?.barName);
+      const barLabel = data.activeProfileId === 'ambar' ? '🍸 Ámbar Music Bar (Modo Prueba)' : '🍺 Santa Chela Music Bar (Oficial)';
+      showAdminToast(`Programa activo: ${barLabel}`, '✅');
+    }
+  } catch (err) {
+    console.error('Error cambiando perfil de bar:', err);
+  }
+}
+
+function renderWaitingTvsUI(waitingTvs) {
+  activeWaitingTvsList = Array.isArray(waitingTvs) ? waitingTvs : [];
+  const banner = document.getElementById('tvWaitingAutoBanner');
+  const bannerCode = document.getElementById('tvWaitingBannerCode');
+  const dot = document.getElementById('tvWaitingHeaderDot');
+  const modalBox = document.getElementById('modalWaitingTvsBox');
+  const modalBadge = document.getElementById('modalWaitingTvCodeBadge');
+  const manualInput = document.getElementById('tvPairManualCodeInput');
+
+  if (activeWaitingTvsList.length > 0) {
+    const latest = activeWaitingTvsList[activeWaitingTvsList.length - 1];
+    if (banner) banner.classList.remove('hidden');
+    if (bannerCode) bannerCode.textContent = `Código ${latest.code}`;
+    if (dot) dot.classList.remove('hidden');
+    if (modalBox) modalBox.classList.remove('hidden');
+    if (modalBadge) modalBadge.textContent = `Código ${latest.code}`;
+    if (manualInput && !manualInput.value) {
+      manualInput.value = latest.code;
+    }
+  } else {
+    if (banner) banner.classList.add('hidden');
+    if (dot) dot.classList.add('hidden');
+    if (modalBox) modalBox.classList.add('hidden');
+  }
+}
+
+async function openTvPairingAdminModal(prefillCode = '') {
+  const modal = document.getElementById('tvPairingAdminModal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  const manualInput = document.getElementById('tvPairManualCodeInput');
+  if (prefillCode && manualInput) {
+    manualInput.value = prefillCode;
+  }
+
+  try {
+    const res = await fetch('/api/bar-profiles');
+    const data = await res.json();
+    if (data) {
+      selectedBarProfileInModal = data.activeProfileId || 'santa-chela';
+      highlightSelectedProfileCardUI(selectedBarProfileInModal);
+      renderWaitingTvsUI(data.waitingTvs || []);
+    }
+  } catch (e) {}
+}
+
+function closeTvPairingAdminModal() {
+  stopQrCameraScanner();
+  const modal = document.getElementById('tvPairingAdminModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+  // Limpiar ?pair=XXXX de la URL si venía de escanear el QR
+  try {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('pair')) {
+      url.searchParams.delete('pair');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }
+  } catch (e) {}
+}
+
+function requestTvShowGiantQr() {
+  socket.emit('admin-show-tv-qr');
+  showAdminToast('📺 Mostrando QR Gigante en la pantalla del TV...', '📡');
+}
+
+async function quickPairWaitingTv(profileId) {
+  const code = activeWaitingTvsList.length > 0 ? activeWaitingTvsList[activeWaitingTvsList.length - 1].code : 'ALL';
+  await executeTvPairingConfirmation(code, profileId);
+}
+
+async function confirmTvPairFromModal(source) {
+  let code = 'ALL';
+  const manualInput = document.getElementById('tvPairManualCodeInput');
+  if (source === 'MANUAL' && manualInput && manualInput.value.trim()) {
+    code = manualInput.value.trim();
+  } else if (activeWaitingTvsList.length > 0) {
+    code = activeWaitingTvsList[activeWaitingTvsList.length - 1].code;
+  } else if (manualInput && manualInput.value.trim()) {
+    code = manualInput.value.trim();
+  }
+  await executeTvPairingConfirmation(code, selectedBarProfileInModal);
+}
+
+async function executeTvPairingConfirmation(code, profileId) {
+  try {
+    const res = await fetch('/api/tv-pair/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: code || 'ALL',
+        profileId: profileId || selectedBarProfileInModal || 'santa-chela'
+      })
+    });
+    const data = await res.json();
+    if (data && data.success) {
+      playMobileWhooshSound();
+      if (navigator.vibrate) {
+        try { navigator.vibrate([40, 60, 100]); } catch (e) {}
+      }
+      const barTitle = data.profile?.barName || 'Santa Chela Music Bar';
+      showAdminToast(`📺 ¡Televisor vinculado a ${barTitle}!`, '🚀');
+      closeTvPairingAdminModal();
+    }
+  } catch (err) {
+    console.error('Error vinculando TV:', err);
+    showAdminToast('Error al vincular el televisor', '⚠️');
+  }
+}
+
+// =========================================================================
+// ESCÁNER DE CÁMARA QR INTEGRADO EN LA APP DEL CELULAR
+// =========================================================================
+function extractPairCodeFromScannedText(rawText) {
+  const text = String(rawText || '').trim();
+  if (!text) return null;
+  if (/^\d{4}$/.test(text)) return text;
+  try {
+    const parsed = new URL(text);
+    const p = parsed.searchParams.get('pair');
+    if (p) return p.trim();
+  } catch (e) {}
+  const match = text.match(/[?&]pair=([0-9]{4})/i) || text.match(/\b([0-9]{4})\b/);
+  return match ? match[1] : null;
+}
+
+function ensureJsQrLibraryLoaded() {
+  return new Promise((resolve) => {
+    if (window.jsQR) return resolve(true);
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+    script.onload = () => resolve(!!window.jsQR);
+    script.onerror = () => resolve(false);
+    document.head.appendChild(script);
+  });
+}
+
+async function startQrCameraScanner() {
+  const box = document.getElementById('qrScannerCameraBox');
+  const video = document.getElementById('qrScannerVideo');
+  const canvas = document.getElementById('qrScannerCanvas');
+  const btn = document.getElementById('btnStartQrCameraScan');
+  if (!box || !video || !canvas) return;
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showAdminToast('Usa la cámara de tu celular o escribe el código de 4 dígitos de la TV', '📷');
+    return;
+  }
+
+  try {
+    qrScannerStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } },
+      audio: false
+    });
+    video.srcObject = qrScannerStream;
+    await video.play();
+
+    box.classList.remove('hidden');
+    if (btn) btn.classList.add('hidden');
+    qrScannerActive = true;
+
+    let nativeDetector = null;
+    if ('BarcodeDetector' in window) {
+      try {
+        nativeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+      } catch (e) {}
+    }
+    if (!nativeDetector) {
+      await ensureJsQrLibraryLoaded();
+    }
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    const scanTick = async () => {
+      if (!qrScannerActive) return;
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        try {
+          let foundRaw = null;
+          if (nativeDetector) {
+            const barcodes = await nativeDetector.detect(video);
+            if (barcodes && barcodes.length > 0) {
+              foundRaw = barcodes[0].rawValue;
+            }
+          } else if (window.jsQR) {
+            canvas.width = video.videoWidth || 320;
+            canvas.height = video.videoHeight || 240;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const qrResult = window.jsQR(imageData.data, imageData.width, imageData.height);
+            if (qrResult && qrResult.data) {
+              foundRaw = qrResult.data;
+            }
+          }
+
+          if (foundRaw) {
+            const code = extractPairCodeFromScannedText(foundRaw) || 'ALL';
+            stopQrCameraScanner();
+            await executeTvPairingConfirmation(code, selectedBarProfileInModal);
+            return;
+          }
+        } catch (err) {}
+      }
+      qrScannerRafId = requestAnimationFrame(scanTick);
+    };
+
+    qrScannerRafId = requestAnimationFrame(scanTick);
+  } catch (err) {
+    console.warn('No se pudo abrir la cámara para escanear:', err);
+    showAdminToast('Permite el acceso a la cámara o ingresa el código de 4 dígitos de la TV', '📷');
+  }
+}
+
+function stopQrCameraScanner() {
+  qrScannerActive = false;
+  if (qrScannerRafId) {
+    cancelAnimationFrame(qrScannerRafId);
+    qrScannerRafId = null;
+  }
+  if (qrScannerStream) {
+    qrScannerStream.getTracks().forEach(t => t.stop());
+    qrScannerStream = null;
+  }
+  const video = document.getElementById('qrScannerVideo');
+  if (video) video.srcObject = null;
+  const box = document.getElementById('qrScannerCameraBox');
+  const btn = document.getElementById('btnStartQrCameraScan');
+  if (box) box.classList.add('hidden');
+  if (btn) btn.classList.remove('hidden');
+}
+
+// Escuchar eventos Socket.io de TV esperando vinculación y cambios de perfil de bar
+socket.on('tv-waiting-list', (data) => {
+  renderWaitingTvsUI(data?.waitingTvs || []);
+});
+
+socket.on('bar-profile-changed', (data) => {
+  if (data && data.profileId) {
+    updateAdminProfileHeaderBadge(data.profileId, data.settings?.barName);
+  }
+});
+
+// Inicializar detección de ?pair=XXXX (si escaneó el QR con la cámara nativa del celular) y PWA
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('/api/bar-profiles');
+    const data = await res.json();
+    if (data) {
+      updateAdminProfileHeaderBadge(data.activeProfileId || 'santa-chela', data.settings?.barName);
+      renderWaitingTvsUI(data.waitingTvs || []);
+    }
+  } catch (e) {}
+
+  // Si abrió la App escaneando el QR Gigante de la TV (?pair=XXXX), abrir modal de vinculación inmediato
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const pairCode = params.get('pair');
+    if (pairCode) {
+      openTvPairingAdminModal(pairCode.trim());
+      showAdminToast(`📺 ¡Código QR de TV detectado (${pairCode})! Elige el bar y toca Conectar TV`, '📡');
+    }
+  } catch (e) {}
+
+  // Registrar Service Worker para la App instalable del celular (exclusiva de la consola DJ)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+});
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPwaPrompt = e;
+  const btn = document.getElementById('btnInstallPwaApp');
+  if (btn) {
+    btn.classList.remove('hidden');
+    btn.classList.add('flex');
+  }
+});
+
+async function triggerPwaInstall() {
+  if (deferredPwaPrompt) {
+    deferredPwaPrompt.prompt();
+    try { await deferredPwaPrompt.userChoice; } catch (e) {}
+    deferredPwaPrompt = null;
+  } else {
+    showAdminToast('En iPhone: toca Compartir ↑ y "Agregar a pantalla de inicio". En Android: menú ⋮ y "Instalar aplicación".', '📲');
+  }
+}
+
 
 
