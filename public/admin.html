@@ -2,16 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>App Control DJ | Santa Chela & Ámbar</title>
-  <meta name="theme-color" content="#0c0e12">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Santa Chela DJ">
-  <meta name="mobile-web-app-capable" content="yes">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Control & DJ | Music Bar</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/css/style.css">
   <script src="/socket.io/socket.io.js"></script>
@@ -49,24 +41,16 @@
           <h1 id="adminBarName" class="text-xs sm:text-base font-extrabold text-white tracking-wide truncate">
             Santa Chela Music Bar
           </h1>
-          <button type="button" onclick="openTvPairingAdminModal()" id="adminActiveProfileBadge" class="shrink-0 inline-flex items-center gap-1 text-[8.5px] sm:text-[9.5px] uppercase tracking-wider font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 whitespace-nowrap hover:bg-amber-500/30 transition cursor-pointer" title="Cambiar programa de bar o conectar TV">
-            <span id="adminActiveProfileIcon">🍺</span>
-            <span id="adminActiveProfileLabel">SANTA CHELA</span>
-          </button>
+          <span class="shrink-0 inline-flex items-center gap-1 text-[8.5px] sm:text-[9px] uppercase tracking-wider font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 whitespace-nowrap">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>EN VIVO</span>
+          </span>
         </div>
       </div>
     </div>
 
     <!-- Accesos Rápidos Header -->
     <div class="flex items-center gap-1 sm:gap-2 shrink-0">
-      <button id="btnOpenTvPairModal" onclick="openTvPairingAdminModal()" class="relative tactile-btn-gold text-xs py-1.5 px-2.5 sm:px-3.5 flex items-center justify-center gap-1.5 font-black shadow-md shadow-amber-500/20" title="Conectar pantalla de TV con QR o elegir programa del bar">
-        <span>📡</span>
-        <span class="text-[11px] sm:text-xs">Conectar TV</span>
-        <span id="tvWaitingHeaderDot" class="hidden absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-black animate-ping"></span>
-      </button>
-      <button id="btnInstallPwaApp" onclick="triggerPwaInstall()" class="hidden btn-secondary text-xs py-1.5 px-2 sm:px-3 items-center justify-center gap-1 text-emerald-300 border-emerald-500/40" title="Instalar App de Control DJ en tu celular">
-        <span>📲</span> <span class="hidden sm:inline">App</span>
-      </button>
       <button id="btnMicMode" onclick="toggleMicMode()" class="btn-secondary text-xs flex items-center justify-center gap-1.5 py-1.5 px-2 sm:px-3 transition" title="Atenuar música para hablar">
         <span id="micModeIcon" class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>
         <span id="micModeText" class="hidden sm:inline">Modo Micrófono</span>
@@ -74,32 +58,14 @@
       <button id="btnTopRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark text-xs py-1.5 px-2 sm:px-3 flex items-center justify-center gap-1.5 text-amber-300 hover:text-amber-200 border border-amber-500/30" title="Activar o desactivar Pantalla Completa en la TV">
         <span id="topFullscreenIcon">⛶</span> <span id="topFullscreenText" class="hidden sm:inline">TV Fullscreen</span>
       </button>
-      <a href="/player.html" target="_blank" class="tactile-btn-dark text-xs py-1.5 px-2 sm:px-3 hidden lg:flex items-center justify-center gap-1.5" title="Abrir pantalla para la TV (Solo PC)">
-        <span>📺</span> <span>Pantalla TV</span>
+      <a href="/player.html" target="_blank" class="tactile-btn-dark text-xs py-1.5 px-2 sm:px-3 hidden sm:flex items-center justify-center gap-1.5" title="Abrir pantalla para la TV">
+        <span>📺</span> <span class="hidden sm:inline">Pantalla TV</span>
       </a>
       <a href="/qrs.html" target="_blank" class="btn-secondary text-xs py-1.5 px-2 sm:px-3 flex items-center justify-center gap-1.5" title="Ver e imprimir códigos QR">
         <span>🖨️</span> <span class="hidden sm:inline">QRs</span>
       </a>
     </div>
   </header>
-
-  <!-- Banner Inteligente de TV Detectado con QR en Espera (Aparece automáticamente en el celular cuando una TV abre el QR) -->
-  <div id="tvWaitingAutoBanner" class="hidden bg-gradient-to-r from-amber-500/20 via-amber-500/15 to-purple-500/20 border-b border-amber-500/40 px-3 sm:px-6 py-2.5 z-20 shrink-0">
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-2 max-w-6xl mx-auto">
-      <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-white text-center sm:text-left">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
-        <span>📺 ¡Televisor esperando conexión! (<strong id="tvWaitingBannerCode" class="text-amber-300 font-mono">Código ----</strong>) — ¿Qué bar deseas proyectar en la TV?</span>
-      </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <button type="button" onclick="quickPairWaitingTv('santa-chela')" class="tactile-btn-gold text-[11px] sm:text-xs font-black px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-          <span>🍺</span> <span>Abrir Santa Chela en TV</span>
-        </button>
-        <button type="button" onclick="quickPairWaitingTv('ambar')" class="bg-purple-500/25 hover:bg-purple-500/35 text-purple-200 border border-purple-400/50 text-[11px] sm:text-xs font-black px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition">
-          <span>🍸</span> <span>Abrir Ámbar (Prueba) en TV</span>
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- Layout Principal: Sidebar Izquierda + Área de Trabajo -->
   <div class="flex-1 flex overflow-hidden relative">
@@ -1425,126 +1391,6 @@
           ▶ Sí, Cambiar Canción
         </button>
       </div>
-    </div>
-  </div>
-
-  <!-- ========================================================================= -->
-  <!-- MODAL DE VINCULACIÓN DE PANTALLA TV CON QR Y PERFILES (SANTA CHELA / ÁMBAR) -->
-  <!-- ========================================================================= -->
-  <div id="tvPairingAdminModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-4">
-    <div class="glass-card w-full max-w-xl p-4 sm:p-6 space-y-4 border border-amber-500/40 max-h-[94vh] overflow-y-auto shadow-[0_0_70px_rgba(245,158,11,0.2)]">
-      
-      <!-- Encabezado -->
-      <div class="flex items-center justify-between border-b border-white/10 pb-3">
-        <div class="flex items-center gap-2.5">
-          <span class="text-2xl">📡</span>
-          <div>
-            <h3 class="font-black text-white text-sm sm:text-base uppercase tracking-wider">Conectar Pantalla TV & Programa del Bar</h3>
-            <p class="text-[11px] text-amber-300 font-semibold">Escanea el QR de la TV o elige qué bar deseas proyectar</p>
-          </div>
-        </div>
-        <button type="button" onclick="closeTvPairingAdminModal()" class="text-gray-400 hover:text-white p-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition">✕</button>
-      </div>
-
-      <!-- PASO 1: Seleccionar el Programa de Bar (Santa Chela Oficial vs Ámbar Prueba) -->
-      <div class="space-y-2">
-        <label class="block text-[11px] font-black uppercase tracking-wider text-amber-400">
-          1. Elige el Programa de Bar a activar / enviar al TV:
-        </label>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <!-- Tarjeta Santa Chela Oficial -->
-          <div id="profileCardSantaChela" onclick="selectAdminBarProfile('santa-chela')" class="p-3.5 rounded-2xl border-2 border-amber-400 bg-amber-500/15 cursor-pointer transition flex items-start gap-3">
-            <span class="text-2xl shrink-0 mt-0.5">🍺</span>
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center justify-between gap-1">
-                <p class="text-xs sm:text-sm font-black text-white truncate">Santa Chela</p>
-                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-black">Oficial</span>
-              </div>
-              <p class="text-[10.5px] text-gray-300 mt-1 leading-snug">
-                Programa oficial con tus listas sagradas de Santa Chela intactas.
-              </p>
-            </div>
-          </div>
-
-          <!-- Tarjeta Ámbar Prueba -->
-          <div id="profileCardAmbar" onclick="selectAdminBarProfile('ambar')" class="p-3.5 rounded-2xl border-2 border-white/15 bg-white/5 hover:border-purple-400/50 cursor-pointer transition flex items-start gap-3">
-            <span class="text-2xl shrink-0 mt-0.5">🍸</span>
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center justify-between gap-1">
-                <p class="text-xs sm:text-sm font-black text-white truncate">Ámbar</p>
-                <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 border border-purple-400/40">Prueba</span>
-              </div>
-              <p class="text-[10.5px] text-gray-300 mt-1 leading-snug">
-                Programa de prueba para conectar pantallas y ensayar sin afectar Santa Chela.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Televisores detectados en espera de conexión (si hay alguno mostrando el QR Gigante) -->
-      <div id="modalWaitingTvsBox" class="hidden p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/40 space-y-2.5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-black text-emerald-300 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span>📺 Televisor detectado esperando conexión:</span>
-          </span>
-          <span id="modalWaitingTvCodeBadge" class="text-xs font-mono font-black text-amber-300 bg-black/50 px-2.5 py-0.5 rounded-lg border border-amber-500/30">Código ----</span>
-        </div>
-        <button type="button" onclick="confirmTvPairFromModal('WAITING')" class="w-full tactile-btn-gold py-3 text-xs sm:text-sm font-black justify-center shadow-lg">
-          ⚡ Conectar este Televisor Ahora al Bar Seleccionado
-        </button>
-      </div>
-
-      <!-- PASO 2: Escanear el QR Gigante de la TV con la Cámara del Celular -->
-      <div class="space-y-2.5 bg-white/[0.03] p-3.5 rounded-2xl border border-white/10">
-        <div class="flex items-center justify-between">
-          <label class="text-[11px] font-black uppercase tracking-wider text-gray-200">
-            2. Conectar Escaneando el QR Gigante de la TV:
-          </label>
-          <button type="button" onclick="requestTvShowGiantQr()" class="text-[10.5px] font-bold text-amber-300 hover:text-amber-200 underline cursor-pointer">
-            📺 Mostrar QR en el TV
-          </button>
-        </div>
-
-        <!-- Visor de Cámara para Escanear QR (Se activa al tocar el botón) -->
-        <div id="qrScannerCameraBox" class="hidden relative rounded-2xl overflow-hidden bg-black border-2 border-amber-400 aspect-video max-h-60 mx-auto">
-          <video id="qrScannerVideo" playsinline muted class="w-full h-full object-cover"></video>
-          <canvas id="qrScannerCanvas" class="hidden"></canvas>
-          <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
-            <div class="w-40 h-40 border-2 border-amber-400 rounded-2xl shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]"></div>
-          </div>
-          <button type="button" onclick="stopQrCameraScanner()" class="absolute top-2 right-2 bg-black/80 text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20">
-            ✕ Cerrar cámara
-          </button>
-          <p class="absolute bottom-2 left-0 right-0 text-center text-[11px] font-bold text-amber-300 bg-black/70 py-1">
-            Apunta la cámara al QR Gigante de la pantalla del TV...
-          </p>
-        </div>
-
-        <button type="button" id="btnStartQrCameraScan" onclick="startQrCameraScanner()" class="w-full py-3 px-4 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs sm:text-sm font-black flex items-center justify-center gap-2 transition cursor-pointer">
-          <span class="text-lg">📷</span>
-          <span>Escanear QR Gigante de la TV con mi Cámara</span>
-        </button>
-
-        <!-- O ingresar el código de 4 dígitos que muestra la TV -->
-        <div class="pt-2 border-t border-white/10 flex flex-col sm:flex-row items-center gap-2">
-          <div class="w-full sm:flex-1">
-            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">O escribe el código de 4 dígitos de la TV:</label>
-            <input type="text" id="tvPairManualCodeInput" maxlength="4" inputmode="numeric" placeholder="Ej: 4829" class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-sm text-amber-300 font-mono font-black tracking-[0.3em] text-center outline-none focus:border-amber-400">
-          </div>
-          <button type="button" onclick="confirmTvPairFromModal('MANUAL')" class="w-full sm:w-auto sm:mt-4 tactile-btn-gold py-2.5 px-5 text-xs sm:text-sm font-black justify-center shrink-0">
-            🚀 Conectar TV
-          </button>
-        </div>
-      </div>
-
-      <!-- Nota informativa de seguridad -->
-      <div class="p-3 rounded-xl bg-black/40 border border-white/5 text-[11px] text-gray-400 flex items-center gap-2">
-        <span>🔒</span>
-        <span>Tu celular funciona exclusivamente como <strong class="text-gray-200">Mando / Consola DJ</strong>. El video y sonido siempre se abren en el Televisor.</span>
-      </div>
-
     </div>
   </div>
 
