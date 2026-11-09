@@ -37,6 +37,71 @@ app.get('/player.html', (req, res, next) => {
   next();
 });
 
+// Si entran por un dominio propio de MOCD MUSIC (ej: mocdmusic.com) en la raíz /, mostrar la Página Comercial de Ventas
+app.get('/', (req, res, next) => {
+  const host = String(req.hostname || req.headers.host || '').toLowerCase();
+  if (host.includes('mocd') && !req.query.mesa) {
+    return res.sendFile(path.join(__dirname, 'public', 'ventas.html'));
+  }
+  next();
+});
+
+// SEO Oficial para Google Chrome: permitir indexar únicamente la página comercial de MOCD MUSIC y ocultar consolas privadas
+app.get('/robots.txt', (req, res) => {
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+  const host = req.headers.host || 'reproductor-music-santachela.onrender.com';
+  const baseUrl = `${proto}://${host}`;
+  res.type('text/plain').send(
+`User-agent: *
+Allow: /ventas
+Allow: /mocd
+Allow: /mocdmusic
+Allow: /promo
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /dj
+Disallow: /player
+Disallow: /player.html
+Disallow: /tv
+Disallow: /qrs.html
+Disallow: /links
+Disallow: /links.html
+Disallow: /bares
+Disallow: /central
+Disallow: /ambar/
+Disallow: /bar3/
+Disallow: /bar4/
+Disallow: /api/
+
+Sitemap: ${baseUrl}/sitemap.xml
+`
+  );
+});
+
+app.get('/sitemap.xml', (req, res) => {
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+  const host = req.headers.host || 'reproductor-music-santachela.onrender.com';
+  const baseUrl = `${proto}://${host}`;
+  const today = new Date().toISOString().split('T')[0];
+  res.type('application/xml').send(
+`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/ventas</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/mocdmusic</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>`
+  );
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Atajos cortos adicionales (sin afectar los enlaces existentes)
