@@ -555,12 +555,19 @@ router.post('/api/request', async (req, res) => {
         return res.status(429).json({ error: check.reason });
       }
 
-      // 2. Filtro Anti-Trolls y Lista Negra
+      // 2. Filtro Anti-Trolls, Lista Negra y Verificación de Solo Canciones Reales
       const blSong = db.isBlacklisted(title, artist);
       const blDed = dedication ? db.isBlacklisted(dedication, '') : { blacklisted: false };
       if (blSong.blacklisted || blDed.blacklisted) {
         return res.status(400).json({
           error: 'Esta canción o mensaje contiene términos o audios no permitidos en el bar.'
+        });
+      }
+
+      const realSongCheck = youtube.validateIsRealSong({ title, artist, duration });
+      if (!realSongCheck.valid) {
+        return res.status(400).json({
+          error: realSongCheck.reason
         });
       }
 
