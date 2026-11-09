@@ -1270,25 +1270,23 @@
         <input type="checkbox" id="camModalAllowQrPhotosToggle" onchange="toggleClientPhotoSettingImmediate(this.checked)" class="w-5 h-5 accent-amber-500 shrink-0 cursor-pointer">
       </div>
 
-      <!-- Inputs ocultos para Cámara Trasera, Frontal y Galería -->
-      <input type="file" id="djCamInputRear" accept="image/*" capture="environment" class="hidden" onchange="onDjCamPhotoSelected(event)">
-      <input type="file" id="djCamInputSelfie" accept="image/*" capture="user" class="hidden" onchange="onDjCamPhotoSelected(event)">
-      <input type="file" id="djCamInputGallery" accept="image/*" class="hidden" onchange="onDjCamPhotoSelected(event)">
-
-      <!-- Botones de Captura de Foto -->
+      <!-- Botones de Captura de Foto con Label Nativo (100% compatible con Galería y Cámara en iOS/Android/PWA) -->
       <div class="grid grid-cols-3 gap-2">
-        <button type="button" onclick="document.getElementById('djCamInputRear').click()" class="py-2.5 px-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-black flex flex-col items-center justify-center gap-1 transition active:scale-95">
-          <span class="text-lg">📷</span>
-          <span>Cámara Bar</span>
-        </button>
-        <button type="button" onclick="document.getElementById('djCamInputSelfie').click()" class="py-2.5 px-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-black flex flex-col items-center justify-center gap-1 transition active:scale-95">
-          <span class="text-lg">🤳</span>
-          <span>Selfie DJ</span>
-        </button>
-        <button type="button" onclick="document.getElementById('djCamInputGallery').click()" class="py-2.5 px-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-gray-200 text-xs font-bold flex flex-col items-center justify-center gap-1 transition active:scale-95">
-          <span class="text-lg">🖼️</span>
-          <span>Galería</span>
-        </button>
+        <label for="djCamInputRear" class="relative overflow-hidden cursor-pointer select-none py-2.5 px-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-black flex flex-col items-center justify-center gap-1 transition active:scale-95">
+          <input type="file" id="djCamInputRear" accept="image/*" capture="environment" class="sr-only" onchange="onDjCamPhotoSelected(event)">
+          <span class="text-lg pointer-events-none">📷</span>
+          <span class="pointer-events-none">Cámara Bar</span>
+        </label>
+        <label for="djCamInputSelfie" class="relative overflow-hidden cursor-pointer select-none py-2.5 px-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-black flex flex-col items-center justify-center gap-1 transition active:scale-95">
+          <input type="file" id="djCamInputSelfie" accept="image/*" capture="user" class="sr-only" onchange="onDjCamPhotoSelected(event)">
+          <span class="text-lg pointer-events-none">🤳</span>
+          <span class="pointer-events-none">Selfie DJ</span>
+        </label>
+        <label for="djCamInputGallery" class="relative overflow-hidden cursor-pointer select-none py-2.5 px-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-gray-200 text-xs font-bold flex flex-col items-center justify-center gap-1 transition active:scale-95">
+          <input type="file" id="djCamInputGallery" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,image/*" class="sr-only" onchange="onDjCamPhotoSelected(event)">
+          <span class="text-lg pointer-events-none">🖼️</span>
+          <span class="pointer-events-none">Galería</span>
+        </label>
       </div>
 
       <!-- Texto / Mensaje y Etiqueta de Mesa -->
@@ -1484,6 +1482,6 @@
     </div>
   </div>
 
-  <script src="/js/admin.js"></script>
+  <script src="/js/admin.js?v=20261109"></script>
 </body>
 </html>

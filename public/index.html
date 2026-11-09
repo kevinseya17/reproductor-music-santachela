@@ -215,17 +215,16 @@
               ¡Tómate una selfie con tu mesa! Saldrá en marco dorado en el televisor junto con tu saludo cuando suene tu canción.
             </p>
 
-            <input type="file" id="clientPhotoInputCamera" accept="image/*" capture="user" class="hidden" onchange="onClientPhotoSelected(event)">
-            <input type="file" id="clientPhotoInputGallery" accept="image/*" class="hidden" onchange="onClientPhotoSelected(event)">
-
-            <!-- Botones para tomar selfie o elegir foto -->
+            <!-- Botones para tomar selfie o elegir foto con Label Nativo -->
             <div id="clientPhotoButtonsRow" class="grid grid-cols-2 gap-2">
-              <button type="button" onclick="document.getElementById('clientPhotoInputCamera').click()" class="py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95">
-                <span>🤳</span> <span>Tomar Selfie</span>
-              </button>
-              <button type="button" onclick="document.getElementById('clientPhotoInputGallery').click()" class="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-gray-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95">
-                <span>🖼️</span> <span>Elegir Foto</span>
-              </button>
+              <label for="clientPhotoInputCamera" class="relative overflow-hidden cursor-pointer select-none py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95">
+                <input type="file" id="clientPhotoInputCamera" accept="image/*" capture="user" class="sr-only" onchange="onClientPhotoSelected(event)">
+                <span class="pointer-events-none">🤳</span> <span class="pointer-events-none">Tomar Selfie</span>
+              </label>
+              <label for="clientPhotoInputGallery" class="relative overflow-hidden cursor-pointer select-none py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-gray-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95">
+                <input type="file" id="clientPhotoInputGallery" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,image/*" class="sr-only" onchange="onClientPhotoSelected(event)">
+                <span class="pointer-events-none">🖼️</span> <span class="pointer-events-none">Elegir Foto</span>
+              </label>
             </div>
 
             <!-- Vista previa cuando ya eligieron foto -->
@@ -261,6 +260,6 @@
     </div>
   </div>
 
-  <script src="/js/client.js"></script>
+  <script src="/js/client.js?v=20261109"></script>
 </body>
 </html>

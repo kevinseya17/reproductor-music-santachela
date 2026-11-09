@@ -1,4 +1,4 @@
-const CACHE_NAME = 'santachela-pwa-v2';
+const CACHE_NAME = 'santachela-pwa-v3';
 const STATIC_ASSETS = [
   '/icons/icon-192.png',
   '/icons/icon-512.png',

@@ -300,41 +300,161 @@ function openConfirmModal(index) {
 
 let currentClientPhotoDataUrl = null;
 
-function onClientPhotoSelected(event) {
-  const file = event.target.files && event.target.files[0];
+function drawClientSourceToJpegDataUrl(source, width, height, maxDim = 800, quality = 0.80) {
+  let w = width || source.width || source.naturalWidth || 800;
+  let h = height || source.height || source.naturalHeight || 800;
+  if (w > h && w > maxDim) {
+    h = Math.max(1, Math.round((h * maxDim) / w));
+    w = maxDim;
+  } else if (h >= w && h > maxDim) {
+    w = Math.max(1, Math.round((w * maxDim) / h));
+    h = maxDim;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0a0c10';
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(source, 0, 0, w, h);
+  return canvas.toDataURL('image/jpeg', quality);
+}
+
+async function decodeClientPhotoFile(file, maxDim = 800, quality = 0.80) {
+  // 1. Intento nativo acelerado por hardware (soporta fotos de Galería sin MIME, WhatsApp, Google Photos y orientación EXIF)
+  if (typeof window.createImageBitmap === 'function') {
+    try {
+      const bitmap = await window.createImageBitmap(file);
+      const dataUrl = drawClientSourceToJpegDataUrl(bitmap, bitmap.width, bitmap.height, maxDim, quality);
+      if (typeof bitmap.close === 'function') bitmap.close();
+      if (dataUrl && dataUrl.startsWith('data:image/')) return dataUrl;
+    } catch (err) {
+      console.warn('createImageBitmap fallback en cliente:', err);
+    }
+  }
+
+  // 2. Intento con URL.createObjectURL (soporta fotos grandes de Galería 12MP/48MP/50MP sin agotar RAM)
+  try {
+    const dataUrl = await new Promise((resolve, reject) => {
+      const blob = (!file.type || file.type === 'application/octet-stream')
+        ? new Blob([file], { type: 'image/jpeg' })
+        : file;
+      const objectUrl = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const out = drawClientSourceToJpegDataUrl(img, img.naturalWidth || img.width, img.naturalHeight || img.height, maxDim, quality);
+          URL.revokeObjectURL(objectUrl);
+          resolve(out);
+        } catch (e) {
+          URL.revokeObjectURL(objectUrl);
+          reject(e);
+        }
+      };
+      img.onerror = (e) => {
+        URL.revokeObjectURL(objectUrl);
+        reject(e);
+      };
+      img.src = objectUrl;
+    });
+    if (dataUrl && dataUrl.startsWith('data:image/')) return dataUrl;
+  } catch (err) {
+    console.warn('ObjectURL fallback en cliente:', err);
+  }
+
+  // 3. Intento con FileReader corrigiendo MIME vacío o application/octet-stream de Android Galería
+  try {
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        let rawDataUrl = String(e.target.result || '');
+        if (rawDataUrl.startsWith('data:application/octet-stream;base64,') || rawDataUrl.startsWith('data:;base64,')) {
+          rawDataUrl = rawDataUrl.replace(/^data:[^;]*;base64,/, 'data:image/jpeg;base64,');
+        }
+        const img = new Image();
+        img.onload = () => {
+          try {
+            resolve(drawClientSourceToJpegDataUrl(img, img.naturalWidth || img.width, img.naturalHeight || img.height, maxDim, quality));
+          } catch (err2) {
+            reject(err2);
+          }
+        };
+        img.onerror = reject;
+        img.src = rawDataUrl;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    if (dataUrl && dataUrl.startsWith('data:image/')) return dataUrl;
+  } catch (err) {
+    console.warn('FileReader fallback en cliente:', err);
+  }
+
+  // 4. Fallback automático para fotos HEIC / HEIF de galería (iPhone / Samsung)
+  try {
+    if (typeof window.heic2any !== 'function') {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    if (typeof window.heic2any === 'function') {
+      const converted = await window.heic2any({ blob: file, toType: 'image/jpeg', quality });
+      const jpgBlob = Array.isArray(converted) ? converted[0] : converted;
+      const objectUrl = URL.createObjectURL(jpgBlob);
+      const dataUrl = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const out = drawClientSourceToJpegDataUrl(img, img.naturalWidth || img.width, img.naturalHeight || img.height, maxDim, quality);
+            URL.revokeObjectURL(objectUrl);
+            resolve(out);
+          } catch (e) {
+            URL.revokeObjectURL(objectUrl);
+            reject(e);
+          }
+        };
+        img.onerror = (e) => {
+          URL.revokeObjectURL(objectUrl);
+          reject(e);
+        };
+        img.src = objectUrl;
+      });
+      if (dataUrl && dataUrl.startsWith('data:image/')) return dataUrl;
+    }
+  } catch (err) {
+    console.warn('HEIC fallback en cliente:', err);
+  }
+
+  throw new Error('No se pudo procesar la foto seleccionada');
+}
+
+async function onClientPhotoSelected(event) {
+  const inputEl = event && event.target;
+  const file = inputEl && inputEl.files && inputEl.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const maxDim = 800;
-      let w = img.width;
-      let h = img.height;
-      if (w > h && w > maxDim) {
-        h = Math.round((h * maxDim) / w);
-        w = maxDim;
-      } else if (h >= w && h > maxDim) {
-        w = Math.round((w * maxDim) / h);
-        h = maxDim;
-      }
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      currentClientPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.80);
+  try {
+    const dataUrl = await decodeClientPhotoFile(file, 800, 0.80);
+    currentClientPhotoDataUrl = dataUrl;
 
-      const previewImg = document.getElementById('clientPhotoPreviewImg');
-      const previewBox = document.getElementById('clientPhotoPreviewBox');
-      const buttonsRow = document.getElementById('clientPhotoButtonsRow');
-      if (previewImg) previewImg.src = currentClientPhotoDataUrl;
-      if (previewBox) previewBox.classList.remove('hidden');
-      if (buttonsRow) buttonsRow.classList.add('hidden');
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+    const previewImg = document.getElementById('clientPhotoPreviewImg');
+    const previewBox = document.getElementById('clientPhotoPreviewBox');
+    const buttonsRow = document.getElementById('clientPhotoButtonsRow');
+    if (previewImg) previewImg.src = currentClientPhotoDataUrl;
+    if (previewBox) previewBox.classList.remove('hidden');
+    if (buttonsRow) buttonsRow.classList.add('hidden');
+  } catch (err) {
+    console.error('Error cargando foto de galería en cliente:', err);
+    showToast('Error con la foto', 'No se pudo leer esa imagen de la galería. Intenta con otra foto.', '⚠️');
+  } finally {
+    if (inputEl) {
+      try { inputEl.value = ''; } catch (e) {}
+    }
+  }
 }
 
 function clearClientPhoto() {

@@ -3641,55 +3641,187 @@ function updateDjCamPolaroidPreviewText() {
   }
 }
 
-function onDjCamPhotoSelected(event) {
-  const file = event.target.files && event.target.files[0];
+function drawDjCamSourceToJpegDataUrl(source, width, height, maxDim = 900, quality = 0.82) {
+  let w = width || source.width || source.naturalWidth || 900;
+  let h = height || source.height || source.naturalHeight || 900;
+  if (w > h && w > maxDim) {
+    h = Math.max(1, Math.round((h * maxDim) / w));
+    w = maxDim;
+  } else if (h >= w && h > maxDim) {
+    w = Math.max(1, Math.round((w * maxDim) / h));
+    h = maxDim;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0a0c10';
+  ctx.fillRect(0, 0, w, h);
+  ctx.drawImage(source, 0, 0, w, h);
+  return canvas.toDataURL('image/jpeg', quality);
+}
+
+async function decodeDjCamPhotoFile(file, maxDim = 900, quality = 0.82) {
+  // 1. Decodificador nativo por hardware (soporta fotos de Galería sin MIME, WhatsApp, Google Photos y orientación EXIF)
+  if (typeof window.createImageBitmap === 'function') {
+    try {
+      const bitmap = await window.createImageBitmap(file);
+      const dataUrl = drawDjCamSourceToJpegDataUrl(bitmap, bitmap.width, bitmap.height, maxDim, quality);
+      if (typeof bitmap.close === 'function') bitmap.close();
+      if (dataUrl && dataUrl.startsWith('data:image/')) return dataUrl;
+    } catch (err) {
+      console.warn('createImageBitmap fallback en DJ Cam:', err);
+    }
+  }
+
+  // 2. Decodificador con URL.createObjectURL (soporta fotos pesadas 12MP/48MP/50MP de Galería sin saturar memoria)
+  try {
+    const dataUrl = await new Promise((resolve, reject) => {
+      const blob = (!file.type || file.type === 'application/octet-stream')
+        ? new Blob([file], { type: 'image/jpeg' })
+        : file;
+      const objectUrl = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const out = drawDjCamSourceToJpegDataUrl(img, img.naturalWidth || img.width, img.naturalHeight || img.height, maxDim, quality);
+          URL.revokeObjectURL(objectUrl);
+          resolve(out);
+        } catch (e) {
+          URL.revokeObjectURL(objectUrl);
+          reject(e);
+        }
+      };
+      img.onerror = (e) => {
+        URL.revokeObjectURL(objectUrl);
+        reject(e);
+      };
+      img.src = objectUrl;
+    });
+    if (dataUrl && dataUrl.startsWith('data:image/')) return dataUrl;
+  } catch (err) {
+    console.warn('ObjectURL fallback en DJ Cam:', err);
+  }
+
+  // 3. Decodificador FileReader reparando cabeceras MIME vacías o application/octet-stream de Android Galería
+  try {
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        let rawDataUrl = String(e.target.result || '');
+        if (rawDataUrl.startsWith('data:application/octet-stream;base64,') || rawDataUrl.startsWith('data:;base64,')) {
+          rawDataUrl = rawDataUrl.replace(/^data:[^;]*;base64,/, 'data:image/jpeg;base64,');
+        }
+        const img = new Image();
+        img.onload = () => {
+          try {
+            resolve(drawDjCamSourceToJpegDataUrl(img, img.naturalWidth || img.width, img.naturalHeight || img.height, maxDim, quality));
+          } catch (err2) {
+            reject(err2);
+          }
+        };
+        img.onerror = reject;
+        img.src = rawDataUrl;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    if (dataUrl && dataUrl.startsWith('data:image/')) return dataUrl;
+  } catch (err) {
+    console.warn('FileReader fallback en DJ Cam:', err);
+  }
+
+  // 4. Conversión automática para fotos HEIC / HEIF de galería (iPhone / Samsung Galaxy)
+  try {
+    if (typeof window.heic2any !== 'function') {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    if (typeof window.heic2any === 'function') {
+      const converted = await window.heic2any({ blob: file, toType: 'image/jpeg', quality });
+      const jpgBlob = Array.isArray(converted) ? converted[0] : converted;
+      const objectUrl = URL.createObjectURL(jpgBlob);
+      const dataUrl = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const out = drawDjCamSourceToJpegDataUrl(img, img.naturalWidth || img.width, img.naturalHeight || img.height, maxDim, quality);
+            URL.revokeObjectURL(objectUrl);
+            resolve(out);
+          } catch (e) {
+            URL.revokeObjectURL(objectUrl);
+            reject(e);
+          }
+        };
+        img.onerror = (e) => {
+          URL.revokeObjectURL(objectUrl);
+          reject(e);
+        };
+        img.src = objectUrl;
+      });
+      if (dataUrl && dataUrl.startsWith('data:image/')) return dataUrl;
+    }
+  } catch (err) {
+    console.warn('HEIC fallback en DJ Cam:', err);
+  }
+
+  throw new Error('No se pudo decodificar la imagen de la galería');
+}
+
+async function onDjCamPhotoSelected(event) {
+  const inputEl = event && event.target;
+  const file = inputEl && inputEl.files && inputEl.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const maxDim = 900;
-      let w = img.width;
-      let h = img.height;
-      if (w > h && w > maxDim) {
-        h = Math.round((h * maxDim) / w);
-        w = maxDim;
-      } else if (h >= w && h > maxDim) {
-        w = Math.round((w * maxDim) / h);
-        h = maxDim;
-      }
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      djCamCurrentPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+  const emptyState = document.getElementById('djCamEmptyState');
+  const originalEmptyHtml = emptyState ? emptyState.innerHTML : '';
+  if (emptyState && !emptyState.classList.contains('hidden')) {
+    emptyState.innerHTML = `
+      <div class="text-3xl animate-bounce">⏳</div>
+      <p class="text-xs font-bold text-amber-300">Cargando foto de tu galería...</p>
+      <p class="text-[11px] text-gray-400">Preparando marco Polaroid para el TV</p>
+    `;
+  }
 
-      const previewImg = document.getElementById('djCamPreviewImg');
-      const emptyState = document.getElementById('djCamEmptyState');
-      const polaroidZone = document.getElementById('djCamPolaroidZone');
-      const polaroidCard = document.getElementById('djCamDraggablePolaroid');
+  try {
+    djCamCurrentPhotoDataUrl = await decodeDjCamPhotoFile(file, 900, 0.82);
 
-      if (previewImg) previewImg.src = djCamCurrentPhotoDataUrl;
-      if (emptyState) emptyState.classList.add('hidden');
-      if (polaroidZone) {
-        polaroidZone.classList.remove('hidden');
-        polaroidZone.classList.add('flex');
-      }
-      if (polaroidCard) {
-        polaroidCard.style.transform = 'translate3d(0,0,0) scale(1)';
-        polaroidCard.style.opacity = '1';
-      }
-      updateDjCamPolaroidPreviewText();
-      playArmCardSound();
-      if (navigator.vibrate) {
-        try { navigator.vibrate([25, 35, 25]); } catch (err) {}
-      }
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
+    const previewImg = document.getElementById('djCamPreviewImg');
+    const polaroidZone = document.getElementById('djCamPolaroidZone');
+    const polaroidCard = document.getElementById('djCamDraggablePolaroid');
+
+    if (previewImg) previewImg.src = djCamCurrentPhotoDataUrl;
+    if (emptyState) {
+      emptyState.innerHTML = originalEmptyHtml;
+      emptyState.classList.add('hidden');
+    }
+    if (polaroidZone) {
+      polaroidZone.classList.remove('hidden');
+      polaroidZone.classList.add('flex');
+    }
+    if (polaroidCard) {
+      polaroidCard.style.transform = 'translate3d(0,0,0) scale(1)';
+      polaroidCard.style.opacity = '1';
+    }
+    updateDjCamPolaroidPreviewText();
+    playArmCardSound();
+    if (navigator.vibrate) {
+      try { navigator.vibrate([25, 35, 25]); } catch (err) {}
+    }
+  } catch (err) {
+    console.error('Error cargando foto en Santa Chela Cam:', err);
+    if (emptyState && originalEmptyHtml) emptyState.innerHTML = originalEmptyHtml;
+    showAdminToast('No se pudo cargar esa foto de la galería. Intenta con otra imagen.', '⚠️');
+  } finally {
+    if (inputEl) {
+      try { inputEl.value = ''; } catch (e) {}
+    }
+  }
 }
 
 function launchDjCamPhotoToTv() {
