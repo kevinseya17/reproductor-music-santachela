@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth bg-[#05060d]" style="background-color: #05060d; color: #f8fafc;">
+<html lang="es" class="scroll-smooth bg-[#04050b]" style="background-color: #04050b; color: #f8fafc;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -12,7 +12,7 @@
   <meta property="og:title" content="MOCD MUSIC | Control • Organiza • Disfruta">
   <meta property="og:description" content="Transforma las pantallas de tu bar en un ecosistema interactivo: pedidos musicales por QR, mezcla inteligente sin silencios y proyección Polaroid 3D en vivo.">
   <meta property="og:image" content="/icons/mocd-banner.png">
-  <meta name="theme-color" content="#05060d">
+  <meta name="theme-color" content="#04050b">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -32,17 +32,17 @@
   <link rel="icon" type="image/png" href="/icons/mocd-app-icon.png">
   <link rel="apple-touch-icon" href="/icons/mocd-app-icon.png">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
-      --bg-deep: #05060d;
+      --bg-deep: #04050b;
       --cyan-electric: #00d4ff;
       --violet-neon: #7c3aed;
       --indigo-glow: #6366f1;
     }
     html, body {
-      background-color: #05060d !important;
+      background-color: #04050b !important;
       color: #f8fafc !important;
       font-family: 'Plus Jakarta Sans', sans-serif;
       overflow-x: hidden;
@@ -51,55 +51,127 @@
     h1, h2, h3, .font-display {
       font-family: 'Outfit', sans-serif;
     }
+    .font-mocd {
+      font-family: 'Orbitron', 'Outfit', sans-serif;
+    }
     .hero-glow {
-      background-color: #05060d !important;
+      background-color: #04050b !important;
       background-image:
-        radial-gradient(circle at 16% 16%, rgba(0, 212, 255, 0.16) 0%, transparent 42%),
-        radial-gradient(circle at 84% 20%, rgba(124, 58, 237, 0.22) 0%, transparent 46%),
-        radial-gradient(circle at 50% 82%, rgba(99, 102, 241, 0.14) 0%, transparent 50%),
-        linear-gradient(to right, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.022) 1px, transparent 1px) !important;
+        radial-gradient(circle at 15% 15%, rgba(0, 212, 255, 0.17) 0%, transparent 40%),
+        radial-gradient(circle at 85% 18%, rgba(124, 58, 237, 0.22) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(99, 102, 241, 0.14) 0%, transparent 50%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px) !important;
       background-size: 100% 100%, 100% 100%, 100% 100%, 44px 44px, 44px 44px;
     }
     .glass-panel {
-      background: linear-gradient(180deg, #0e1222 0%, #080a14 100%) !important;
-      border: 1px solid rgba(129, 140, 248, 0.16);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.72);
+      background: linear-gradient(180deg, #0d1122 0%, #070912 100%) !important;
+      border: 1px solid rgba(129, 140, 248, 0.18);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+    .glass-panel:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 212, 255, 0.45);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 212, 255, 0.12);
     }
     .glass-panel-mocd {
-      background: linear-gradient(180deg, #10152b 0%, #080b16 100%) !important;
-      border: 1px solid rgba(0, 212, 255, 0.40);
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.88), 0 0 35px rgba(99, 102, 241, 0.18);
+      background: linear-gradient(180deg, #10152b 0%, #070a15 100%) !important;
+      border: 1px solid rgba(0, 212, 255, 0.42);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.88), 0 0 40px rgba(99, 102, 241, 0.20);
     }
     .cta-dark-card {
-      background: linear-gradient(135deg, #0d152e 0%, #090c1a 50%, #170f2e 100%) !important;
+      background: linear-gradient(135deg, #0c142c 0%, #080b18 50%, #160e2c 100%) !important;
       border: 1px solid rgba(0, 212, 255, 0.45);
-      box-shadow: 0 25px 75px rgba(0, 0, 0, 0.90), 0 0 45px rgba(0, 212, 255, 0.14);
+      box-shadow: 0 25px 75px rgba(0, 0, 0, 0.90), 0 0 45px rgba(0, 212, 255, 0.15);
     }
     .text-gradient-mocd {
-      background: linear-gradient(135deg, #ffffff 0%, #38bdf8 48%, #a855f7 100%);
+      background: linear-gradient(135deg, #ffffff 0%, #38bdf8 45%, #a855f7 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .text-gradient-silver {
-      background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 65%, #94a3b8 100%);
+    .text-metallic-chrome {
+      background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 45%, #94a3b8 85%, #f8fafc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .btn-neon-mocd {
       background: linear-gradient(135deg, #00c6ff 0%, #4f46e5 55%, #7c3aed 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 4s ease infinite;
       color: #ffffff;
       font-weight: 800;
       box-shadow: 0 10px 35px -5px rgba(79, 70, 229, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.35);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .btn-neon-mocd:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 16px 45px -5px rgba(0, 198, 255, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 16px 45px -5px rgba(0, 198, 255, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
     .btn-neon-mocd:active {
       transform: translateY(0) scale(0.98);
     }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* Animaciones 3D y Holográficas para el Logo MOCD MUSIC */
+    @keyframes logoFloat3D {
+      0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+      50% { transform: translateY(-7px) rotateX(2deg) rotateY(-2deg); }
+    }
+    .animate-logo-float {
+      animation: logoFloat3D 5s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+
+    @keyframes chromeSweep {
+      0% { transform: translateX(-140%) skewX(-25deg); }
+      45%, 100% { transform: translateX(220%) skewX(-25deg); }
+    }
+    .chrome-shimmer::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 45%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), rgba(0, 212, 255, 0.25), transparent);
+      animation: chromeSweep 4.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+      pointer-events: none;
+    }
+
+    @keyframes playTrianglePulse {
+      0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.85)) drop-shadow(0 0 18px rgba(124, 58, 237, 0.6));
+        transform: scale(1);
+      }
+      50% {
+        filter: drop-shadow(0 0 16px rgba(0, 212, 255, 1)) drop-shadow(0 0 32px rgba(168, 85, 247, 0.95));
+        transform: scale(1.08);
+      }
+    }
+    .play-glow-pulse {
+      animation: playTrianglePulse 2.4s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes borderGlowSpin {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+    .neon-stage-border {
+      position: relative;
+      background: linear-gradient(180deg, #090c1a 0%, #050711 100%);
+      border: 1px solid rgba(0, 212, 255, 0.45);
+      box-shadow:
+        0 0 35px rgba(0, 212, 255, 0.18),
+        0 0 65px rgba(124, 58, 237, 0.16),
+        inset 0 0 30px rgba(0, 212, 255, 0.08);
+    }
+
     @keyframes eqPulse {
       0%, 100% { height: 6px; }
       50% { height: 20px; }
@@ -118,7 +190,7 @@
       animation: polaroidFlyIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .hero-title-fluid {
-      font-size: clamp(1.85rem, 4.6vw, 3.75rem);
+      font-size: clamp(1.85rem, 4.5vw, 3.7rem);
       line-height: 1.07;
     }
     .logo-blend {
@@ -126,14 +198,42 @@
     }
   </style>
 </head>
-<body class="bg-[#05060d] text-white hero-glow selection:bg-cyan-400 selection:text-black" style="background-color: #05060d; color: #f8fafc;">
+<body class="bg-[#04050b] text-white hero-glow selection:bg-cyan-400 selection:text-black" style="background-color: #04050b; color: #f8fafc;">
 
-  <!-- Barra de Navegación Superior con Logo Oficial MOCD MUSIC -->
-  <header class="sticky top-0 z-40 border-b border-white/10 bg-[#05060d]/90 backdrop-blur-xl">
+  <!-- Barra de Navegación Superior con Logo Vectorial Animado MOCD MUSIC -->
+  <header class="sticky top-0 z-40 border-b border-white/10 bg-[#04050b]/90 backdrop-blur-xl">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
-      <!-- Logo Oficial Horizontal MOCD MUSIC -->
-      <a href="#" class="flex items-center gap-2.5 group shrink-0">
-        <img src="/icons/mocd-nav-logo.png" alt="MOCD MUSIC" class="h-10 sm:h-12 w-auto object-contain logo-blend">
+      <!-- Logo Vectorial Animado MOCD MUSIC en Header -->
+      <a href="#" class="flex items-center gap-3 group shrink-0">
+        <div class="relative w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#080b18] border border-cyan-400/40 shadow-[0_0_25px_rgba(0,212,255,0.3)] flex items-center justify-center overflow-hidden group-hover:border-cyan-300 transition">
+          <!-- SVG Vectorial 3D de la "M" + Triángulo Play Neón con Pulso en Vivo -->
+          <svg class="w-8 h-8 sm:w-9 sm:h-9" viewBox="0 0 100 84" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="navMetalM" x1="0" y1="0" x2="100" y2="84" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="45%" stop-color="#cbd5e1"/>
+                <stop offset="75%" stop-color="#64748b"/>
+                <stop offset="100%" stop-color="#f8fafc"/>
+              </linearGradient>
+              <linearGradient id="navPlayNeon" x1="28" y1="42" x2="52" y2="70" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#a855f7"/>
+                <stop offset="50%" stop-color="#4f46e5"/>
+                <stop offset="100%" stop-color="#00d4ff"/>
+              </linearGradient>
+            </defs>
+            <!-- Trazo Metálico 3D de la M -->
+            <path d="M14 72V22C14 14 22 11 28 16L50 35L72 16C78 11 86 14 86 22V72" stroke="url(#navMetalM)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Triángulo Play Neón Pulsante -->
+            <polygon class="play-glow-pulse" points="31,43 31,70 52,56.5" fill="url(#navPlayNeon)"/>
+          </svg>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <div class="h-7 w-[1px] bg-gradient-to-b from-transparent via-cyan-400/60 to-transparent hidden xs:block"></div>
+          <div>
+            <span class="font-mocd font-black text-lg sm:text-xl tracking-[0.14em] text-metallic-chrome block leading-none">MOCD</span>
+            <span class="font-display font-bold text-[9px] sm:text-[10px] tracking-[0.48em] text-indigo-400 block mt-1 leading-none">MUSIC</span>
+          </div>
+        </div>
       </a>
 
       <!-- Navegación -->
@@ -173,20 +273,75 @@
   </header>
 
   <!-- HERO PRINCIPAL -->
-  <section class="relative pt-6 pb-14 sm:pt-12 sm:pb-20 lg:pt-14 lg:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+  <section class="relative pt-6 pb-14 sm:pt-10 sm:pb-20 lg:pt-12 lg:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 items-center">
 
-      <!-- Columna Izquierda: Identidad Oficial + Propuesta de Valor Ejecutiva -->
+      <!-- Columna Izquierda: ESCENARIO 3D ANIMADO DEL LOGO + PROPUESTA DE VALOR -->
       <div class="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left">
 
-        <!-- Banner Oficial 3D MOCD MUSIC con Onda Sonora -->
-        <div class="inline-block w-full max-w-md sm:max-w-lg mx-auto lg:mx-0 rounded-2xl overflow-hidden border border-cyan-500/30 shadow-[0_15px_50px_rgba(0,212,255,0.18)] bg-[#070914]">
-          <img src="/icons/mocd-banner.png" alt="MOCD MUSIC — Control • Organiza • Disfruta" class="w-full h-auto object-cover">
-          <div class="py-1.5 px-3 bg-gradient-to-r from-[#070914] via-[#10162f] to-[#070914] border-t border-white/10 flex items-center justify-center gap-3 text-[10px] sm:text-[11px] font-bold tracking-[0.28em] text-cyan-300 uppercase">
+        <!-- ESCENARIO HOLOGRÁFICO EN VIVO DEL LOGO MOCD MUSIC (Con Ondas Sonoras Animadas a 60 FPS) -->
+        <div id="heroLogoStage" class="relative w-full max-w-xl mx-auto lg:mx-0 rounded-3xl neon-stage-border chrome-shimmer overflow-hidden p-5 sm:p-7 select-none">
+          <!-- Luz ambiental dinámica detrás del logo -->
+          <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-cyan-500/20 blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-purple-600/25 blur-3xl pointer-events-none"></div>
+
+          <!-- Lienzo Canvas de Ondas Sonoras Neón en Tiempo Real (Idénticas al Logo Oficial pero en Movimiento Vivo) -->
+          <canvas id="mocdWaveCanvas" class="absolute inset-x-0 bottom-0 w-full h-24 sm:h-28 pointer-events-none opacity-95"></canvas>
+
+          <!-- Composición 3D Flotante del Logo MOCD MUSIC -->
+          <div id="heroLogoInner" class="relative z-10 flex items-center justify-center lg:justify-start gap-4 sm:gap-6 animate-logo-float pb-4 sm:pb-5">
+            <!-- Símbolo "M" Metálico 3D + Triángulo Play con Pulso de Energía -->
+            <div class="relative shrink-0">
+              <div class="absolute inset-0 rounded-2xl bg-gradient-to-tr from-cyan-400/30 to-purple-500/30 blur-xl"></div>
+              <svg class="relative w-20 h-16 sm:w-28 sm:h-24 drop-shadow-[0_12px_25px_rgba(0,0,0,0.85)]" viewBox="0 0 120 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="heroMetalLeft" x1="10" y1="10" x2="40" y2="90" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#ffffff"/>
+                    <stop offset="35%" stop-color="#cbd5e1"/>
+                    <stop offset="70%" stop-color="#475569"/>
+                    <stop offset="100%" stop-color="#f1f5f9"/>
+                  </linearGradient>
+                  <linearGradient id="heroMetalRibbon" x1="15" y1="12" x2="105" y2="85" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#ffffff"/>
+                    <stop offset="40%" stop-color="#e2e8f0"/>
+                    <stop offset="75%" stop-color="#64748b"/>
+                    <stop offset="100%" stop-color="#94a3b8"/>
+                  </linearGradient>
+                  <linearGradient id="heroPlayGradient" x1="36" y1="46" x2="66" y2="82" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#a855f7"/>
+                    <stop offset="50%" stop-color="#4f46e5"/>
+                    <stop offset="100%" stop-color="#00e5ff"/>
+                  </linearGradient>
+                </defs>
+                <!-- Pilar Izquierdo 3D -->
+                <path d="M18 82V22C18 14 27 10 34 16L60 39L86 16C93 10 102 14 102 22V82" stroke="url(#heroMetalRibbon)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+                <!-- Brillo de bisel superior sobre la M -->
+                <path d="M18 80V22C18 14 27 10 34 16L60 39L86 16C93 10 102 14 102 22V80" stroke="url(#heroMetalLeft)" stroke-width="3" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/>
+                <!-- Triángulo Play Neón con Pulso Luminoso -->
+                <polygon class="play-glow-pulse" points="37,48 37,80 63,64" fill="url(#heroPlayGradient)"/>
+              </svg>
+            </div>
+
+            <!-- Línea Divisoria Luminosa -->
+            <div class="h-14 sm:h-20 w-[1.5px] bg-gradient-to-b from-transparent via-slate-300/80 to-transparent shrink-0"></div>
+
+            <!-- Tipografía Metálica 3D MOCD MUSIC -->
+            <div class="text-left">
+              <div class="font-mocd font-black text-3xl sm:text-5xl tracking-[0.14em] text-metallic-chrome drop-shadow-[0_4px_15px_rgba(255,255,255,0.18)] leading-none">
+                MOCD
+              </div>
+              <div class="font-display font-bold text-xs sm:text-base tracking-[0.55em] text-indigo-400 mt-2 pl-1 uppercase drop-shadow-[0_0_12px_rgba(129,140,248,0.65)]">
+                MUSIC
+              </div>
+            </div>
+          </div>
+
+          <!-- Lema Oficial con Indicador de Onda Activa -->
+          <div class="relative z-10 pt-2 border-t border-white/10 flex items-center justify-between gap-2 text-[9px] sm:text-[11px] font-bold tracking-[0.25em] sm:tracking-[0.35em] text-cyan-300/90 uppercase">
             <span>CONTROL</span>
-            <span class="text-purple-400">•</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
             <span>ORGANIZA</span>
-            <span class="text-purple-400">•</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping"></span>
             <span>DISFRUTA</span>
           </div>
         </div>
@@ -357,7 +512,7 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Módulo 1 -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 hover:border-cyan-500/45 transition group">
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 group">
         <div class="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
@@ -371,7 +526,7 @@
       </div>
 
       <!-- Módulo 2 -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 hover:border-purple-500/45 transition group">
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 group">
         <div class="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-105 transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
@@ -384,7 +539,7 @@
       </div>
 
       <!-- Módulo 3 -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 hover:border-indigo-500/45 transition group">
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 group">
         <div class="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-105 transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
@@ -397,9 +552,9 @@
       </div>
 
       <!-- Módulo 4 (Con el App Icon Oficial de MOCD MUSIC) -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 hover:border-cyan-500/45 transition group">
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 group">
         <div class="flex items-center gap-3">
-          <img src="/icons/mocd-app-icon.png" alt="MOCD App Icon" class="w-12 h-12 rounded-2xl object-cover shadow-lg border border-cyan-400/30 group-hover:scale-105 transition">
+          <img src="/icons/mocd-app-icon.png" alt="MOCD App Icon" class="w-12 h-12 rounded-2xl object-cover shadow-[0_0_20px_rgba(0,212,255,0.3)] border border-cyan-400/30 group-hover:scale-105 transition">
           <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 text-[10px] font-bold uppercase tracking-wider">iOS & Android</span>
         </div>
         <h3 class="font-display font-bold text-xl text-white">Consola Móvil Instalable (PWA)</h3>
@@ -409,7 +564,7 @@
       </div>
 
       <!-- Módulo 5 -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 hover:border-emerald-500/45 transition group">
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 group">
         <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
@@ -422,7 +577,7 @@
       </div>
 
       <!-- Módulo 6 -->
-      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 hover:border-purple-500/45 transition group">
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3.5 group">
         <div class="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-105 transition">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -600,8 +755,8 @@
 
   <!-- CTA FINAL -->
   <section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-    <div class="rounded-3xl cta-dark-card p-7 sm:p-12 text-center space-y-5" style="background: linear-gradient(135deg, #0d152e 0%, #090c1a 50%, #170f2e 100%); border: 1px solid rgba(0, 212, 255, 0.45);">
-      <img src="/icons/mocd-app-icon.png" alt="MOCD MUSIC" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl mx-auto object-cover shadow-[0_0_30px_rgba(0,212,255,0.35)]">
+    <div class="rounded-3xl cta-dark-card chrome-shimmer relative overflow-hidden p-7 sm:p-12 text-center space-y-5" style="background: linear-gradient(135deg, #0d152e 0%, #090c1a 50%, #170f2e 100%); border: 1px solid rgba(0, 212, 255, 0.45);">
+      <img src="/icons/mocd-app-icon.png" alt="MOCD MUSIC" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl mx-auto object-cover shadow-[0_0_35px_rgba(0,212,255,0.45)] animate-logo-float">
       <h2 class="font-display font-black text-2xl sm:text-4xl text-white">
         Lleva la experiencia de tu establecimiento al siguiente nivel
       </h2>
@@ -650,6 +805,94 @@
 
   <script>
     // =====================================================
+    // MOTOR DE ONDAS SONORAS NEÓN 60FPS DEL LOGO MOCD MUSIC
+    // =====================================================
+    let waveEnergyBoost = 1;
+    (function initMocdSoundwaveCanvas() {
+      const canvas = document.getElementById('mocdWaveCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let width = 0;
+      let height = 0;
+      let phase = 0;
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = rect.width || 500;
+        height = rect.height || 100;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+
+      const waves = [
+        { amp: 14, freq: 0.014, speed: 0.042, color1: 'rgba(0, 212, 255, 0.90)', color2: 'rgba(168, 85, 247, 0.85)', lineWidth: 2.4 },
+        { amp: 19, freq: 0.011, speed: -0.032, color1: 'rgba(99, 102, 241, 0.70)', color2: 'rgba(0, 212, 255, 0.65)', lineWidth: 1.7 },
+        { amp: 10, freq: 0.020, speed: 0.055, color1: 'rgba(168, 85, 247, 0.55)', color2: 'rgba(56, 189, 248, 0.65)', lineWidth: 1.3 },
+        { amp: 22, freq: 0.008, speed: 0.025, color1: 'rgba(0, 212, 255, 0.30)', color2: 'rgba(124, 58, 237, 0.35)', lineWidth: 1.0 }
+      ];
+
+      function renderWaves() {
+        ctx.clearRect(0, 0, width, height);
+        phase += 1;
+        if (waveEnergyBoost > 1) {
+          waveEnergyBoost = Math.max(1, waveEnergyBoost * 0.96);
+        }
+
+        const midY = height * 0.54;
+        for (let i = 0; i < waves.length; i++) {
+          const w = waves[i];
+          const grad = ctx.createLinearGradient(0, 0, width, 0);
+          grad.addColorStop(0, w.color1);
+          grad.addColorStop(0.5, w.color2);
+          grad.addColorStop(1, w.color1);
+
+          ctx.beginPath();
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = w.lineWidth;
+          ctx.shadowColor = i === 0 ? '#00d4ff' : '#8b5cf6';
+          ctx.shadowBlur = i === 0 ? 12 : 6;
+
+          for (let x = 0; x <= width; x += 4) {
+            const envelope = Math.sin((x / width) * Math.PI);
+            const y =
+              midY +
+              Math.sin(x * w.freq + phase * w.speed) * (w.amp * waveEnergyBoost) * envelope +
+              Math.cos(x * (w.freq * 0.6) - phase * (w.speed * 0.8)) * (w.amp * 0.35 * waveEnergyBoost) * envelope;
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        }
+        requestAnimationFrame(renderWaves);
+      }
+      requestAnimationFrame(renderWaves);
+
+      // Efecto Parallax 3D suave al mover el cursor o tocar el escenario del logo
+      const stage = document.getElementById('heroLogoStage');
+      const inner = document.getElementById('heroLogoInner');
+      if (stage && inner) {
+        stage.addEventListener('mousemove', (e) => {
+          const rect = stage.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width - 0.5;
+          const y = (e.clientY - rect.top) / rect.height - 0.5;
+          inner.style.transform = `perspective(700px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) scale(1.02)`;
+          waveEnergyBoost = 1.45;
+        });
+        stage.addEventListener('mouseleave', () => {
+          inner.style.transform = '';
+        });
+        stage.addEventListener('touchstart', () => {
+          waveEnergyBoost = 1.6;
+        }, { passive: true });
+      }
+    })();
+
+    // =====================================================
     // LÓGICA DEL SIMULADOR INTERACTIVO EN VIVO (DEMO TV)
     // =====================================================
     const DEMO_PHOTOS = [
@@ -693,6 +936,7 @@
     let polaroidTimer = null;
 
     function playDemoBeep(freq = 620) {
+      waveEnergyBoost = 1.75;
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
