@@ -37,6 +37,26 @@ app.get('/player.html', (req, res, next) => {
   next();
 });
 
+// Blindaje global para motores de búsqueda: BLOQUEAR el programa de los bares en Google; SOLO permitir la página web comercial (/ventas, /mocd, /mocdmusic, /promo)
+app.use((req, res, next) => {
+  const p = req.path.toLowerCase();
+  const host = String(req.hostname || req.headers.host || '').toLowerCase();
+  const isCommercialWebPage =
+    p === '/ventas' ||
+    p === '/ventas.html' ||
+    p === '/mocd' ||
+    p === '/mocdmusic' ||
+    p === '/promo' ||
+    p === '/robots.txt' ||
+    p === '/sitemap.xml' ||
+    (p === '/' && host.includes('mocd') && !req.query.mesa);
+
+  if (!isCommercialWebPage) {
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet');
+  }
+  next();
+});
+
 // Si entran por un dominio propio de MOCD MUSIC (ej: mocdmusic.com) en la raíz /, mostrar la Página Comercial de Ventas
 app.get('/', (req, res, next) => {
   const host = String(req.hostname || req.headers.host || '').toLowerCase();
@@ -46,7 +66,7 @@ app.get('/', (req, res, next) => {
   next();
 });
 
-// SEO Oficial para Google Chrome: permitir indexar únicamente la página comercial de MOCD MUSIC y ocultar consolas privadas
+// SEO Oficial para Google Chrome: permitir indexar únicamente la página comercial de MOCD MUSIC y ocultar el programa de los bares
 app.get('/robots.txt', (req, res) => {
   const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
   const host = req.headers.host || 'reproductor-music-santachela.onrender.com';
@@ -54,9 +74,12 @@ app.get('/robots.txt', (req, res) => {
   res.type('text/plain').send(
 `User-agent: *
 Allow: /ventas
+Allow: /ventas.html
 Allow: /mocd
 Allow: /mocdmusic
 Allow: /promo
+Disallow: /index.html
+Disallow: /*?mesa=*
 Disallow: /admin
 Disallow: /admin.html
 Disallow: /dj
@@ -68,8 +91,11 @@ Disallow: /links
 Disallow: /links.html
 Disallow: /bares
 Disallow: /central
+Disallow: /ambar
 Disallow: /ambar/
+Disallow: /bar3
 Disallow: /bar3/
+Disallow: /bar4
 Disallow: /bar4/
 Disallow: /api/
 
