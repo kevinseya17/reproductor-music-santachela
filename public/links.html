@@ -57,6 +57,30 @@
       </div>
     </header>
 
+    <!-- Banner de Acceso Rápido a la Página Comercial de Ventas (MOCD MUSIC) -->
+    <section class="bar-card rounded-3xl p-4 sm:p-5 border border-pink-500/40 shadow-[0_10px_40px_rgba(236,72,153,0.12)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5 min-w-0">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-500 via-purple-500 to-amber-500 text-white flex items-center justify-center text-xl font-black shrink-0 shadow-lg">
+          🚀
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="px-2 py-0.5 rounded-full bg-pink-500 text-white text-[10px] font-black uppercase tracking-wider">PÁGINA COMERCIAL DE VENTAS</span>
+            <h2 class="text-sm sm:text-base font-black text-white">MOCD MUSIC — Landing Page para Clientes y Dueños de Bares</h2>
+          </div>
+          <p id="salesPageUrlDisplay" class="text-xs font-mono text-amber-300 truncate mt-0.5">/ventas</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+        <a href="/ventas" target="_blank" class="flex-1 sm:flex-initial text-center px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black text-xs transition shadow-md">
+          Abrir Página ↗
+        </a>
+        <button onclick="copyLink(ORIGIN + '/ventas', 'Página Comercial MOCD MUSIC')" class="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-black border border-white/15 text-gray-200 font-bold text-xs transition cursor-pointer">
+          📋 Copiar Link
+        </button>
+      </div>
+    </section>
+
     <!-- Grid de los 4 Programas Independientes -->
     <div id="programsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
       <!-- Se renderiza dinámicamente con los nombres en vivo de cada programa -->
@@ -72,6 +96,8 @@
   <script>
     const ORIGIN = window.location.origin;
     document.getElementById('footerSelfUrl').textContent = ORIGIN + '/links';
+    const salesUrlEl = document.getElementById('salesPageUrlDisplay');
+    if (salesUrlEl) salesUrlEl.textContent = ORIGIN + '/ventas';
 
     const PROGRAMS_DEF = [
       {

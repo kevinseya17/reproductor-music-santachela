@@ -52,6 +52,10 @@ app.get(['/links', '/bares', '/central'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'links.html'));
 });
 
+app.get(['/ventas', '/promo', '/mocd', '/mocdmusic'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'ventas.html'));
+});
+
 function createBarProgram(instanceId = 'default', routePrefix = '') {
   const db = dbFactory.getInstance(instanceId);
   const router = express.Router();

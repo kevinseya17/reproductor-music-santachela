@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOCD MUSIC | El Sistema Musical & Visual Interactivo #1 para Bares y Gastrobares</title>
+  <meta name="description" content="Transforma los televisores de tu bar en una experiencia interactiva con pedidos por QR, DJ Inteligente sin silencios, filtro anti-bromas y fotos Polaroid 3D en vivo.">
+  <meta name="theme-color" content="#07080d">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #06070b;
+      --gold: #f59e0b;
+      --neon-pink: #ec4899;
+      --neon-purple: #8b5cf6;
+    }
+    body {
+      background-color: var(--bg-deep);
+      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, .font-display {
+      font-family: 'Outfit', sans-serif;
+    }
+    .hero-glow {
+      background:
+        radial-gradient(circle at 18% 18%, rgba(245, 158, 11, 0.20) 0%, transparent 42%),
+        radial-gradient(circle at 82% 22%, rgba(139, 92, 246, 0.22) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(236, 72, 153, 0.14) 0%, transparent 50%);
+    }
+    .glass-panel {
+      background: linear-gradient(180deg, rgba(22, 26, 38, 0.78) 0%, rgba(12, 14, 22, 0.92) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+    }
+    .glass-panel-gold {
+      background: linear-gradient(180deg, rgba(35, 28, 15, 0.75) 0%, rgba(14, 15, 23, 0.95) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .text-gradient-gold {
+      background: linear-gradient(135deg, #fde68a 0%, #f59e0b 50%, #fb7185 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .text-gradient-cyber {
+      background: linear-gradient(135deg, #38bdf8 0%, #a855f7 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .btn-neon-gold {
+      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      color: #050505;
+      font-weight: 800;
+      box-shadow: 0 10px 35px -5px rgba(245, 158, 11, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-neon-gold:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 16px 45px -5px rgba(245, 158, 11, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .btn-neon-gold:active {
+      transform: translateY(0) scale(0.98);
+    }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px) rotate(-2deg); }
+      50% { transform: translateY(-10px) rotate(1.5deg); }
+    }
+    .animate-float {
+      animation: floatSlow 5s ease-in-out infinite;
+    }
+    @keyframes eqPulse {
+      0%, 100% { height: 6px; }
+      50% { height: 22px; }
+    }
+    .eq-bar-1 { animation: eqPulse 0.7s ease-in-out infinite; }
+    .eq-bar-2 { animation: eqPulse 0.5s ease-in-out infinite 0.15s; }
+    .eq-bar-3 { animation: eqPulse 0.85s ease-in-out infinite 0.3s; }
+    .eq-bar-4 { animation: eqPulse 0.6s ease-in-out infinite 0.1s; }
+
+    @keyframes polaroidFlyIn {
+      0% { opacity: 0; transform: translateY(120px) scale(0.5) rotate(12deg); }
+      70% { opacity: 1; transform: translateY(-8px) scale(1.04) rotate(-3deg); }
+      100% { opacity: 1; transform: translateY(0) scale(1) rotate(-2deg); }
+    }
+    .polaroid-enter {
+      animation: polaroidFlyIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .grid-bg {
+      background-size: 40px 40px;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="hero-glow grid-bg selection:bg-amber-500 selection:text-black">
+
+  <!-- Barra de Navegación Flotante -->
+  <header class="sticky top-0 z-40 border-b border-white/10 bg-[#06070b]/85 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+      <!-- Logo MOCD MUSIC -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-pink-600 p-0.5 shadow-[0_0_25px_rgba(245,158,11,0.45)]">
+          <div class="w-full h-full bg-[#090b12] rounded-[14px] flex items-center justify-center">
+            <div class="flex items-end gap-0.5 h-5">
+              <span class="w-1 bg-amber-400 rounded-full eq-bar-1"></span>
+              <span class="w-1 bg-orange-400 rounded-full eq-bar-2"></span>
+              <span class="w-1 bg-pink-500 rounded-full eq-bar-3"></span>
+              <span class="w-1 bg-purple-400 rounded-full eq-bar-4"></span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-display font-black text-lg sm:text-2xl tracking-tight text-white">MOCD</span>
+            <span class="font-display font-black text-lg sm:text-2xl tracking-tight text-gradient-gold">MUSIC</span>
+          </div>
+          <p class="text-[10px] sm:text-[11px] text-gray-400 font-semibold -mt-1 tracking-wide uppercase">Smart Bar Entertainment OS</p>
+        </div>
+      </a>
+
+      <!-- Enlaces rápidos -->
+      <nav class="hidden md:flex items-center gap-6 text-xs lg:text-sm font-semibold text-gray-300">
+        <a href="#simulador" class="hover:text-amber-400 transition">Simulador en Vivo</a>
+        <a href="#funciones" class="hover:text-amber-400 transition">¿Qué incluye?</a>
+        <a href="#comparativa" class="hover:text-amber-400 transition">Antes vs. Ahora</a>
+        <a href="#planes" class="hover:text-amber-400 transition">Planes para Bares</a>
+      </nav>
+
+      <!-- CTA Principal -->
+      <div class="flex items-center gap-2">
+        <button onclick="openSalesWhatsapp('Hola, vi la página de MOCD MUSIC y quiero una demostración para mi bar 🍻')" class="btn-neon-gold px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 cursor-pointer">
+          <span>💬</span>
+          <span>Pedir Demo Gratis</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO PRINCIPAL -->
+  <section class="relative pt-8 pb-16 sm:pt-14 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+
+      <!-- Columna Izquierda: Copy de Alto Impacto -->
+      <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-extrabold uppercase tracking-wider shadow-[0_0_25px_rgba(245,158,11,0.15)]">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+          <span>La Nueva Era para Bares, Gastrobares y Discotecas</span>
+        </div>
+
+        <h1 class="font-display font-black text-4xl sm:text-6xl lg:text-[64px] leading-[1.05] tracking-tight text-white">
+          Convierte las pantallas de tu bar en una <span class="text-gradient-gold">máquina de ambiente y ventas.</span>
+        </h1>
+
+        <p class="text-sm sm:text-lg text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
+          Con <strong class="text-white">MOCD MUSIC</strong> tus clientes piden canciones desde su mesa con código QR, envían saludos de cumpleaños y lanzan <strong class="text-amber-300">fotos Polaroid en 3D directo al televisor</strong> mientras un DJ con Inteligencia Artificial mezcla sin silencios y bloquea videos basura automáticamente.
+        </p>
+
+        <!-- Botones de Acción -->
+        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
+          <button onclick="openSalesWhatsapp('¡Hola! Quiero probar MOCD MUSIC en mi bar y conocer los precios 🚀')" class="w-full sm:w-auto btn-neon-gold px-7 py-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2.5 cursor-pointer">
+            <span>🚀</span>
+            <span>Quiero MOCD MUSIC en mi Bar</span>
+          </button>
+          <a href="#simulador" class="w-full sm:w-auto px-6 py-4 rounded-2xl glass-panel hover:border-amber-400/50 text-white font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition">
+            <span>🎮</span>
+            <span>Probar Simulador Interactivo</span>
+          </a>
+        </div>
+
+        <!-- Métricas de confianza -->
+        <div class="grid grid-cols-3 gap-3 pt-4 border-t border-white/10 max-w-xl mx-auto lg:mx-0">
+          <div class="text-center lg:text-left">
+            <p class="font-display font-black text-xl sm:text-3xl text-amber-400">100%</p>
+            <p class="text-[11px] sm:text-xs text-gray-400 font-semibold">Música Real (Filtro Anti-Bromas)</p>
+          </div>
+          <div class="text-center lg:text-left">
+            <p class="font-display font-black text-xl sm:text-3xl text-pink-400">+40%</p>
+            <p class="text-[11px] sm:text-xs text-gray-400 font-semibold">Más permanencia y consumo por mesa</p>
+          </div>
+          <div class="text-center lg:text-left">
+            <p class="font-display font-black text-xl sm:text-3xl text-purple-400">0 seg</p>
+            <p class="text-[11px] sm:text-xs text-gray-400 font-semibold">Silencios entre canciones (Crossfade)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: SIMULADOR INTERACTIVO EN VIVO DEL TV + CELULAR -->
+      <div id="simulador" class="lg:col-span-5 space-y-4">
+        <div class="glass-panel-gold rounded-3xl p-4 sm:p-5 shadow-[0_25px_80px_rgba(0,0,0,0.9)] relative overflow-hidden">
+          <!-- Cabecera del Simulador -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> DEMO INTERACTIVO
+              </span>
+              <span class="text-xs font-bold text-gray-300">Toca abajo para probar el TV</span>
+            </div>
+            <span class="text-[11px] font-black text-amber-400">📺 SMART TV DEL BAR</span>
+          </div>
+
+          <!-- Pantalla Virtual del Televisor del Bar -->
+          <div id="demoTvScreen" class="relative aspect-video rounded-2xl overflow-hidden border-2 border-white/15 bg-black shadow-2xl">
+            <!-- Imagen de fondo simulando videoclip musical -->
+            <img id="demoTvBg" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=80" alt="Concierto en TV" class="w-full h-full object-cover opacity-80 transition-all duration-500">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/60"></div>
+
+            <!-- Marca del Bar arriba a la izquierda en el TV -->
+            <div class="absolute top-3 left-3 flex items-center gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/15">
+              <span class="text-sm">🎷</span>
+              <div>
+                <p class="text-[10px] font-black text-amber-400 leading-none uppercase tracking-wider">TU BAR AQUÍ • TV EN VIVO</p>
+                <p id="demoTvNowPlaying" class="text-[11px] font-bold text-white truncate max-w-[170px] sm:max-w-[220px]">🎵 Feid - SE ME OLVIDA (Video Oficial)</p>
+              </div>
+            </div>
+
+            <!-- QR Flotante en la esquina del TV -->
+            <div class="absolute top-3 right-3 bg-black/80 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-amber-500/40 text-right">
+              <p class="text-[9px] font-black text-amber-300 uppercase">📱 PIDE MÚSICA EN TU MESA</p>
+              <p class="text-[10px] font-bold text-white">Escanea el QR de tu mesa</p>
+            </div>
+
+            <!-- Overlay Dinámico: Foto Polaroid 3D en el TV -->
+            <div id="demoPolaroidOverlay" class="hidden absolute inset-0 bg-black/65 backdrop-blur-sm flex items-center justify-center p-4 z-20">
+              <div id="demoPolaroidCard" class="bg-gradient-to-b from-[#fffbeb] via-[#fef3c7] to-[#fde68a] p-2.5 pb-4 rounded-2xl shadow-[0_20px_60px_rgba(245,158,11,0.65)] border-2 border-amber-300 w-44 sm:w-52 text-center polaroid-enter">
+                <div class="w-full aspect-square rounded-xl overflow-hidden bg-black relative">
+                  <img id="demoPolaroidImg" src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&q=80" class="w-full h-full object-cover">
+                  <span class="absolute top-1.5 right-1.5 bg-black/80 text-amber-300 text-[8px] font-black px-2 py-0.5 rounded-full border border-amber-400/40">📸 MOCD CAM</span>
+                </div>
+                <p id="demoPolaroidCaption" class="text-[11px] font-black text-gray-900 mt-2 px-1 truncate">¡Salud desde la Mesa 5! 🍻🔥</p>
+              </div>
+            </div>
+
+            <!-- Overlay Dinámico: Dedicatoria de Cumpleaños / Saludo en el TV -->
+            <div id="demoDedicationBanner" class="absolute bottom-3 left-3 right-3 bg-gradient-to-r from-amber-500/95 via-orange-500/95 to-pink-600/95 text-black p-2.5 sm:p-3 rounded-xl shadow-2xl flex items-center justify-between gap-2 transition-all duration-300">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span id="demoBannerIcon" class="text-xl sm:text-2xl shrink-0">🎂</span>
+                <div class="min-w-0">
+                  <p id="demoBannerSender" class="text-[9px] font-black uppercase tracking-wider text-black/80">PEDIDO DE MESA 4 • DEDICATORIA EN PANTALLA</p>
+                  <p id="demoBannerText" class="text-xs sm:text-sm font-black text-black truncate">¡Feliz Cumpleaños Valentina! Que siga la fiesta 🎉🍻</p>
+                </div>
+              </div>
+              <span class="text-[10px] font-black bg-black text-amber-300 px-2 py-1 rounded-lg shrink-0">EN VIVO</span>
+            </div>
+          </div>
+
+          <!-- Botones Interactivos para que el dueño del bar juegue con el simulador -->
+          <div class="mt-4 space-y-2">
+            <p class="text-[11px] font-bold text-amber-300 uppercase tracking-wider text-center">
+              👇 Haz clic en un botón para ver qué pasa en el TV del bar:
+            </p>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="triggerDemoPolaroid()" class="py-2.5 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-black flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer">
+                <span>📸</span> <span>Lanzar Foto al TV</span>
+              </button>
+              <button type="button" onclick="triggerDemoBirthday()" class="py-2.5 px-3 rounded-xl bg-pink-500/20 hover:bg-pink-500/30 border border-pink-400/50 text-pink-300 text-xs font-black flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer">
+                <span>🎂</span> <span>Saludo Cumpleaños</span>
+              </button>
+              <button type="button" onclick="triggerDemoSongChange()" class="py-2.5 px-3 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/50 text-purple-300 text-xs font-black flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer">
+                <span>🎺</span> <span>Pedido por QR Mesa</span>
+              </button>
+              <button type="button" onclick="triggerDemoAntiPrank()" class="py-2.5 px-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 text-xs font-black flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer">
+                <span>🛡️</span> <span>Filtro Anti-Bromas</span>
+              </button>
+            </div>
+            <p id="demoStatusFeedback" class="text-[11px] text-center text-gray-300 font-semibold pt-1">
+              ✨ Todo se controla desde el celular del administrador sin cables ni consolas complicadas.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SECCIÓN: LAS 6 ARMAS SECRETAS DE MOCD MUSIC -->
+  <section id="funciones" class="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div class="text-center max-w-3xl mx-auto space-y-3 mb-12 sm:mb-16">
+      <span class="text-xs font-black uppercase tracking-widest text-amber-400">POTENCIA TOTAL PARA TU NEGOCIO</span>
+      <h2 class="font-display font-black text-3xl sm:text-5xl text-white">
+        Mucho más que música: <span class="text-gradient-cyber">una experiencia viral</span> en cada mesa
+      </h2>
+      <p class="text-sm sm:text-base text-gray-400">
+        Diseñado específicamente para dueños de bares que quieren tener el local lleno, las mesas animadas y el control absoluto de la música sin pagar costosos sistemas.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Feature 1 -->
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3 hover:border-amber-500/40 transition group">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+          📸
+        </div>
+        <h3 class="font-display font-black text-xl text-white">MOCD Cam (Fotos Polaroid 3D al TV)</h3>
+        <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+          Toma fotos a las mesas más prendidas o activa las selfies por QR y lánzalas deslizando el dedo hacia arriba. Aparecen en el televisor en marco Polaroid con el nombre de tu bar. <strong class="text-amber-300">¡Publicidad viral gratis cuando tus clientes graban historias!</strong>
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3 hover:border-pink-500/40 transition group">
+        <div class="w-12 h-12 rounded-2xl bg-pink-500/15 border border-pink-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+          🛡️
+        </div>
+        <h3 class="font-display font-black text-xl text-white">Escudo Inteligente "Solo Canciones"</h3>
+        <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+          ¿Clientes intentando poner chistes, partidos, novelas o videos de 1 hora para molestar? <strong class="text-pink-300">MOCD MUSIC los bloquea automáticamente.</strong> Solo permite canciones oficiales verificadas de duración musical (1:10 a 8:30 min).
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3 hover:border-purple-500/40 transition group">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+          🧠
+        </div>
+        <h3 class="font-display font-black text-xl text-white">DJ con IA & Tandas por Género</h3>
+        <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+          No salta de una salsa a un rock de golpe. El algoritmo organiza los pedidos de las mesas en bloques armónicos (Salsa, Popular, Reggaetón, Vallenato) y hace <strong class="text-purple-300">mezcla Crossfade suave</strong> entre cada video sin silencios.
+        </p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3 hover:border-sky-500/40 transition group">
+        <div class="w-12 h-12 rounded-2xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+          📲
+        </div>
+        <h3 class="font-display font-black text-xl text-white">App Móvil de Bolsillo (Consola DJ)</h3>
+        <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+          Instala la App en tu iPhone o Android. Sube o baja el volumen del TV desde tu bolsillo, cambia la canción con un toque, lanza efectos de sonido (sirena, aplausos, campana de ronda) y aprueba o elimina pedidos al instante.
+        </p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3 hover:border-emerald-500/40 transition group">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+          🎂
+        </div>
+        <h3 class="font-display font-black text-xl text-white">Dedicatorias y Cumpleaños en Vivo</h3>
+        <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+          Cada vez que una mesa pide canción desde su código QR, puede escribir su saludo o felicitación de cumpleaños. Cuando su canción empieza a sonar, el mensaje sale animado en pantalla gigante.
+        </p>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="glass-panel rounded-3xl p-6 sm:p-7 space-y-3 hover:border-orange-500/40 transition group">
+        <div class="w-12 h-12 rounded-2xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+          🔒
+        </div>
+        <h3 class="font-display font-black text-xl text-white">2 Modos: Abierto o Solo Tus Listas</h3>
+        <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">
+          ¿Noche temática de solo Salsa o solo Clásicos del Bar? Con un botón en tu celular decides si las mesas pueden buscar en todo el catálogo musical o elegir <strong class="text-orange-300">exclusivamente dentro de las listas oficiales de tu bar</strong>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN COMPARATIVA: YOUTUBE NORMAL VS MOCD MUSIC -->
+  <section id="comparativa" class="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+    <div class="glass-panel rounded-3xl p-6 sm:p-10 border border-white/10 space-y-8">
+      <div class="text-center space-y-2">
+        <span class="text-xs font-black uppercase tracking-widest text-pink-400">¿POR QUÉ CAMBIARTE HOY MISMO?</span>
+        <h2 class="font-display font-black text-2xl sm:text-4xl text-white">
+          Un bar tradicional vs. <span class="text-gradient-gold">Tu Bar con MOCD MUSIC</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Antes -->
+        <div class="rounded-2xl bg-rose-950/20 border border-rose-500/30 p-5 space-y-3.5">
+          <div class="flex items-center gap-2 text-rose-400 font-black text-sm uppercase tracking-wider">
+            <span>❌</span> <span>Poner YouTube normal en el Bar</span>
+          </div>
+          <ul class="space-y-2.5 text-xs sm:text-sm text-gray-300">
+            <li class="flex items-start gap-2"><span class="text-rose-400 font-bold">✕</span> <span>Silencios incómodos mientras alguien busca qué canción poner con el teclado.</span></li>
+            <li class="flex items-start gap-2"><span class="text-rose-400 font-bold">✕</span> <span>Meseros interrumpidos cada 5 minutos por clientes pidiendo canciones.</span></li>
+            <li class="flex items-start gap-2"><span class="text-rose-400 font-bold">✕</span> <span>Pantallas desaprovechadas que no muestran el nombre de tu bar ni animan a las mesas.</span></li>
+            <li class="flex items-start gap-2"><span class="text-rose-400 font-bold">✕</span> <span>Desorden de géneros que mata la rumba en el mejor momento de la noche.</span></li>
+          </ul>
+        </div>
+
+        <!-- Ahora con MOCD MUSIC -->
+        <div class="rounded-2xl bg-amber-500/10 border border-amber-500/40 p-5 space-y-3.5 shadow-[0_0_40px_rgba(245,158,11,0.12)]">
+          <div class="flex items-center gap-2 text-amber-300 font-black text-sm uppercase tracking-wider">
+            <span>⚡</span> <span>Tu Negocio con MOCD MUSIC</span>
+          </div>
+          <ul class="space-y-2.5 text-xs sm:text-sm text-white font-medium">
+            <li class="flex items-start gap-2"><span class="text-emerald-400 font-black">✓</span> <span><strong>Mezcla automática continua (Crossfade)</strong> con tus listas sagradas de respaldo toda la noche.</span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-400 font-black">✓</span> <span><strong>QRs por mesa personalizados</strong> con el nombre de tu bar listos para imprimir.</span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-400 font-black">✓</span> <span><strong>Fotos Polaroid 3D y saludos en el TV</strong> que hacen que todas las mesas aplaudan y pidan otra ronda.</span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-400 font-black">✓</span> <span><strong>100% Independiente en la Nube:</strong> Tu propio link exclusivo, tus propias listas y tu propia App móvil.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN: PLANES / CÓMO FUNCIONA LA INSTALACIÓN -->
+  <section id="planes" class="py-14 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+    <div class="text-center max-w-2xl mx-auto space-y-2 mb-12">
+      <span class="text-xs font-black uppercase tracking-widest text-amber-400">LISTO EN MENOS DE 15 MINUTOS</span>
+      <h2 class="font-display font-black text-3xl sm:text-5xl text-white">
+        Lleva <span class="text-gradient-gold">MOCD MUSIC</span> a tu bar hoy
+      </h2>
+      <p class="text-sm text-gray-400">
+        No necesitas comprar consolas ni equipos costosos. Solo un computador o Smart TV conectado a tus pantallas y tu celular.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+      <!-- Plan Bar Individual -->
+      <div class="glass-panel rounded-3xl p-7 border border-white/15 flex flex-col justify-between space-y-6">
+        <div class="space-y-4">
+          <span class="px-3 py-1 rounded-full bg-white/10 text-gray-200 text-[11px] font-black uppercase tracking-wider">Licencia Mensual por Local</span>
+          <h3 class="font-display font-black text-2xl sm:text-3xl text-white">Plan Bar Pro</h3>
+          <p class="text-xs sm:text-sm text-gray-400">Ideal para bares, gastrobares, billares, licoreras y restaurantes que quieren encender el ambiente todas las noches.</p>
+          <ul class="space-y-2.5 text-xs sm:text-sm text-gray-200 pt-2">
+            <li class="flex items-center gap-2"><span class="text-amber-400">★</span> <span>Programa 100% independiente con el nombre de tu Bar</span></li>
+            <li class="flex items-center gap-2"><span class="text-amber-400">★</span> <span>Generador de Códigos QR ilimitados por mesa listos para imprimir</span></li>
+            <li class="flex items-center gap-2"><span class="text-amber-400">★</span> <span>App Móvil DJ para controlar el TV desde tu celular</span></li>
+            <li class="flex items-center gap-2"><span class="text-amber-400">★</span> <span>MOCD Cam (Fotos Polaroid 3D en vivo al televisor)</span></li>
+            <li class="flex items-center gap-2"><span class="text-amber-400">★</span> <span>Filtro inteligente Anti-Bromas + Listas musicales incluidas</span></li>
+          </ul>
+        </div>
+        <button onclick="openSalesWhatsapp('Hola, me interesa el Plan Bar Pro de MOCD MUSIC para mi negocio. ¿Me das información y precios? 🍺')" class="w-full py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-sm transition cursor-pointer">
+          Consultar Precio por WhatsApp →
+        </button>
+      </div>
+
+      <!-- Plan VIP + Instalación y Demo Presencial -->
+      <div class="glass-panel-gold rounded-3xl p-7 flex flex-col justify-between space-y-6 relative shadow-[0_20px_60px_rgba(245,158,11,0.2)]">
+        <div class="absolute -top-3.5 right-6 bg-gradient-to-r from-amber-400 to-orange-500 text-black text-[10px] font-black uppercase px-3 py-1 rounded-full shadow-lg">
+          🔥 MÁS ELEGIDO POR DUEÑOS DE BARES
+        </div>
+        <div class="space-y-4">
+          <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-black uppercase tracking-wider">Llave en Mano + Personalización</span>
+          <h3 class="font-display font-black text-2xl sm:text-3xl text-white">Plan MOCD VIP + Demo en tu Bar</h3>
+          <p class="text-xs sm:text-sm text-gray-300">Te dejamos todo configurado en las pantallas de tu negocio, con tus listas musicales favoritas y capacitación en 10 minutos.</p>
+          <ul class="space-y-2.5 text-xs sm:text-sm text-white font-medium pt-2">
+            <li class="flex items-center gap-2"><span class="text-amber-400">⚡</span> <span><strong>Demostración en vivo</strong> directamente en el televisor de tu bar</span></li>
+            <li class="flex items-center gap-2"><span class="text-amber-400">⚡</span> <span>Configuración de tus listas de Salsa, Popular, Reggaetón, Vallenato y Rock</span></li>
+            <li class="flex items-center gap-2"><span class="text-amber-400">⚡</span> <span>Instalación de la App DJ en el celular del dueño y administrador</span></li>
+            <li class="flex items-center gap-2"><span class="text-amber-400">⚡</span> <span>Diseño de QRs de mesas personalizados con tu marca</span></li>
+            <li class="flex items-center gap-2"><span class="text-amber-400">⚡</span> <span>Soporte directo y actualizaciones prioritarias</span></li>
+          </ul>
+        </div>
+        <button onclick="openSalesWhatsapp('¡Hola! Quiero agendar una Demostración en Vivo del Plan MOCD VIP en mi bar 🚀🍻')" class="w-full btn-neon-gold py-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer">
+          <span>💬</span> <span>Agendar Demostración en Vivo</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+    <div class="rounded-3xl bg-gradient-to-r from-amber-500/20 via-purple-600/20 to-pink-600/20 border border-amber-500/40 p-8 sm:p-12 text-center space-y-5 shadow-2xl">
+      <h2 class="font-display font-black text-2xl sm:text-4xl text-white">
+        ¿Listo para que todo el mundo hable de tu bar este fin de semana?
+      </h2>
+      <p class="text-sm sm:text-base text-gray-300 max-w-xl mx-auto">
+        Escríbenos ahora mismo por WhatsApp y prueba <strong class="text-amber-300">MOCD MUSIC</strong> funcionando en tiempo real desde tu propio celular.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+        <button onclick="openSalesWhatsapp('Hola, quiero ver una demostración en vivo de MOCD MUSIC para mi bar 🎶')" class="w-full sm:w-auto btn-neon-gold px-8 py-4 rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2 cursor-pointer">
+          <span>📲</span> <span>Hablar con Ventas por WhatsApp</span>
+        </button>
+        <button onclick="shareSalesPage()" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-bold text-sm flex items-center justify-center gap-2 transition cursor-pointer">
+          <span>🔗</span> <span>Copiar Link de esta Página</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER CON CONFIGURADOR DISCRETO DE WHATSAPP DEL VENDEDOR -->
+  <footer class="border-t border-white/10 py-8 px-4 text-center text-xs text-gray-500 space-y-3">
+    <div class="flex items-center justify-center gap-2 font-display font-black text-sm text-gray-300">
+      <span>🎷</span> <span>MOCD MUSIC</span> <span class="text-amber-400">•</span> <span>Tecnología Interactiva para Bares</span>
+    </div>
+    <p>© 2026 MOCD MUSIC. Todos los derechos reservados.</p>
+    <div class="pt-1 flex items-center justify-center gap-4 text-[11px]">
+      <button onclick="configureSellerWhatsapp()" class="text-gray-500 hover:text-amber-400 underline cursor-pointer">
+        ⚙️ Configurar mi número de WhatsApp para recibir clientes
+      </button>
+      <a href="/links" class="text-gray-500 hover:text-amber-400 underline">Ir al Panel de Links (/links)</a>
+    </div>
+  </footer>
+
+  <!-- Toast Flotante -->
+  <div id="salesToast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-amber-500 text-black font-black text-xs sm:text-sm px-5 py-3 rounded-2xl shadow-[0_10px_40px_rgba(245,158,11,0.6)] flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+    <span>✅</span>
+    <span id="salesToastText">¡Listo!</span>
+  </div>
+
+  <script>
+    // =====================================================
+    // LÓGICA DEL SIMULADOR INTERACTIVO EN VIVO (DEMO TV)
+    // =====================================================
+    const DEMO_PHOTOS = [
+      {
+        img: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&q=80',
+        caption: '¡La Mesa 5 prendiendo la noche! 🍻🔥'
+      },
+      {
+        img: 'https://images.unsplash.com/photo-1575444758702-4a6b9222336e?w=600&q=80',
+        caption: '🎂 ¡Celebrando el cumple de Camilo! 🥃'
+      },
+      {
+        img: 'https://images.unsplash.com/photo-1543007630-9710e4a00a20?w=600&q=80',
+        caption: '¡Ronda de shots para la Mesa 2! 🎉'
+      }
+    ];
+
+    const DEMO_SONGS = [
+      {
+        title: '🎺 Grupo Niche - Cali Pachanguero (Oficial)',
+        bg: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=900&q=80',
+        sender: 'PEDIDO POR QR • MESA 8 (TANDA DE SALSA)',
+        text: '¡Para bailar toda la noche con los amigos! 💃🕺',
+        icon: '🎺'
+      },
+      {
+        title: '🥃 Carin León & Pipe Bueno - Guaro Remix',
+        bg: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80',
+        sender: 'PEDIDO POR QR • MESA 3 (TANDA POPULAR)',
+        text: '¡Salud por los que estamos desde temprano! 🍻',
+        icon: '🥃'
+      },
+      {
+        title: '🔥 Feid & Atl Jacob - Luna (Video Oficial)',
+        bg: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=80',
+        sender: 'PEDIDO POR QR • MESA 10 (TANDA REGGAETÓN)',
+        text: '¡El mejor ambiente está en este bar! 🔥🎶',
+        icon: '🔥'
+      }
+    ];
+
+    let demoPhotoIdx = 0;
+    let demoSongIdx = 0;
+    let polaroidTimer = null;
+
+    function playDemoBeep(freq = 620) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.45, ctx.currentTime + 0.14);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.16);
+      } catch (e) {}
+    }
+
+    function triggerDemoPolaroid() {
+      playDemoBeep(680);
+      const overlay = document.getElementById('demoPolaroidOverlay');
+      const card = document.getElementById('demoPolaroidCard');
+      const img = document.getElementById('demoPolaroidImg');
+      const caption = document.getElementById('demoPolaroidCaption');
+      const feedback = document.getElementById('demoStatusFeedback');
+
+      const item = DEMO_PHOTOS[demoPhotoIdx % DEMO_PHOTOS.length];
+      demoPhotoIdx++;
+
+      img.src = item.img;
+      caption.textContent = item.caption;
+      overlay.classList.remove('hidden');
+      card.classList.remove('polaroid-enter');
+      void card.offsetWidth;
+      card.classList.add('polaroid-enter');
+
+      feedback.innerHTML = '📸 <strong class="text-amber-300">¡Foto Polaroid lanzada al TV!</strong> Tus clientes aman verse en pantalla gigante.';
+
+      clearTimeout(polaroidTimer);
+      polaroidTimer = setTimeout(() => {
+        overlay.classList.add('hidden');
+      }, 4200);
+    }
+
+    function triggerDemoBirthday() {
+      playDemoBeep(780);
+      const overlay = document.getElementById('demoPolaroidOverlay');
+      overlay.classList.add('hidden');
+
+      const icon = document.getElementById('demoBannerIcon');
+      const sender = document.getElementById('demoBannerSender');
+      const text = document.getElementById('demoBannerText');
+      const banner = document.getElementById('demoDedicationBanner');
+      const feedback = document.getElementById('demoStatusFeedback');
+
+      icon.textContent = '🎂';
+      sender.textContent = 'CELEBRACIÓN EN VIVO • MESA VIP';
+      text.textContent = '🎉 ¡Feliz Cumpleaños Camila! Ronda de shots en la Mesa 6 🥂';
+      banner.classList.add('scale-105');
+      setTimeout(() => banner.classList.remove('scale-105'), 250);
+
+      feedback.innerHTML = '🎂 <strong class="text-pink-300">¡Dedicatoria de cumpleaños en pantalla!</strong> Impulsa la venta de botellas y rondas.';
+    }
+
+    function triggerDemoSongChange() {
+      playDemoBeep(540);
+      const overlay = document.getElementById('demoPolaroidOverlay');
+      overlay.classList.add('hidden');
+
+      const song = DEMO_SONGS[demoSongIdx % DEMO_SONGS.length];
+      demoSongIdx++;
+
+      document.getElementById('demoTvNowPlaying').textContent = song.title;
+      document.getElementById('demoTvBg').src = song.bg;
+      document.getElementById('demoBannerIcon').textContent = song.icon;
+      document.getElementById('demoBannerSender').textContent = song.sender;
+      document.getElementById('demoBannerText').textContent = song.text;
+
+      const feedback = document.getElementById('demoStatusFeedback');
+      feedback.innerHTML = '🎵 <strong class="text-purple-300">¡Canción organizada por género con Crossfade!</strong> Cero silencios entre videos.';
+    }
+
+    function triggerDemoAntiPrank() {
+      playDemoBeep(420);
+      const overlay = document.getElementById('demoPolaroidOverlay');
+      overlay.classList.add('hidden');
+
+      const feedback = document.getElementById('demoStatusFeedback');
+      feedback.innerHTML = '🛡️ <strong class="text-emerald-300">Filtro Anti-Bromas Activo:</strong> Bloqueado intento de pedir "Sonido de broma / Resumen de partido". ¡Solo pasan canciones reales!';
+      showSalesToast('🛡️ Escudo MOCD: Videos de broma o no musicales bloqueados automáticamente');
+    }
+
+    // =====================================================
+    // WHATSAPP DE VENTAS Y COMPARTIR PÁGINA
+    // =====================================================
+    function getSellerWhatsappNumber() {
+      const params = new URLSearchParams(window.location.search);
+      const fromUrl = params.get('wa');
+      if (fromUrl && /^\d{8,15}$/.test(fromUrl.trim())) {
+        localStorage.setItem('mocd_sales_whatsapp', fromUrl.trim());
+        return fromUrl.trim();
+      }
+      return localStorage.getItem('mocd_sales_whatsapp') || '';
+    }
+
+    function configureSellerWhatsapp() {
+      const current = getSellerWhatsappNumber();
+      const input = prompt(
+        'Ingresa tu número de WhatsApp con código de país (sin el signo +).\nEjemplo para Colombia: 573001234567\n\nAsí cuando compartas esta página con dueños de bares, el botón de contacto te escribirá directo a tu WhatsApp:',
+        current || '57'
+      );
+      if (input === null) return;
+      const clean = input.replace(/\D/g, '');
+      if (clean.length < 8) {
+        alert('Por favor ingresa un número válido con código de país (ej: 573001234567).');
+        return;
+      }
+      localStorage.setItem('mocd_sales_whatsapp', clean);
+      const shareUrl = `${window.location.origin}/ventas?wa=${clean}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).catch(() => {});
+      }
+      showSalesToast('✅ ¡Tu WhatsApp quedó vinculado y se copió tu link personalizado!');
+    }
+
+    function openSalesWhatsapp(message) {
+      const phone = getSellerWhatsappNumber();
+      const encoded = encodeURIComponent(message);
+      if (phone) {
+        window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+      } else {
+        window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+      }
+    }
+
+    function shareSalesPage() {
+      const phone = getSellerWhatsappNumber();
+      const url = phone
+        ? `${window.location.origin}/ventas?wa=${phone}`
+        : `${window.location.origin}/ventas`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          showSalesToast('🔗 ¡Link de MOCD MUSIC copiado para enviar a clientes!');
+        }).catch(() => {});
+      } else {
+        prompt('Copia este link comercial:', url);
+      }
+    }
+
+    let salesToastTimer = null;
+    function showSalesToast(msg) {
+      const t = document.getElementById('salesToast');
+      const txt = document.getElementById('salesToastText');
+      if (!t || !txt) return;
+      txt.textContent = msg;
+      t.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      t.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(salesToastTimer);
+      salesToastTimer = setTimeout(() => {
+        t.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        t.classList.remove('opacity-100', 'translate-y-0');
+      }, 3200);
+    }
+  </script>
+</body>
+</html>
