@@ -61,6 +61,7 @@ app.use((req, res, next) => {
 app.get('/', (req, res, next) => {
   const host = String(req.hostname || req.headers.host || '').toLowerCase();
   if (host.includes('mocd') && !req.query.mesa) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     return res.sendFile(path.join(__dirname, 'public', 'ventas.html'));
   }
   next();
@@ -144,6 +145,7 @@ app.get(['/links', '/bares', '/central'], (req, res) => {
 });
 
 app.get(['/ventas', '/promo', '/mocd', '/mocdmusic'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.sendFile(path.join(__dirname, 'public', 'ventas.html'));
 });
 
