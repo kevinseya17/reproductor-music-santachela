@@ -43,9 +43,7 @@
       </button>
 
       <div class="flex items-center gap-2 min-w-0 flex-1">
-        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-extrabold text-xs sm:text-sm shadow-[0_0_12px_rgba(245,158,11,0.3)] shrink-0">
-          ⚡
-        </div>
+        <img src="/icons/mocd-official-m-transparent.png?v=3" alt="MOCD" class="w-7 h-7 sm:w-8 sm:h-8 object-contain shrink-0 drop-shadow-[0_2px_10px_rgba(0,229,255,0.4)]">
         <div class="min-w-0 flex items-center gap-1.5 sm:gap-2">
           <h1 id="adminBarName" class="text-xs sm:text-base font-extrabold text-white tracking-wide truncate">
             Santa Chela Music Bar
@@ -60,6 +58,9 @@
 
     <!-- Accesos Rápidos Header -->
     <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+      <button id="btnAdminTourHelp" onclick="startAdminTour(true)" class="btn-secondary text-xs py-1.5 px-2 sm:px-2.5 flex items-center justify-center gap-1 text-cyan-300 hover:text-cyan-200 border border-cyan-500/40" title="Ver Guía Explicativa del Programa">
+        <span>💡</span> <span class="hidden sm:inline">Tutorial</span>
+      </button>
       <button id="btnTopInstallPwa" onclick="triggerInstallPwa()" class="tactile-btn-gold text-[11px] sm:text-xs py-1.5 px-2.5 sm:px-3 flex items-center justify-center gap-1 font-black shadow-[0_0_12px_rgba(245,158,11,0.3)]" title="Instalar Consola como App en tu iPhone o Celular">
         <span>📲</span> <span class="hidden xs:inline">Instalar App</span>
       </button>
@@ -87,8 +88,11 @@
       
       <!-- Menú Vertical -->
       <div class="p-3.5 space-y-1.5 overflow-y-auto">
-        <div class="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-gray-500 flex items-center justify-between">
-          <span>CONSOLA DEL BAR</span>
+        <div class="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center justify-between border-b border-white/5 pb-2 mb-1">
+          <div class="flex items-center gap-2">
+            <img src="/icons/mocd-official-m-transparent.png?v=3" alt="MOCD" class="w-4 h-4 object-contain">
+            <span class="tracking-wider text-cyan-400">MOCD CONSOLE</span>
+          </div>
           <button onclick="toggleSidebarMobile()" class="lg:hidden text-gray-400 hover:text-white p-1">✕</button>
         </div>
 
@@ -165,7 +169,7 @@
         <!-- ============================================================ -->
         <!-- REPRODUCTOR PRO HARDWARE DECK (ESTILO DARK GOLD TRAKTOR/DJ) -->
         <!-- ============================================================ -->
-        <div class="relative bg-gradient-to-b from-[#181b24] via-[#12141c] to-[#0e1017] rounded-3xl p-4 sm:p-7 border border-amber-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.6),0_0_25px_rgba(245,158,11,0.08)] space-y-3.5 sm:space-y-5">
+        <div id="adminNowPlayingDeck" class="relative bg-gradient-to-b from-[#181b24] via-[#12141c] to-[#0e1017] rounded-3xl p-4 sm:p-7 border border-amber-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.6),0_0_25px_rgba(245,158,11,0.08)] space-y-3.5 sm:space-y-5">
           
           <!-- Header del Deck (1 sola línea limpia) -->
           <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5 sm:pb-3">
@@ -295,7 +299,7 @@
           </div>
 
           <!-- Botones de Show en Vivo: Ruleta 3D y Santa Chela Cam -->
-          <div class="pt-2.5 border-t border-white/10 grid grid-cols-2 gap-2">
+          <div id="adminLiveShowButtons" class="pt-2.5 border-t border-white/10 grid grid-cols-2 gap-2">
             <button onclick="openRouletteModal()" class="w-full py-2.5 px-2.5 sm:px-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/25 to-amber-500/20 hover:from-amber-500/35 hover:to-orange-500/35 border border-amber-400/50 text-amber-300 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_20px_rgba(245,158,11,0.15)] active:scale-[0.98] transition">
               <span class="text-base">🎰</span>
               <span class="truncate">RULETA 3D</span>
@@ -337,7 +341,7 @@
         <!-- ============================================================ -->
         <!-- SECCIÓN UP NEXT / QUEUE (ESTILO EXACTO DE LA REFERENCIA)     -->
         <!-- ============================================================ -->
-        <div class="glass-card p-4 sm:p-6 space-y-4 border-white/10">
+        <div id="adminQueueSection" class="glass-card p-4 sm:p-6 space-y-4 border-white/10">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div class="flex items-center gap-2.5">
               <span class="text-amber-400 font-bold text-base">≡</span>
@@ -1483,6 +1487,14 @@
     </div>
   </div>
 
+  <script src="/js/tour-guide.js?v=20261109"></script>
   <script src="/js/admin.js?v=20261109"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof window.initAdminTour === 'function') {
+        window.initAdminTour();
+      }
+    });
+  </script>
 </body>
 </html>
