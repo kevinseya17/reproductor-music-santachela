@@ -1,6 +1,7 @@
 /**
- * MOCD MUSIC / Santa Chela - Interactive Onboarding Tour Engine
- * Guía interactiva paso a paso con Spotlight, Tooltip con muesca/flecha y persistencia LocalStorage.
+ * MOCD MUSIC / Santa Chela - Interactive Onboarding Tour Engine (v2)
+ * Guía interactiva paso a paso con SVG Cutout Mask (agujero 100% transparente),
+ * marco de neón animado con resplandor cyan-púrpura, tooltip con muesca/flecha y persistencia LocalStorage.
  * Soporta modo Administrador/DJ y modo Cliente en mesas.
  */
 
@@ -9,14 +10,16 @@
 
   class OnboardingTour {
     constructor(options = {}) {
-      this.storageKey = options.storageKey || 'mocd_tour_completed';
+      this.storageKey = options.storageKey || 'mocd_tour_completed_v2';
       this.steps = options.steps || [];
       this.currentStep = 0;
       this.active = false;
-      this.overlayEl = null;
+      this.svgEl = null;
+      this.maskHoleEl = null;
       this.spotlightEl = null;
       this.popoverEl = null;
       this.notchEl = null;
+      this.lastTargetEl = null;
       this.onComplete = options.onComplete || null;
       this.autoStartDelay = options.autoStartDelay || 1200;
 
@@ -51,35 +54,63 @@
     createDom() {
       this.destroyDom();
 
-      // 1. Estilos Globales del Tour
+      // 1. Inyectar Estilos Globales del Tour
       if (!document.getElementById('mocdTourStyles')) {
         const style = document.createElement('style');
         style.id = 'mocdTourStyles';
         style.innerHTML = `
-          .mocd-tour-overlay {
+          .mocd-tour-svg {
             position: fixed;
             inset: 0;
-            background: rgba(3, 5, 12, 0.82);
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(3px);
+            width: 100vw;
+            height: 100vh;
             z-index: 999980;
+            pointer-events: none;
             opacity: 0;
             transition: opacity 0.35s ease;
+          }
+          .mocd-tour-svg.visible {
+            opacity: 1;
+          }
+          .mocd-tour-backdrop {
             pointer-events: auto;
+            fill: rgba(3, 7, 18, 0.84);
+          }
+          #mocdMaskHole {
+            transition: x 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                        y 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                        width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                        height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                        rx 0.35s ease,
+                        ry 0.35s ease;
           }
           .mocd-tour-spotlight {
             position: fixed;
-            z-index: 999985;
-            border-radius: 18px;
-            box-shadow: 0 0 0 9999px rgba(3, 5, 12, 0.84), 0 0 25px rgba(0, 229, 255, 0.65), inset 0 0 15px rgba(139, 92, 246, 0.35);
+            z-index: 999988;
+            border-radius: 16px;
             border: 2.5px solid #00e5ff;
+            background: transparent;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.7), 0 0 50px rgba(139, 92, 246, 0.35), inset 0 0 10px rgba(0, 229, 255, 0.2);
             pointer-events: none;
             transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             animation: mocdSpotlightGlow 2.5s infinite alternate ease-in-out;
           }
           @keyframes mocdSpotlightGlow {
-            0% { border-color: #00e5ff; box-shadow: 0 0 0 9999px rgba(3, 5, 12, 0.84), 0 0 18px rgba(0, 229, 255, 0.5), inset 0 0 10px rgba(0, 229, 255, 0.2); }
-            100% { border-color: #a855f7; box-shadow: 0 0 0 9999px rgba(3, 5, 12, 0.84), 0 0 28px rgba(168, 85, 247, 0.7), inset 0 0 16px rgba(168, 85, 247, 0.35); }
+            0% {
+              border-color: #00e5ff;
+              box-shadow: 0 0 20px rgba(0, 229, 255, 0.75), 0 0 45px rgba(0, 229, 255, 0.3), inset 0 0 10px rgba(0, 229, 255, 0.2);
+            }
+            100% {
+              border-color: #c084fc;
+              box-shadow: 0 0 28px rgba(192, 132, 252, 0.85), 0 0 55px rgba(168, 85, 247, 0.4), inset 0 0 14px rgba(168, 85, 247, 0.25);
+            }
+          }
+          .mocd-tour-target-active {
+            filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.35)) !important;
+          }
+          .mocd-tour-target-active input::placeholder,
+          .mocd-tour-target-active::placeholder {
+            color: rgba(255, 255, 255, 0.85) !important;
           }
           .mocd-tour-popover {
             position: fixed;
@@ -201,14 +232,63 @@
         document.head.appendChild(style);
       }
 
-      this.overlayEl = document.createElement('div');
-      this.overlayEl.id = 'mocdTourOverlay';
-      this.overlayEl.className = 'mocd-tour-overlay';
+      // 2. Crear SVG Overlay con Mask Cutout (recorte 100% transparente)
+      const svgNS = 'http://www.w3.org/2000/svg';
+      this.svgEl = document.createElementNS(svgNS, 'svg');
+      this.svgEl.id = 'mocdTourSvg';
+      this.svgEl.setAttribute('class', 'mocd-tour-svg');
+      this.svgEl.setAttribute('width', '100%');
+      this.svgEl.setAttribute('height', '100%');
 
+      const defs = document.createElementNS(svgNS, 'defs');
+      const mask = document.createElementNS(svgNS, 'mask');
+      mask.id = 'mocdSpotlightMask';
+      mask.setAttribute('maskUnits', 'userSpaceOnUse');
+      mask.setAttribute('maskContentUnits', 'userSpaceOnUse');
+      mask.setAttribute('x', '0');
+      mask.setAttribute('y', '0');
+      mask.setAttribute('width', '100%');
+      mask.setAttribute('height', '100%');
+
+      // Base blanca (hace visible el fondo oscuro en todo el viewport)
+      const whiteRect = document.createElementNS(svgNS, 'rect');
+      whiteRect.setAttribute('x', '0');
+      whiteRect.setAttribute('y', '0');
+      whiteRect.setAttribute('width', '100%');
+      whiteRect.setAttribute('height', '100%');
+      whiteRect.setAttribute('fill', '#ffffff');
+      mask.appendChild(whiteRect);
+
+      // Agujero negro (crea el recorte 100% transparente en el elemento resaltado)
+      this.maskHoleEl = document.createElementNS(svgNS, 'rect');
+      this.maskHoleEl.id = 'mocdMaskHole';
+      this.maskHoleEl.setAttribute('fill', '#000000');
+      this.maskHoleEl.setAttribute('x', '0');
+      this.maskHoleEl.setAttribute('y', '0');
+      this.maskHoleEl.setAttribute('width', '0');
+      this.maskHoleEl.setAttribute('height', '0');
+      this.maskHoleEl.setAttribute('rx', '16');
+      this.maskHoleEl.setAttribute('ry', '16');
+      mask.appendChild(this.maskHoleEl);
+      defs.appendChild(mask);
+      this.svgEl.appendChild(defs);
+
+      // Rectángulo de fondo oscuro con la máscara aplicada
+      const backdrop = document.createElementNS(svgNS, 'rect');
+      backdrop.setAttribute('class', 'mocd-tour-backdrop');
+      backdrop.setAttribute('x', '0');
+      backdrop.setAttribute('y', '0');
+      backdrop.setAttribute('width', '100%');
+      backdrop.setAttribute('height', '100%');
+      backdrop.setAttribute('mask', 'url(#mocdSpotlightMask)');
+      this.svgEl.appendChild(backdrop);
+
+      // 3. Spotlight Div (borde neón animado con box-shadow flotante)
       this.spotlightEl = document.createElement('div');
       this.spotlightEl.id = 'mocdTourSpotlight';
       this.spotlightEl.className = 'mocd-tour-spotlight';
 
+      // 4. Popover Card y Muesca
       this.popoverEl = document.createElement('div');
       this.popoverEl.id = 'mocdTourPopover';
       this.popoverEl.className = 'mocd-tour-popover';
@@ -217,12 +297,12 @@
       this.notchEl.className = 'mocd-tour-notch';
       this.popoverEl.appendChild(this.notchEl);
 
-      document.body.appendChild(this.overlayEl);
+      document.body.appendChild(this.svgEl);
       document.body.appendChild(this.spotlightEl);
       document.body.appendChild(this.popoverEl);
 
       requestAnimationFrame(() => {
-        if (this.overlayEl) this.overlayEl.style.opacity = '1';
+        if (this.svgEl) this.svgEl.classList.add('visible');
       });
     }
 
@@ -262,9 +342,10 @@
 
       targetEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
 
+      // Permite que el scroll suave se asiente antes de fijar las coordenadas finales
       setTimeout(() => {
         this.positionSpotlightAndPopover(targetEl, step);
-      }, 160);
+      }, 220);
     }
 
     positionSpotlightAndPopover(targetEl, step) {
@@ -272,16 +353,58 @@
 
       const rect = targetEl.getBoundingClientRect();
       const padding = step.padding !== undefined ? step.padding : 8;
+      const radius = step.borderRadius !== undefined ? step.borderRadius : 16;
 
       const spotTop = Math.max(0, rect.top - padding);
       const spotLeft = Math.max(0, rect.left - padding);
       const spotWidth = rect.width + padding * 2;
       const spotHeight = rect.height + padding * 2;
 
+      // 1. Actualizar el agujero del SVG Mask (100% transparente)
+      if (this.maskHoleEl) {
+        this.maskHoleEl.setAttribute('x', spotLeft);
+        this.maskHoleEl.setAttribute('y', spotTop);
+        this.maskHoleEl.setAttribute('width', spotWidth);
+        this.maskHoleEl.setAttribute('height', spotHeight);
+        this.maskHoleEl.setAttribute('rx', radius);
+        this.maskHoleEl.setAttribute('ry', radius);
+        this.maskHoleEl.style.x = `${spotLeft}px`;
+        this.maskHoleEl.style.y = `${spotTop}px`;
+        this.maskHoleEl.style.width = `${spotWidth}px`;
+        this.maskHoleEl.style.height = `${spotHeight}px`;
+        this.maskHoleEl.style.rx = `${radius}px`;
+        this.maskHoleEl.style.ry = `${radius}px`;
+      }
+
+      // 2. Actualizar el marco Neón animado
       this.spotlightEl.style.top = `${spotTop}px`;
       this.spotlightEl.style.left = `${spotLeft}px`;
       this.spotlightEl.style.width = `${spotWidth}px`;
       this.spotlightEl.style.height = `${spotHeight}px`;
+      this.spotlightEl.style.borderRadius = `${radius}px`;
+
+      // 3. Elevar temporalmente el elemento activo para máxima nitidez y contraste
+      if (this.lastTargetEl && this.lastTargetEl !== targetEl) {
+        this.lastTargetEl.classList.remove('mocd-tour-target-active');
+        if (this.lastTargetEl.dataset.tourOrigPos !== undefined) {
+          this.lastTargetEl.style.position = this.lastTargetEl.dataset.tourOrigPos;
+          delete this.lastTargetEl.dataset.tourOrigPos;
+        }
+        if (this.lastTargetEl.dataset.tourOrigZ !== undefined) {
+          this.lastTargetEl.style.zIndex = this.lastTargetEl.dataset.tourOrigZ;
+          delete this.lastTargetEl.dataset.tourOrigZ;
+        }
+      }
+
+      targetEl.dataset.tourOrigPos = targetEl.style.position || '';
+      targetEl.dataset.tourOrigZ = targetEl.style.zIndex || '';
+      const compPos = window.getComputedStyle(targetEl).position;
+      if (compPos === 'static') {
+        targetEl.style.position = 'relative';
+      }
+      targetEl.style.zIndex = '999986';
+      targetEl.classList.add('mocd-tour-target-active');
+      this.lastTargetEl = targetEl;
 
       const totalSteps = this.steps.length;
       const isFirst = this.currentStep === 0;
@@ -345,15 +468,21 @@
 
       let placement = preferredPlacement;
 
-      if (placement === 'auto') {
+      if (placement === 'auto' || placement === 'bottom') {
         const spaceBelow = winH - (sTop + sHeight);
         const spaceAbove = sTop;
-        if (spaceBelow >= pHeight + margin + 10) {
-          placement = 'bottom';
-        } else if (spaceAbove >= pHeight + margin + 10) {
+        if (placement === 'bottom' && spaceBelow < pHeight + margin + 10 && spaceAbove >= pHeight + margin + 10) {
           placement = 'top';
-        } else {
-          placement = winW > 768 && sLeft > pWidth + margin ? 'left' : 'bottom';
+        } else if (placement === 'top' && spaceAbove < pHeight + margin + 10 && spaceBelow >= pHeight + margin + 10) {
+          placement = 'bottom';
+        } else if (placement === 'auto') {
+          if (spaceBelow >= pHeight + margin + 10) {
+            placement = 'bottom';
+          } else if (spaceAbove >= pHeight + margin + 10) {
+            placement = 'top';
+          } else {
+            placement = winW > 768 && sLeft > pWidth + margin ? 'left' : 'bottom';
+          }
         }
       }
 
@@ -368,6 +497,8 @@
         const notchLeft = Math.max(22, Math.min(pWidth - 22, sLeft + sWidth / 2 - left));
         notch.style.left = `${notchLeft}px`;
         notch.style.top = `-7px`;
+        notch.style.bottom = '';
+        notch.style.right = '';
       } else if (placement === 'top') {
         top = sTop - pHeight - margin;
         left = sLeft + sWidth / 2 - pWidth / 2;
@@ -375,18 +506,24 @@
         const notchLeft = Math.max(22, Math.min(pWidth - 22, sLeft + sWidth / 2 - left));
         notch.style.left = `${notchLeft}px`;
         notch.style.bottom = `-7px`;
+        notch.style.top = '';
+        notch.style.right = '';
       } else if (placement === 'left') {
         top = sTop + sHeight / 2 - pHeight / 2;
         left = sLeft - pWidth - margin;
         notch.classList.add('right');
         notch.style.right = `-7px`;
         notch.style.top = `${pHeight / 2 - 7}px`;
+        notch.style.left = '';
+        notch.style.bottom = '';
       } else {
         top = sTop + sHeight / 2 - pHeight / 2;
         left = sLeft + sWidth + margin;
         notch.classList.add('left');
         notch.style.left = `-7px`;
         notch.style.top = `${pHeight / 2 - 7}px`;
+        notch.style.right = '';
+        notch.style.bottom = '';
       }
 
       left = Math.max(12, Math.min(winW - pWidth - 12, left));
@@ -414,11 +551,14 @@
       localStorage.setItem(this.storageKey, 'true');
       this.active = false;
 
-      if (this.overlayEl) {
-        this.overlayEl.style.opacity = '0';
+      if (this.svgEl) {
+        this.svgEl.classList.remove('visible');
       }
       if (this.popoverEl) {
         this.popoverEl.classList.remove('visible');
+      }
+      if (this.spotlightEl) {
+        this.spotlightEl.style.opacity = '0';
       }
 
       setTimeout(() => {
@@ -435,8 +575,20 @@
     }
 
     destroyDom() {
-      if (this.overlayEl && this.overlayEl.parentNode) {
-        this.overlayEl.parentNode.removeChild(this.overlayEl);
+      if (this.lastTargetEl) {
+        this.lastTargetEl.classList.remove('mocd-tour-target-active');
+        if (this.lastTargetEl.dataset.tourOrigPos !== undefined) {
+          this.lastTargetEl.style.position = this.lastTargetEl.dataset.tourOrigPos;
+          delete this.lastTargetEl.dataset.tourOrigPos;
+        }
+        if (this.lastTargetEl.dataset.tourOrigZ !== undefined) {
+          this.lastTargetEl.style.zIndex = this.lastTargetEl.dataset.tourOrigZ;
+          delete this.lastTargetEl.dataset.tourOrigZ;
+        }
+        this.lastTargetEl = null;
+      }
+      if (this.svgEl && this.svgEl.parentNode) {
+        this.svgEl.parentNode.removeChild(this.svgEl);
       }
       if (this.spotlightEl && this.spotlightEl.parentNode) {
         this.spotlightEl.parentNode.removeChild(this.spotlightEl);
@@ -444,7 +596,8 @@
       if (this.popoverEl && this.popoverEl.parentNode) {
         this.popoverEl.parentNode.removeChild(this.popoverEl);
       }
-      this.overlayEl = null;
+      this.svgEl = null;
+      this.maskHoleEl = null;
       this.spotlightEl = null;
       this.popoverEl = null;
       this.notchEl = null;
@@ -510,7 +663,13 @@
         placement: 'top'
       },
       {
-        target: '#tabBtnPlaylists',
+        target: () => {
+          if (window.innerWidth < 1024) {
+            const btnMenu = document.querySelector('button[onclick="toggleSidebarMobile()"]');
+            return btnMenu || document.querySelector('#tabBtnPlaylists');
+          }
+          return document.querySelector('#tabBtnPlaylists');
+        },
         icon: '📂',
         title: 'Listas Maestras y DJ Inteligente con IA',
         description: 'Configura las playlists base de tu bar (Salsa, Crossover, Rock) y activa el DJ con Inteligencia Artificial para que la fiesta nunca se quede en silencio.',
@@ -526,7 +685,7 @@
     ];
 
     window.adminTourInstance = new OnboardingTour({
-      storageKey: 'mocd_admin_tour_completed_v1',
+      storageKey: 'mocd_admin_tour_completed_v2',
       steps: adminSteps,
       autoStartDelay: 1500
     });
@@ -581,7 +740,7 @@
     ];
 
     window.clientTourInstance = new OnboardingTour({
-      storageKey: 'mocd_client_tour_completed_v1',
+      storageKey: 'mocd_client_tour_completed_v2',
       steps: clientSteps,
       autoStartDelay: 1400
     });
