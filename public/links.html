@@ -5,13 +5,13 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Directorio Oficial de Links | 4 Programas Independientes</title>
-  <meta name="theme-color" content="#090b10">
+  <meta name="theme-color" content="#04050b">
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      background: radial-gradient(circle at top, #151924 0%, #090b10 65%);
+      background: radial-gradient(circle at top, #070a16 0%, #04050b 65%);
       color: #f3f4f6;
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
@@ -24,7 +24,7 @@
 <body class="min-h-screen py-6 px-3 sm:px-6 lg:px-10">
 
   <!-- Toast de confirmación de copiado -->
-  <div id="copyToast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-amber-500 text-black font-black text-xs sm:text-sm px-5 py-3 rounded-2xl shadow-[0_10px_40px_rgba(245,158,11,0.6)] flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+  <div id="copyToast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-cyan-400 text-black font-black text-xs sm:text-sm px-5 py-3 rounded-2xl shadow-[0_10px_40px_rgba(0,229,255,0.6)] flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
     <span>✅</span>
     <span id="copyToastText">¡Enlace copiado al portapapeles!</span>
   </div>
@@ -32,13 +32,13 @@
   <div class="max-w-6xl mx-auto space-y-6 sm:space-y-8">
 
     <!-- Cabecera Principal -->
-    <header class="bar-card rounded-3xl p-5 sm:p-8 border border-amber-500/30 shadow-[0_15px_50px_rgba(0,0,0,0.7)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <header class="bar-card rounded-3xl p-5 sm:p-8 border border-cyan-500/30 shadow-[0_15px_50px_rgba(0,0,0,0.7)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div class="flex items-center gap-3.5 sm:gap-4">
         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-black/60 border border-cyan-400/30 flex items-center justify-center p-2 shadow-[0_0_20px_rgba(0,229,255,0.3)] shrink-0">
           <img src="/icons/mocd-official-m-transparent.png?v=3" alt="MOCD" class="w-full h-full object-contain">
         </div>
         <div>
-          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-black uppercase tracking-widest mb-1">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-[10px] font-black uppercase tracking-widest mb-1">
             <span>⚡ PANEL CENTRAL DE ACCESOS</span>
           </div>
           <h1 class="text-xl sm:text-3xl font-black text-white tracking-tight">
@@ -51,7 +51,7 @@
       </div>
 
       <div class="flex items-center gap-2 w-full md:w-auto">
-        <button onclick="copyAllFourProgramsSummary()" class="w-full md:w-auto bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs sm:text-sm px-4 py-3 rounded-2xl shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
+        <button onclick="copyAllFourProgramsSummary()" class="w-full md:w-auto bg-gradient-to-r from-cyan-400 to-indigo-600 hover:from-amber-400 hover:to-orange-400 text-black font-black text-xs sm:text-sm px-4 py-3 rounded-2xl shadow-lg shadow-cyan-500/30 transition flex items-center justify-center gap-2 cursor-pointer">
           <span>📋</span>
           <span>Copiar Directorio Completo</span>
         </button>
@@ -69,14 +69,14 @@
             <span class="px-2 py-0.5 rounded-full bg-pink-500 text-white text-[10px] font-black uppercase tracking-wider">PÁGINA COMERCIAL DE VENTAS</span>
             <h2 class="text-sm sm:text-base font-black text-white">MOCD MUSIC — Landing Page para Clientes y Dueños de Bares</h2>
           </div>
-          <p id="salesPageUrlDisplay" class="text-xs font-mono text-amber-300 truncate mt-0.5">/ventas</p>
+          <p id="salesPageUrlDisplay" class="text-xs font-mono text-cyan-300 truncate mt-0.5">/ventas</p>
         </div>
       </div>
       <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
         <a href="/ventas" target="_blank" class="flex-1 sm:flex-initial text-center px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-black text-xs transition shadow-md">
           Abrir Página ↗
         </a>
-        <button onclick="copyLink(ORIGIN + '/ventas', 'Página Comercial MOCD MUSIC')" class="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-black border border-white/15 text-gray-200 font-bold text-xs transition cursor-pointer">
+        <button onclick="copyLink(ORIGIN + '/ventas', 'Página Comercial MOCD MUSIC')" class="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-cyan-400 hover:text-black border border-white/15 text-gray-200 font-bold text-xs transition cursor-pointer">
           📋 Copiar Link
         </button>
       </div>
@@ -108,7 +108,7 @@
         badge: 'PROGRAMA 1 • OFICIAL PRINCIPAL',
         icon: '🍺',
         accentBorder: 'border-amber-500/45',
-        accentBadge: 'bg-amber-500 text-black',
+        accentBadge: 'bg-cyan-400 text-black',
         accentGlow: 'shadow-[0_10px_40px_rgba(245,158,11,0.12)]',
         prefix: '',
         statusApi: '/api/status'
@@ -206,15 +206,15 @@
                 </div>
               </div>
               <div class="flex items-center gap-1.5 shrink-0">
-                <button onclick="copySingleLink('${lnk.url}', '${barTitle} - ${lnk.label}')" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-amber-500 hover:text-black text-gray-200 text-[11px] font-extrabold transition cursor-pointer flex items-center gap-1" title="Copiar este link">
+                <button onclick="copySingleLink('${lnk.url}', '${barTitle} - ${lnk.label}')" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-cyan-400 hover:text-black text-gray-200 text-[11px] font-extrabold transition cursor-pointer flex items-center gap-1" title="Copiar este link">
                   <span>📋</span> <span>Copiar</span>
                 </button>
-                <a href="${lnk.url}" target="_blank" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black border border-amber-500/40 text-[11px] font-black transition flex items-center gap-1" title="Abrir en nueva pestaña">
+                <a href="${lnk.url}" target="_blank" class="px-3 py-1.5 rounded-xl bg-cyan-400/20 hover:bg-cyan-400 text-cyan-300 hover:text-black border border-amber-500/40 text-[11px] font-black transition flex items-center gap-1" title="Abrir en nueva pestaña">
                   <span>Abrir</span> <span>↗</span>
                 </a>
               </div>
             </div>
-            <div class="bg-[#07090d] px-3 py-1.5 rounded-xl border border-white/5 font-mono text-[11px] text-amber-300/90 break-all select-all">
+            <div class="bg-[#07090d] px-3 py-1.5 rounded-xl border border-white/5 font-mono text-[11px] text-cyan-300/90 break-all select-all">
               ${lnk.url}
             </div>
           </div>

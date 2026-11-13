@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0c0e12">
+  <meta name="theme-color" content="#04050b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,17 +14,17 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
   <title>Santa Chela DJ | Consola de Control</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.css?v=20261113_v2">
   <script src="/socket.io/socket.io.js"></script>
 </head>
-<body class="bg-[#0c0e12] text-gray-100 min-h-screen flex flex-col font-sans">
+<body class="bg-[#04050b] text-gray-100 min-h-screen flex flex-col font-sans hero-glow">
 
   <!-- Portal visual de lanzamiento hacia el TV (Aparece al arrastrar canciones hacia arriba) -->
-  <div id="castDropPortal" class="fixed top-0 left-0 right-0 z-50 pointer-events-none transform -translate-y-full transition-transform duration-300 ease-out flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-b from-amber-500/40 via-amber-600/25 to-transparent border-b-2 border-amber-400 backdrop-blur-md shadow-[0_10px_50px_rgba(245,158,11,0.6)]">
+  <div id="castDropPortal" class="fixed top-0 left-0 right-0 z-50 pointer-events-none transform -translate-y-full transition-transform duration-300 ease-out flex flex-col items-center justify-center py-4 px-4 bg-gradient-to-b from-cyan-500/40 via-indigo-600/25 to-transparent border-b-2 border-cyan-400 backdrop-blur-md shadow-[0_10px_50px_rgba(0,229,255,0.6)]">
     <div class="flex items-center gap-3">
       <span class="text-3xl sm:text-4xl animate-bounce">🚀</span>
       <div class="text-center sm:text-left">
-        <p class="text-xs sm:text-base font-black text-amber-300 uppercase tracking-widest drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+        <p class="text-xs sm:text-base font-black text-cyan-300 uppercase tracking-widest drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
           ¡SUELTA AQUÍ PARA SONAR EN LA TV!
         </p>
         <p class="text-[9.5px] sm:text-xs text-white font-bold">
@@ -61,14 +61,14 @@
       <button id="btnAdminTourHelp" onclick="startAdminTour(true)" class="btn-secondary text-xs py-1.5 px-2 sm:px-2.5 flex items-center justify-center gap-1 text-cyan-300 hover:text-cyan-200 border border-cyan-500/40" title="Ver Guía Explicativa del Programa">
         <span>💡</span> <span class="hidden sm:inline">Tutorial</span>
       </button>
-      <button id="btnTopInstallPwa" onclick="triggerInstallPwa()" class="tactile-btn-gold text-[11px] sm:text-xs py-1.5 px-2.5 sm:px-3 flex items-center justify-center gap-1 font-black shadow-[0_0_12px_rgba(245,158,11,0.3)]" title="Instalar Consola como App en tu iPhone o Celular">
+      <button id="btnTopInstallPwa" onclick="triggerInstallPwa()" class="tactile-btn-gold text-[11px] sm:text-xs py-1.5 px-2.5 sm:px-3 flex items-center justify-center gap-1 font-black shadow-[0_0_12px_rgba(0,229,255,0.3)]" title="Instalar Consola como App en tu iPhone o Celular">
         <span>📲</span> <span class="hidden xs:inline">Instalar App</span>
       </button>
       <button id="btnMicMode" onclick="toggleMicMode()" class="btn-secondary text-xs flex items-center justify-center gap-1.5 py-1.5 px-2 sm:px-3 transition" title="Atenuar música para hablar">
         <span id="micModeIcon" class="w-2 h-2 rounded-full bg-gray-400 inline-block"></span>
         <span id="micModeText" class="hidden sm:inline">Modo Micrófono</span>
       </button>
-      <button id="btnTopRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark text-xs py-1.5 px-2 sm:px-3 flex items-center justify-center gap-1.5 text-amber-300 hover:text-amber-200 border border-amber-500/30" title="Activar o desactivar Pantalla Completa en la TV">
+      <button id="btnTopRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark text-xs py-1.5 px-2 sm:px-3 flex items-center justify-center gap-1.5 text-cyan-300 hover:text-cyan-200 border border-cyan-500/30" title="Activar o desactivar Pantalla Completa en la TV">
         <span id="topFullscreenIcon">⛶</span> <span id="topFullscreenText" class="hidden sm:inline">TV Fullscreen</span>
       </button>
       <a href="/player.html" target="_blank" class="tactile-btn-dark text-xs py-1.5 px-2 sm:px-3 hidden sm:flex items-center justify-center gap-1.5" title="Abrir pantalla para la TV">
@@ -96,12 +96,12 @@
           <button onclick="toggleSidebarMobile()" class="lg:hidden text-gray-400 hover:text-white p-1">✕</button>
         </div>
 
-        <button onclick="switchTab('queue')" id="tabBtnQueue" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+        <button onclick="switchTab('queue')" id="tabBtnQueue" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-[0_0_15px_rgba(0,229,255,0.15)]">
           <div class="flex items-center gap-2.5">
             <span class="text-base">📻</span>
             <span>En Vivo & Consola</span>
           </div>
-          <span id="queueCounterBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500 text-black font-extrabold">0</span>
+          <span id="queueCounterBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500 text-black font-extrabold">0</span>
         </button>
 
         <button onclick="switchTab('playlists')" id="tabBtnPlaylists" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-transparent transition">
@@ -130,7 +130,7 @@
         </button>
 
         <div id="btnSidebarInstallPwa" class="pt-2">
-          <button onclick="triggerInstallPwa()" class="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition shadow">
+          <button onclick="triggerInstallPwa()" class="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-cyan-500/20 to-orange-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 transition shadow">
             <span>📲</span>
             <span>Instalar como App</span>
           </button>
@@ -140,10 +140,10 @@
       <!-- Mini Tarjeta Persistente al Fondo del Sidebar -->
       <div class="p-3 border-t border-white/10 bg-black/40 m-3 rounded-2xl border border-white/5">
         <div class="flex items-center gap-2.5 mb-2">
-          <img id="adminSidebarMiniThumb" src="" class="w-10 h-10 rounded-xl object-cover border border-amber-500/40 shrink-0">
+          <img id="adminSidebarMiniThumb" src="" class="w-10 h-10 rounded-xl object-cover border border-cyan-500/40 shrink-0">
           <div class="min-w-0 flex-1">
             <p id="adminSidebarMiniTitle" class="text-xs font-bold text-white truncate">Cargando...</p>
-            <p id="adminSidebarMiniArtist" class="text-[10px] text-amber-400 truncate font-semibold">Artista</p>
+            <p id="adminSidebarMiniArtist" class="text-[10px] text-cyan-400 truncate font-semibold">Artista</p>
           </div>
         </div>
         <div class="flex items-center justify-between text-[10px] text-gray-400 font-mono">
@@ -169,13 +169,13 @@
         <!-- ============================================================ -->
         <!-- REPRODUCTOR PRO HARDWARE DECK (ESTILO DARK GOLD TRAKTOR/DJ) -->
         <!-- ============================================================ -->
-        <div id="adminNowPlayingDeck" class="relative bg-gradient-to-b from-[#181b24] via-[#12141c] to-[#0e1017] rounded-3xl p-4 sm:p-7 border border-amber-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.6),0_0_25px_rgba(245,158,11,0.08)] space-y-3.5 sm:space-y-5">
+        <div id="adminNowPlayingDeck" class="relative bg-gradient-to-b from-[#181b24] via-[#12141c] to-[#0e1017] rounded-3xl p-4 sm:p-7 border border-cyan-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.6),0_0_25px_rgba(0,229,255,0.08)] space-y-3.5 sm:space-y-5">
           
           <!-- Header del Deck (1 sola línea limpia) -->
           <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5 sm:pb-3">
             <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
-              <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#facc15] animate-pulse shrink-0"></span>
-              <span class="text-[9.5px] sm:text-xs font-black tracking-[0.12em] sm:tracking-[0.2em] text-amber-400 uppercase whitespace-nowrap truncate">NOW PLAYING • CONSOLA DJ</span>
+              <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#00e5ff] animate-pulse shrink-0"></span>
+              <span class="text-[9.5px] sm:text-xs font-black tracking-[0.12em] sm:tracking-[0.2em] text-cyan-400 uppercase whitespace-nowrap truncate">NOW PLAYING • CONSOLA DJ</span>
             </div>
             <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <span id="adminNowGenre" class="genre-badge genre-Salsa text-[9px] sm:text-[10px] shrink-0">Salsa</span>
@@ -187,14 +187,14 @@
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6">
             <div class="flex items-center gap-3 sm:gap-6 min-w-0 flex-1 w-full sm:w-auto">
               <div class="relative shrink-0 group">
-                <div class="absolute -inset-1 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 opacity-40 blur-sm group-hover:opacity-75 transition"></div>
-                <img id="adminNowThumb" src="" class="relative w-16 h-16 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-amber-400 shadow-2xl">
+                <div class="absolute -inset-1 rounded-2xl bg-gradient-to-br from-amber-400 to-indigo-600 opacity-40 blur-sm group-hover:opacity-75 transition"></div>
+                <img id="adminNowThumb" src="" class="relative w-16 h-16 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-cyan-400 shadow-2xl">
               </div>
               <div class="min-w-0 flex-1">
                 <h2 id="adminNowTitle" class="text-base sm:text-2xl lg:text-3xl font-black text-white tracking-wide truncate leading-tight">
                   Cargando...
                 </h2>
-                <p id="adminNowArtist" class="text-xs sm:text-base text-amber-400 font-bold truncate mt-0.5">
+                <p id="adminNowArtist" class="text-xs sm:text-base text-cyan-400 font-bold truncate mt-0.5">
                   Artista
                 </p>
                 <p class="text-[11px] sm:text-xs text-gray-400 mt-1 flex items-center gap-1.5">
@@ -206,7 +206,7 @@
             <!-- Tiempo Numérico Grande (Estilo Display Digital) -->
             <div class="bg-black/60 border border-white/10 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-right shrink-0 w-full sm:w-auto flex sm:flex-col items-center sm:items-end justify-between sm:justify-center">
               <div class="text-[9px] sm:text-[10px] uppercase tracking-widest text-gray-400 font-bold sm:mb-0.5">TIEMPO TRANSCURRIDO</div>
-              <div class="font-mono text-lg sm:text-2xl font-black tracking-wider text-amber-400">
+              <div class="font-mono text-lg sm:text-2xl font-black tracking-wider text-cyan-400">
                 <span id="adminCurrentTime">00:00</span> <span class="text-gray-500 text-sm sm:text-base">/</span> <span id="adminTotalDuration" class="text-gray-300">00:00</span>
               </div>
             </div>
@@ -240,7 +240,7 @@
 
               <!-- PLAY / PAUSE (DESTACADO DORADO AL CENTRO) -->
               <div class="flex flex-col items-center gap-1 min-w-0">
-                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-amber-400 tracking-wider whitespace-nowrap">PLAY / PAUSE</span>
+                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-cyan-400 tracking-wider whitespace-nowrap">PLAY / PAUSE</span>
                 <button id="btnPlayPause" onclick="togglePlayPauseRemote()" class="tactile-btn-gold w-full sm:w-auto justify-center px-3 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-lg flex items-center gap-1.5 whitespace-nowrap" title="Pausar o Reanudar">
                   <span id="btnPlayPauseIcon">⏸️</span>
                   <span id="btnPlayPauseText" class="text-[11px] sm:text-sm uppercase tracking-wider font-black">PAUSAR</span>
@@ -258,7 +258,7 @@
               <!-- NEXT / SALTAR -->
               <div class="flex flex-col items-center gap-1 min-w-0">
                 <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-gray-400 tracking-wider whitespace-nowrap">NEXT</span>
-                <button onclick="skipCurrentSong()" class="tactile-btn-dark w-full sm:w-auto justify-center px-2 sm:px-5 py-2.5 sm:py-2 text-xs sm:text-sm hover:border-amber-400/60 flex items-center gap-1 whitespace-nowrap" title="Saltar a la siguiente canción">
+                <button onclick="skipCurrentSong()" class="tactile-btn-dark w-full sm:w-auto justify-center px-2 sm:px-5 py-2.5 sm:py-2 text-xs sm:text-sm hover:border-cyan-400/60 flex items-center gap-1 whitespace-nowrap" title="Saltar a la siguiente canción">
                   <span>⏭️</span> <span>Saltar</span>
                 </button>
               </div>
@@ -278,8 +278,8 @@
 
               <!-- PANTALLA COMPLETA TV -->
               <div class="flex flex-col items-center gap-1">
-                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-amber-400 tracking-wider whitespace-nowrap">PANTALLA TV</span>
-                <button id="btnDeckRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark h-[38px] px-3 sm:px-4 py-2 text-xs hover:border-amber-400/60 flex items-center justify-center gap-1.5 text-amber-300 whitespace-nowrap" title="Activar o desactivar Pantalla Completa en el televisor">
+                <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-cyan-400 tracking-wider whitespace-nowrap">PANTALLA TV</span>
+                <button id="btnDeckRemoteFullscreen" onclick="remoteToggleFullscreen()" class="tactile-btn-dark h-[38px] px-3 sm:px-4 py-2 text-xs hover:border-cyan-400/60 flex items-center justify-center gap-1.5 text-cyan-300 whitespace-nowrap" title="Activar o desactivar Pantalla Completa en el televisor">
                   <span id="deckFullscreenIcon">⛶</span> <span id="deckFullscreenText" class="font-bold">TV Full</span>
                 </button>
               </div>
@@ -289,8 +289,8 @@
                 <span class="text-[8.5px] sm:text-[9px] font-black uppercase text-gray-400 tracking-wider pl-1 whitespace-nowrap">VOLUMEN TV</span>
                 <div class="h-[38px] w-full sm:w-auto bg-black/50 px-3 rounded-xl border border-white/10 flex items-center justify-between gap-2">
                   <span class="text-xs text-gray-400 shrink-0">🔊</span>
-                  <input type="range" id="adminVolumeSlider" min="0" max="100" value="100" oninput="onVolumeChange(this.value)" class="w-full sm:w-28 accent-amber-500 cursor-pointer h-1.5 bg-white/20 rounded-lg">
-                  <span id="adminVolumeDisplay" class="text-[10px] font-mono text-amber-400 font-bold w-8 text-right shrink-0">100%</span>
+                  <input type="range" id="adminVolumeSlider" min="0" max="100" value="100" oninput="onVolumeChange(this.value)" class="w-full sm:w-28 accent-cyan-400 cursor-pointer h-1.5 bg-white/20 rounded-lg">
+                  <span id="adminVolumeDisplay" class="text-[10px] font-mono text-cyan-400 font-bold w-8 text-right shrink-0">100%</span>
                 </div>
               </div>
 
@@ -300,15 +300,15 @@
 
           <!-- Botones de Show en Vivo: Ruleta 3D y Santa Chela Cam -->
           <div id="adminLiveShowButtons" class="pt-2.5 border-t border-white/10 grid grid-cols-2 gap-2">
-            <button onclick="openRouletteModal()" class="w-full py-2.5 px-2.5 sm:px-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/25 to-amber-500/20 hover:from-amber-500/35 hover:to-orange-500/35 border border-amber-400/50 text-amber-300 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_20px_rgba(245,158,11,0.15)] active:scale-[0.98] transition">
+            <button onclick="openRouletteModal()" class="w-full py-2.5 px-2.5 sm:px-3.5 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-blue-500/25 to-indigo-500/20 hover:from-cyan-500/35 hover:to-orange-500/35 border border-cyan-400/50 text-cyan-300 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_20px_rgba(0,229,255,0.15)] active:scale-[0.98] transition">
               <span class="text-base">🎰</span>
               <span class="truncate">RULETA 3D</span>
-              <span class="hidden sm:inline text-[9.5px] bg-amber-400 text-black font-black px-2 py-0.5 rounded-full uppercase shrink-0">TV</span>
+              <span class="hidden sm:inline text-[9.5px] bg-cyan-400 text-black font-black px-2 py-0.5 rounded-full uppercase shrink-0">TV</span>
             </button>
-            <button onclick="openSantaChelaCamModal()" class="w-full py-2.5 px-2.5 sm:px-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-orange-500/25 hover:from-amber-500/35 hover:to-orange-500/35 border border-amber-400/50 text-amber-300 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_20px_rgba(245,158,11,0.15)] active:scale-[0.98] transition">
+            <button onclick="openSantaChelaCamModal()" class="w-full py-2.5 px-2.5 sm:px-3.5 rounded-2xl bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-cyan-500/25 hover:from-cyan-500/35 hover:to-orange-500/35 border border-cyan-400/50 text-cyan-300 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-[0_0_20px_rgba(0,229,255,0.15)] active:scale-[0.98] transition">
               <span class="text-base">📸</span>
               <span class="truncate">FOTO AL TV</span>
-              <span class="hidden sm:inline text-[9.5px] bg-amber-400 text-black font-black px-2 py-0.5 rounded-full uppercase shrink-0">Cam</span>
+              <span class="hidden sm:inline text-[9.5px] bg-cyan-400 text-black font-black px-2 py-0.5 rounded-full uppercase shrink-0">Cam</span>
             </button>
           </div>
 
@@ -326,7 +326,7 @@
           </div>
           <div class="flex flex-col sm:flex-row gap-2">
             <div class="relative flex-1">
-              <input type="text" id="adminSearchInput" onkeydown="handleAdminSearchKey(event)" placeholder="Buscar canción, artista o pegar enlace de YouTube..." class="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white outline-none focus:border-amber-400 pr-9">
+              <input type="text" id="adminSearchInput" onkeydown="handleAdminSearchKey(event)" placeholder="Buscar canción, artista o pegar enlace de YouTube..." class="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white outline-none focus:border-cyan-400 pr-9">
               <button id="adminSearchInputClear" onclick="clearAdminSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-xs hidden" title="Limpiar">✕</button>
             </div>
             <button id="adminSearchBtn" onclick="adminSearchSong()" class="btn-secondary text-xs sm:text-sm px-4 py-2.5 flex items-center justify-center gap-1.5 font-bold">
@@ -344,18 +344,18 @@
         <div id="adminQueueSection" class="glass-card p-4 sm:p-6 space-y-4 border-white/10">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div class="flex items-center gap-2.5">
-              <span class="text-amber-400 font-bold text-base">≡</span>
+              <span class="text-cyan-400 font-bold text-base">≡</span>
               <h3 class="font-black text-sm sm:text-base text-white tracking-wider uppercase flex items-center gap-2">
                 COLA DE REPRODUCCIÓN (<span id="queueCounter">0</span>)
               </h3>
-              <span id="queueCustomerBadge" class="hidden text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              <span id="queueCustomerBadge" class="hidden text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                 0 de mesas
               </span>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
               <!-- Selector Rápido de Modo de Arrastre de Cola -->
               <div class="inline-flex items-center gap-1 p-0.5 rounded-xl bg-black/60 border border-white/10 text-[11px]">
-                <button type="button" id="btnQueueDragReorder" onclick="setQueueDragMode(false)" class="px-2.5 py-1 rounded-lg transition bg-amber-500 text-black font-black shadow" title="Arrastrar canciones para cambiar de posición en la cola">
+                <button type="button" id="btnQueueDragReorder" onclick="setQueueDragMode(false)" class="px-2.5 py-1 rounded-lg transition bg-cyan-500 text-black font-black shadow" title="Arrastrar canciones para cambiar de posición en la cola">
                   ⇅ Organizar Lista
                 </button>
                 <button type="button" id="btnQueueDragCast" onclick="setQueueDragMode(true)" class="px-2.5 py-1 rounded-lg transition text-gray-400 hover:text-white font-semibold" title="Tocar y arrastrar canciones hacia arriba para lanzarlas al TV">
@@ -400,7 +400,7 @@
             Restaurar
           </button>
           <input type="file" id="importBackupFileInput" accept=".json" class="hidden" onchange="handleBackupFileSelected(event)">
-          <button onclick="autoClassifyAllPlaylists()" class="btn-secondary text-xs flex items-center gap-1 py-1.5 px-2.5 text-amber-300 hover:text-amber-200 border-amber-500/30" title="Analiza todas tus listas y actualiza temas en Crossover al género correcto">
+          <button onclick="autoClassifyAllPlaylists()" class="btn-secondary text-xs flex items-center gap-1 py-1.5 px-2.5 text-cyan-300 hover:text-cyan-200 border-cyan-500/30" title="Analiza todas tus listas y actualiza temas en Crossover al género correcto">
             Auto-Detectar Géneros
           </button>
           <button onclick="openImportModal()" class="btn-secondary text-xs flex items-center gap-1 py-1.5 px-2.5">
@@ -413,10 +413,10 @@
       </div>
  
       <!-- Panel de Control de Modo de Reproducción de Listas Base -->
-      <div class="glass-card p-4 sm:p-5 space-y-3.5 border-amber-500/30 bg-amber-500/5">
+      <div class="glass-card p-4 sm:p-5 space-y-3.5 border-cyan-500/30 bg-cyan-500/5">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div>
-            <h3 class="text-sm font-bold text-amber-400">
+            <h3 class="text-sm font-bold text-cyan-400">
               Modo de Reproducción Base (Cuando no hay pedidos)
             </h3>
             <p class="text-[11px] sm:text-xs text-gray-300">Elige cómo rota la música de fondo entre tus listas.</p>
@@ -430,8 +430,8 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
           <!-- Opción 1: Lista Única -->
-          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-amber-400/50 transition flex items-start gap-3">
-            <input type="radio" name="basePlaybackModeRadio" value="single" class="mt-0.5 accent-amber-500" onchange="changeBasePlaybackMode('single')">
+          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-cyan-400/50 transition flex items-start gap-3">
+            <input type="radio" name="basePlaybackModeRadio" value="single" class="mt-0.5 accent-cyan-400" onchange="changeBasePlaybackMode('single')">
             <div class="text-xs">
               <p class="font-bold text-white">Lista Única</p>
               <p class="text-[11px] text-gray-400 mt-0.5">Suena únicamente la lista activa.</p>
@@ -439,17 +439,17 @@
           </label>
 
           <!-- Opción 2: Crossover Multilistas -->
-          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-amber-400/50 transition flex items-start gap-3">
-            <input type="radio" name="basePlaybackModeRadio" value="crossover" class="mt-0.5 accent-amber-500" onchange="changeBasePlaybackMode('crossover')">
+          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-cyan-400/50 transition flex items-start gap-3">
+            <input type="radio" name="basePlaybackModeRadio" value="crossover" class="mt-0.5 accent-cyan-400" onchange="changeBasePlaybackMode('crossover')">
             <div class="text-xs">
-              <p class="font-bold text-amber-400">Crossover Multilistas</p>
+              <p class="font-bold text-cyan-400">Crossover Multilistas</p>
               <p class="text-[11px] text-gray-400 mt-0.5">Mezcla tandas automáticas (ej: 2 de cada lista).</p>
             </div>
           </label>
 
           <!-- Opción 3: Secuencial / Consecutivo -->
-          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-amber-400/50 transition flex items-start gap-3">
-            <input type="radio" name="basePlaybackModeRadio" value="sequential" class="mt-0.5 accent-amber-500" onchange="changeBasePlaybackMode('sequential')">
+          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-cyan-400/50 transition flex items-start gap-3">
+            <input type="radio" name="basePlaybackModeRadio" value="sequential" class="mt-0.5 accent-cyan-400" onchange="changeBasePlaybackMode('sequential')">
             <div class="text-xs">
               <p class="font-bold text-sky-400">Consecutivo en Cadena</p>
               <p class="text-[11px] text-gray-400 mt-0.5">Suena una lista completa tras otra.</p>
@@ -457,8 +457,8 @@
           </label>
 
           <!-- Opción 4: Género Específico Multilistas -->
-          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-amber-400/50 transition flex items-start gap-3">
-            <input type="radio" name="basePlaybackModeRadio" value="genre_focus" class="mt-0.5 accent-amber-500" onchange="changeBasePlaybackMode('genre_focus')">
+          <label class="cursor-pointer border border-white/10 p-3 rounded-xl bg-black/30 hover:border-cyan-400/50 transition flex items-start gap-3">
+            <input type="radio" name="basePlaybackModeRadio" value="genre_focus" class="mt-0.5 accent-cyan-400" onchange="changeBasePlaybackMode('genre_focus')">
             <div class="text-xs">
               <p class="font-bold text-emerald-400">Género Específico</p>
               <p class="text-[11px] text-gray-400 mt-0.5">Todas las canciones de un solo género.</p>
@@ -467,14 +467,14 @@
         </div>
 
         <!-- Panel 1: Opciones de Crossover -->
-        <div id="crossoverSettingsPanel" class="hidden p-3.5 rounded-xl bg-black/40 border border-amber-500/20 space-y-3">
+        <div id="crossoverSettingsPanel" class="hidden p-3.5 rounded-xl bg-black/40 border border-cyan-500/20 space-y-3">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-2.5">
             <div>
               <p class="text-xs font-bold text-white">Método de Distribución Crossover:</p>
               <p class="text-[11px] text-gray-400">Elige si mezclar por tandas fijas de temas o por porcentaje de presencia %.</p>
             </div>
             <div class="flex items-center gap-2">
-              <select id="crossoverDistTypeSelect" onchange="updateCrossoverDistType(this.value)" class="bg-black/60 border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-amber-400 font-semibold">
+              <select id="crossoverDistTypeSelect" onchange="updateCrossoverDistType(this.value)" class="bg-black/60 border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-cyan-400 font-semibold">
                 <option value="batch">Por Tandas (1 a 5 temas seguidos)</option>
                 <option value="percentage">Por Porcentajes % (Ponderación)</option>
               </select>
@@ -487,7 +487,7 @@
               <p class="text-xs font-semibold text-gray-200">Temas seguidos por lista antes de saltar a otra:</p>
               <p class="text-[11px] text-gray-400">Ejemplo: Con 2 temas, sonarán 2 de Lista A, luego 2 de Lista B, etc.</p>
             </div>
-            <select id="crossoverBatchSizeSelect" onchange="updateCrossoverBatchSize(this.value)" class="bg-black/60 border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-amber-400 font-semibold">
+            <select id="crossoverBatchSizeSelect" onchange="updateCrossoverBatchSize(this.value)" class="bg-black/60 border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white outline-none focus:border-cyan-400 font-semibold">
               <option value="1">1 canción por lista</option>
               <option value="2">2 canciones por lista</option>
               <option value="3">3 canciones por lista (Recomendado)</option>
@@ -497,15 +497,15 @@
           </div>
 
           <!-- Información para Porcentajes (Punto 3) -->
-          <div id="crossoverPercentageOption" class="hidden space-y-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
-            <p class="text-xs font-bold text-amber-300">📊 Modo Porcentajes Activo (Distribución Proporcional):</p>
+          <div id="crossoverPercentageOption" class="hidden space-y-2 p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
+            <p class="text-xs font-bold text-cyan-300">📊 Modo Porcentajes Activo (Distribución Proporcional):</p>
             <p class="text-[11px] text-gray-300 leading-relaxed">
               Asigna en cada tarjeta de lista el porcentaje deseado (ej: <strong>60%</strong> Salsa, <strong>30%</strong> Reggaetón, <strong>10%</strong> Vallenato). El sistema distribuirá armónicamente los temas a lo largo de la cola sin saturar la pista.
             </p>
           </div>
 
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
-            <p class="text-[11px] text-amber-300">
+            <p class="text-[11px] text-cyan-300">
               💡 Marca abajo con el botón <strong>"En Rotación"</strong> las listas que quieres que participen.
             </p>
             <button onclick="changeBasePlaybackMode('sequential')" class="text-[11px] px-2.5 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 transition font-bold shrink-0">
@@ -528,7 +528,7 @@
                 <option value="natural">Orden Natural (de primera a última)</option>
                 <option value="custom">Orden Personalizado (manual)</option>
               </select>
-              <button onclick="changeBasePlaybackMode('crossover')" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition font-bold whitespace-nowrap">
+              <button onclick="changeBasePlaybackMode('crossover')" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition font-bold whitespace-nowrap">
                 Cambiar a mezclar por tandas
               </button>
             </div>
@@ -603,7 +603,7 @@
 
         <div class="space-y-2">
           <label class="block text-xs font-semibold text-gray-300">Instrucción para el DJ IA:</label>
-          <textarea id="aiPromptInput" rows="3" placeholder="Ej: Ármame una lista de 8 canciones para viernes en la noche, con 50% salsa brava y 50% música popular de cantina..." class="w-full bg-black/40 border border-white/15 rounded-2xl p-3 text-sm text-white outline-none focus:border-amber-400"></textarea>
+          <textarea id="aiPromptInput" rows="3" placeholder="Ej: Ármame una lista de 8 canciones para viernes en la noche, con 50% salsa brava y 50% música popular de cantina..." class="w-full bg-black/40 border border-white/15 rounded-2xl p-3 text-sm text-white outline-none focus:border-cyan-400"></textarea>
           <p class="text-[11px] text-gray-400">Funciona automáticamente sin necesidad de clave. (Opcional: Si quieres razonamiento conversacional avanzado, puedes ingresar tu clave gratuita de Gemini en Ajustes del Bar).</p>
         </div>
 
@@ -612,7 +612,7 @@
         </button>
 
         <div id="aiGeneratedResults" class="hidden space-y-3 pt-4 border-t border-white/10">
-          <h4 class="text-sm font-bold text-amber-400">Canciones sugeridas por la IA:</h4>
+          <h4 class="text-sm font-bold text-cyan-400">Canciones sugeridas por la IA:</h4>
           <div id="aiTracksList" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
           <button onclick="saveAIGeneratedPlaylist()" class="btn-primary text-xs py-2 px-4">Guardar como Lista Base</button>
         </div>
@@ -626,7 +626,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Top Canciones -->
         <div class="glass-card p-5 space-y-3">
-          <h3 class="font-bold text-sm text-amber-400 flex items-center gap-2">
+          <h3 class="font-bold text-sm text-cyan-400 flex items-center gap-2">
             Lo Más Pedido por los Clientes
           </h3>
           <div id="topSongsList" class="space-y-2 text-xs"></div>
@@ -634,7 +634,7 @@
 
         <!-- Top Géneros -->
         <div class="glass-card p-5 space-y-3">
-          <h3 class="font-bold text-sm text-amber-400 flex items-center gap-2">
+          <h3 class="font-bold text-sm text-cyan-400 flex items-center gap-2">
             Géneros Más Populares
           </h3>
           <div id="topGenresList" class="space-y-2 text-xs"></div>
@@ -654,7 +654,7 @@
     <div id="tabContentControl" class="hidden space-y-6">
       
       <!-- Panel Destacado: Control de Pantalla TV & Modo Pantalla Completa -->
-      <div class="glass-card p-5 sm:p-6 space-y-4 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-black/40 to-black/40 shadow-xl">
+      <div class="glass-card p-5 sm:p-6 space-y-4 border border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 via-black/40 to-black/40 shadow-xl">
         <div class="border-b border-white/10 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 class="text-base font-extrabold text-white flex items-center gap-2">
@@ -671,7 +671,7 @@
           <button onclick="remoteToggleFullscreen()" class="tactile-btn-gold text-xs sm:text-sm px-5 py-2.5 flex items-center gap-2 font-black shadow-lg">
             <span id="tabFullscreenIcon">⛶</span> <span id="tabFullscreenText">Alternar Pantalla Completa en TV</span>
           </button>
-          <a href="/player.html" target="_blank" class="tactile-btn-dark text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2 font-bold hover:border-amber-400/50">
+          <a href="/player.html" target="_blank" class="tactile-btn-dark text-xs sm:text-sm px-4 py-2.5 flex items-center gap-2 font-bold hover:border-cyan-400/50">
             <span>📺</span> <span>Abrir Pantalla TV en Nueva Ventana</span>
           </a>
         </div>
@@ -693,8 +693,8 @@
 
           <!-- Formulario para pausar mesa -->
           <div class="flex flex-wrap gap-2">
-            <input type="text" id="banTableInput" placeholder="N° de mesa (ej: 4)" class="w-32 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
-            <select id="banTableMinutes" class="bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+            <input type="text" id="banTableInput" placeholder="N° de mesa (ej: 4)" class="w-32 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
+            <select id="banTableMinutes" class="bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
               <option value="15">15 minutos</option>
               <option value="30" selected>30 minutos</option>
               <option value="60">1 hora</option>
@@ -725,7 +725,7 @@
           </div>
 
           <div class="flex gap-2">
-            <input type="text" id="newBlacklistWordInput" placeholder="Nueva palabra o término prohibido..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+            <input type="text" id="newBlacklistWordInput" placeholder="Nueva palabra o término prohibido..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
             <button onclick="addBlacklistWord()" class="btn-secondary text-xs px-4">Agregar</button>
           </div>
 
@@ -746,7 +746,7 @@
           </div>
 
           <div class="flex gap-2">
-            <input type="text" id="newPromoInput" placeholder="Ej: Hoy 2x1 en Cócteles hasta las 10 PM..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+            <input type="text" id="newPromoInput" placeholder="Ej: Hoy 2x1 en Cócteles hasta las 10 PM..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
             <button onclick="addPromoMessage()" class="btn-primary text-xs px-4">Agregar</button>
           </div>
 
@@ -766,7 +766,7 @@
             </div>
             <div class="flex items-center gap-2">
               <span class="text-xs text-gray-400">Activo:</span>
-              <input type="checkbox" id="settingScheduleEnabled" onchange="toggleScheduleEnabled(this.checked)" class="w-4 h-4 accent-amber-500">
+              <input type="checkbox" id="settingScheduleEnabled" onchange="toggleScheduleEnabled(this.checked)" class="w-4 h-4 accent-cyan-400">
             </div>
           </div>
 
@@ -777,24 +777,24 @@
 
           <!-- Formulario para agregar bloque de horario -->
           <div class="bg-black/30 p-3.5 rounded-2xl border border-white/10 space-y-2">
-            <p class="text-xs font-bold text-amber-400">Agregar nuevo bloque de horario:</p>
+            <p class="text-xs font-bold text-cyan-400">Agregar nuevo bloque de horario:</p>
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="text-[10px] text-gray-400 block mb-0.5">Desde (Hora):</label>
-                <input type="time" id="newScheduleStart" value="20:00" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-amber-400">
+                <input type="time" id="newScheduleStart" value="20:00" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-cyan-400">
               </div>
               <div>
                 <label class="text-[10px] text-gray-400 block mb-0.5">Hasta (Hora):</label>
-                <input type="time" id="newScheduleEnd" value="23:30" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-amber-400">
+                <input type="time" id="newScheduleEnd" value="23:30" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-cyan-400">
               </div>
             </div>
             <div>
               <label class="text-[10px] text-gray-400 block mb-0.5">Nombre de la tanda:</label>
-              <input type="text" id="newScheduleName" placeholder="Ej: Previa y Rumba" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-amber-400">
+              <input type="text" id="newScheduleName" placeholder="Ej: Previa y Rumba" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-cyan-400">
             </div>
             <div>
               <label class="text-[10px] text-gray-400 block mb-0.5">Lista Base a reproducir:</label>
-              <select id="newSchedulePlaylistSelect" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-amber-400">
+              <select id="newSchedulePlaylistSelect" class="w-full bg-black/40 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs text-white outline-none focus:border-cyan-400">
                 <!-- Inyectado dinámicamente con las listas disponibles -->
               </select>
             </div>
@@ -818,24 +818,24 @@
 
         <div>
           <label class="block text-xs text-gray-400 mb-1">Nombre del Bar:</label>
-          <input type="text" id="settingBarName" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+          <input type="text" id="settingBarName" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-xs text-gray-400 mb-1">Máx. pedidos por mesa (Clientes QR):</label>
-            <input type="number" id="settingMaxRequests" min="1" max="50" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
-            <p class="text-[10px] text-amber-400/80 mt-1">El DJ/Admin puede colocar temas ilimitados.</p>
+            <input type="number" id="settingMaxRequests" min="1" max="50" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
+            <p class="text-[10px] text-cyan-400/80 mt-1">El DJ/Admin puede colocar temas ilimitados.</p>
           </div>
           <div>
             <label class="block text-xs text-gray-400 mb-1">Ventana máx. de espera (canciones):</label>
-            <input type="number" id="settingWindow" min="1" max="10" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+            <input type="number" id="settingWindow" min="1" max="10" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
           </div>
         </div>
 
         <div>
           <label class="block text-xs text-gray-400 mb-1">Total de Mesas en el Bar:</label>
-          <input type="number" id="settingTotalTables" min="1" max="100" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+          <input type="number" id="settingTotalTables" min="1" max="100" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
         </div>
 
         <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
@@ -843,7 +843,7 @@
             <p class="text-sm font-bold text-white">DJ Automático Inteligente</p>
             <p class="text-xs text-gray-400">Agrupa por tandas de género automáticamente</p>
           </div>
-          <input type="checkbox" id="settingAutoDJ" class="w-5 h-5 accent-amber-500">
+          <input type="checkbox" id="settingAutoDJ" class="w-5 h-5 accent-cyan-400">
         </div>
 
         <!-- Tamaño de Tanda de Género -->
@@ -854,7 +854,7 @@
               <p class="text-xs text-gray-400">Cuántos temas del mismo ritmo suenan seguidos antes de pasar a otro</p>
             </div>
           </div>
-          <select id="settingGenreBatchSize" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+          <select id="settingGenreBatchSize" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
             <option value="1">1 canción (Rotación inmediata / Cambio continuo)</option>
             <option value="2">2 canciones (Tandas dinámicas y ágiles)</option>
             <option value="3">3 canciones (Estándar DJ de bar - Recomendado)</option>
@@ -871,68 +871,68 @@
               <p class="text-xs text-gray-400">Define cómo piden música los clientes desde sus mesas</p>
             </div>
           </div>
-          <select id="settingRequestMode" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+          <select id="settingRequestMode" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
             <option value="open">Modo Abierto (Búsqueda libre en YouTube)</option>
             <option value="playlist">Modo Cerrado (Solo canciones de las Listas del Bar)</option>
           </select>
           <div class="bg-black/30 p-2.5 rounded-lg border border-white/5 text-[11px] text-gray-300 space-y-1">
-            <p><span class="text-amber-400 font-semibold">• Modo Abierto:</span> Los clientes tienen barra de búsqueda libre en YouTube y pueden pedir cualquier tema.</p>
-            <p><span class="text-amber-400 font-semibold">• Modo Cerrado:</span> Los clientes ven el catálogo de tus Listas Maestras y solo pueden elegir entre esas canciones.</p>
+            <p><span class="text-cyan-400 font-semibold">• Modo Abierto:</span> Los clientes tienen barra de búsqueda libre en YouTube y pueden pedir cualquier tema.</p>
+            <p><span class="text-cyan-400 font-semibold">• Modo Cerrado:</span> Los clientes ven el catálogo de tus Listas Maestras y solo pueden elegir entre esas canciones.</p>
           </div>
         </div>
 
         <!-- Opción Desbloqueable: Permitir Foto / Selfie en Pedidos QR de las Mesas -->
-        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white/5 to-white/5 border border-amber-500/35">
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-cyan-500/15 via-white/5 to-white/5 border border-cyan-500/35">
           <div class="pr-3">
             <div class="flex items-center gap-2">
-              <p class="text-sm font-bold text-amber-300">📸 Permitir Foto / Selfie en Pedidos QR (Mesas)</p>
-              <span class="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">Desbloqueable</span>
+              <p class="text-sm font-bold text-cyan-300">📸 Permitir Foto / Selfie en Pedidos QR (Mesas)</p>
+              <span class="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">Desbloqueable</span>
             </div>
             <p class="text-xs text-gray-300 mt-1">
               Si activas esta opción, cuando una mesa pida una canción por QR podrá tomarse una foto/selfie opcional para que salga en el TV junto con su saludo. Si está desactivada, el formulario QR aparece normal como siempre.
             </p>
           </div>
-          <input type="checkbox" id="settingAllowClientPhoto" onchange="toggleClientPhotoSettingImmediate(this.checked)" class="w-5 h-5 accent-amber-500 shrink-0 cursor-pointer">
+          <input type="checkbox" id="settingAllowClientPhoto" onchange="toggleClientPhotoSettingImmediate(this.checked)" class="w-5 h-5 accent-cyan-400 shrink-0 cursor-pointer">
         </div>
 
         <!-- Opción Desbloqueable: Modo Show - Lanzar canciones al TV arrastrándolas -->
-        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white/5 to-white/5 border border-amber-500/35">
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-cyan-500/15 via-white/5 to-white/5 border border-cyan-500/35">
           <div class="pr-3">
             <div class="flex items-center gap-2">
-              <p class="text-sm font-bold text-amber-300">🚀 Modo Show: Lanzar canciones al TV arrastrándolas</p>
-              <span class="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30">Opcional</span>
+              <p class="text-sm font-bold text-cyan-300">🚀 Modo Show: Lanzar canciones al TV arrastrándolas</p>
+              <span class="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">Opcional</span>
             </div>
             <p class="text-xs text-gray-300 mt-1">
               Si activas esta opción, puedes tocar una canción de la cola y arrastrarla hacia arriba para lanzarla al televisor. <strong>Por defecto (desactivado)</strong>, arrastrar una canción reordena su posición en la lista de espera de un turno a otro como siempre.
             </p>
           </div>
-          <input type="checkbox" id="settingDragToCast" onchange="toggleDragToCastSettingImmediate(this.checked)" class="w-5 h-5 accent-amber-500 shrink-0 cursor-pointer">
+          <input type="checkbox" id="settingDragToCast" onchange="toggleDragToCastSettingImmediate(this.checked)" class="w-5 h-5 accent-cyan-400 shrink-0 cursor-pointer">
         </div>
 
         <!-- Opción de Seguridad: Confirmar antes de cambiar la canción que está sonando -->
-        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white/5 to-white/5 border border-amber-500/35">
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-cyan-500/15 via-white/5 to-white/5 border border-cyan-500/35">
           <div class="pr-3">
             <div class="flex items-center gap-2">
-              <p class="text-sm font-bold text-amber-300">🛡️ Confirmar antes de cambiar canción sonando</p>
+              <p class="text-sm font-bold text-cyan-300">🛡️ Confirmar antes de cambiar canción sonando</p>
               <span class="text-[9.5px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Seguridad</span>
             </div>
             <p class="text-xs text-gray-300 mt-1">
               Muestra un letrero de confirmación (<em>"¿Realmente deseas cambiar la canción?"</em>) al pulsar Sonar, Saltar o cambiar temas, para evitar cortar la música del bar por error o equivocación al organizar la lista.
             </p>
           </div>
-          <input type="checkbox" id="settingConfirmBeforeSongChange" onchange="toggleConfirmSettingImmediate(this.checked)" class="w-5 h-5 accent-amber-500 shrink-0 cursor-pointer">
+          <input type="checkbox" id="settingConfirmBeforeSongChange" onchange="toggleConfirmSettingImmediate(this.checked)" class="w-5 h-5 accent-cyan-400 shrink-0 cursor-pointer">
         </div>
 
         <!-- Transiciones y Duración de Canciones (Ritmo DJ) -->
-        <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-white/5 to-white/5 border border-amber-500/30 space-y-3">
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-cyan-500/10 via-white/5 to-white/5 border border-cyan-500/30 space-y-3">
           <div class="flex items-center justify-between border-b border-white/10 pb-2">
             <div>
-              <p class="text-sm font-bold text-amber-400 flex items-center gap-1.5">
+              <p class="text-sm font-bold text-cyan-400 flex items-center gap-1.5">
                 Transiciones & Duración de Canciones
               </p>
               <p class="text-xs text-gray-400">Evita silencios o cortes bruscos y mantén el bar con buena energía</p>
             </div>
-            <span class="text-xs font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-md border border-amber-500/30 font-bold">DJ FX</span>
+            <span class="text-xs font-mono bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-md border border-cyan-500/30 font-bold">DJ FX</span>
           </div>
 
           <!-- Fundido Suave (Fade Out / Fade In) -->
@@ -941,13 +941,13 @@
               <p class="text-xs font-bold text-white">Transición Suave (Fade Out 6s / Fade In 2s)</p>
               <p class="text-[11px] text-gray-400">Baja suavemente el volumen al terminar y sube la nueva sin cortes secos.</p>
             </div>
-            <input type="checkbox" id="settingFadeTransition" class="w-5 h-5 accent-amber-500">
+            <input type="checkbox" id="settingFadeTransition" class="w-5 h-5 accent-cyan-400">
           </div>
 
           <!-- Límite de Duración por Tema -->
           <div class="space-y-1">
             <label class="block text-xs font-bold text-white">Tiempo Máximo por Canción:</label>
-            <select id="settingMaxSongDuration" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+            <select id="settingMaxSongDuration" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
               <option value="0" selected>Canción Completa (100% del tema - Sin cortes)</option>
               <option value="150">2:30 minutos (Modo Ultra Dinámico / Hora Pico)</option>
               <option value="180">3:00 minutos (Modo Rumba y Rápida Rotación)</option>
@@ -960,16 +960,16 @@
           <!-- Modo Inteligente Dinámico por Cola -->
           <div class="flex items-center justify-between p-2.5 rounded-xl bg-black/30 border border-white/5">
             <div class="pr-2">
-              <p class="text-xs font-bold text-amber-300">Recorte Inteligente solo si hay Pedidos</p>
+              <p class="text-xs font-bold text-cyan-300">Recorte Inteligente solo si hay Pedidos</p>
               <p class="text-[11px] text-gray-400">Si la cola está vacía, deja sonar la lista base completa. Si hay pedidos de mesas, activa el límite de tiempo.</p>
             </div>
-            <input type="checkbox" id="settingDynamicDuration" class="w-5 h-5 accent-amber-500">
+            <input type="checkbox" id="settingDynamicDuration" class="w-5 h-5 accent-cyan-400">
           </div>
         </div>
 
         <div>
           <label class="block text-xs text-gray-400 mb-1">Clave de API de Gemini (Opcional, para funciones avanzadas de IA):</label>
-          <input type="password" id="settingApiKey" placeholder="AIzaSy..." class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-amber-400">
+          <input type="password" id="settingApiKey" placeholder="AIzaSy..." class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-cyan-400">
         </div>
 
         <button onclick="saveSettings()" class="btn-primary w-full py-3 text-xs font-bold mt-2">
@@ -995,19 +995,19 @@
       <div class="space-y-3">
         <div>
           <label class="block text-xs font-semibold text-gray-400 mb-1">Nombre de la lista:</label>
-          <input type="text" id="newPlaylistName" placeholder="Ej: Sábado Parrandero y Salsa" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white outline-none focus:border-amber-400">
+          <input type="text" id="newPlaylistName" placeholder="Ej: Sábado Parrandero y Salsa" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white outline-none focus:border-cyan-400">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-gray-400 mb-1">Descripción:</label>
-          <input type="text" id="newPlaylistDesc" placeholder="Ej: Salsa dura, merengue y despecho para fin de semana" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white outline-none focus:border-amber-400">
+          <input type="text" id="newPlaylistDesc" placeholder="Ej: Salsa dura, merengue y despecho para fin de semana" class="w-full bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white outline-none focus:border-cyan-400">
         </div>
 
         <!-- Agregar temas a la nueva lista -->
         <div class="border-t border-white/10 pt-3 space-y-2">
-          <label class="block text-xs font-semibold text-amber-400">Buscar y agregar canciones de YouTube:</label>
+          <label class="block text-xs font-semibold text-cyan-400">Buscar y agregar canciones de YouTube:</label>
           <div class="flex gap-2">
-            <input type="text" id="playlistSearchSongInput" placeholder="Buscar canción o artista en YouTube..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+            <input type="text" id="playlistSearchSongInput" placeholder="Buscar canción o artista en YouTube..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
             <button onclick="searchSongForPlaylist()" class="btn-secondary text-xs px-3 py-2">Buscar</button>
           </div>
 
@@ -1039,7 +1039,7 @@
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2">
             <h3 id="viewPlaylistTitle" class="text-sm sm:text-base font-bold text-white truncate">Nombre de Lista</h3>
-            <span id="viewPlaylistTrackCount" class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30 whitespace-nowrap">0 temas</span>
+            <span id="viewPlaylistTrackCount" class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 font-bold border border-cyan-500/30 whitespace-nowrap">0 temas</span>
           </div>
           <p id="viewPlaylistDesc" class="text-[11px] sm:text-xs text-gray-400 mt-0.5 truncate"></p>
         </div>
@@ -1053,9 +1053,9 @@
 
       <!-- Buscador para agregar canciones nuevas a ESTA lista -->
       <div class="bg-black/30 p-3 rounded-2xl border border-white/10 space-y-2">
-        <label class="block text-xs font-semibold text-amber-400">Agregar nueva canción de YouTube a esta lista:</label>
+        <label class="block text-xs font-semibold text-cyan-400">Agregar nueva canción de YouTube a esta lista:</label>
         <div class="flex gap-2">
-          <input type="text" id="addSongToPlaylistInput" placeholder="Buscar canción, artista o pegar link de YouTube..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+          <input type="text" id="addSongToPlaylistInput" placeholder="Buscar canción, artista o pegar link de YouTube..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
           <button onclick="searchSongToAddToCurrentPlaylist()" class="btn-secondary text-xs px-4">Buscar</button>
         </div>
         <div id="addSongToPlaylistResults" class="space-y-1.5 max-h-48 overflow-y-auto hidden pt-1"></div>
@@ -1065,7 +1065,7 @@
       <div class="space-y-2">
         <div class="flex items-center justify-between">
           <h4 class="text-xs font-bold text-gray-300">Canciones en esta lista:</h4>
-          <button onclick="autoClassifyCurrentPlaylist()" class="text-[11px] px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold transition flex items-center gap-1" title="Detecta automáticamente Salsa, Reggaetón, Cantina, Vallenato, etc. en todas las canciones de esta lista">
+          <button onclick="autoClassifyCurrentPlaylist()" class="text-[11px] px-2.5 py-1 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 font-bold transition flex items-center gap-1" title="Detecta automáticamente Salsa, Reggaetón, Cantina, Vallenato, etc. en todas las canciones de esta lista">
             Auto-Detectar Géneros
           </button>
         </div>
@@ -1093,7 +1093,7 @@
 
       <!-- Pestañas internas del modal -->
       <div class="flex gap-4 border-b border-white/10 text-xs font-bold">
-        <button id="importTabBtnLinks" onclick="switchImportTab('links')" class="pb-2 border-b-2 border-amber-400 text-amber-400">
+        <button id="importTabBtnLinks" onclick="switchImportTab('links')" class="pb-2 border-b-2 border-cyan-400 text-cyan-400">
           Pegar Varios Enlaces (Masivo)
         </button>
         <button id="importTabBtnSearch" onclick="switchImportTab('search')" class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white">
@@ -1107,7 +1107,7 @@
           <label class="block text-xs font-semibold text-gray-300 mb-1">
             Pega los enlaces de las listas de tu cuenta (uno por renglón):
           </label>
-          <textarea id="multipleUrlsInput" rows="5" placeholder="https://www.youtube.com/playlist?list=PL...&#10;https://www.youtube.com/playlist?list=PL...&#10;https://www.youtube.com/playlist?list=PL..." class="w-full bg-black/40 border border-white/15 rounded-2xl p-3 text-xs text-white outline-none focus:border-amber-400 font-mono"></textarea>
+          <textarea id="multipleUrlsInput" rows="5" placeholder="https://www.youtube.com/playlist?list=PL...&#10;https://www.youtube.com/playlist?list=PL...&#10;https://www.youtube.com/playlist?list=PL..." class="w-full bg-black/40 border border-white/15 rounded-2xl p-3 text-xs text-white outline-none focus:border-cyan-400 font-mono"></textarea>
           <p class="text-[11px] text-gray-400 mt-1">Puedes pegar todos los enlaces que quieras de tu cuenta a la vez. Recuerda que en YouTube las listas deben estar como Públicas o No Listadas.</p>
         </div>
 
@@ -1119,7 +1119,7 @@
       <!-- Vista 2: Buscar por Nombre / Canal -->
       <div id="importViewSearch" class="hidden space-y-3">
         <div class="flex gap-2">
-          <input type="text" id="searchChannelPlaylistInput" placeholder="Nombre del bar, canal o tema (ej: Santa Chela, Salsa)..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+          <input type="text" id="searchChannelPlaylistInput" placeholder="Nombre del bar, canal o tema (ej: Santa Chela, Salsa)..." class="flex-1 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
           <button onclick="executeSearchPlaylists()" class="btn-secondary text-xs px-4">Buscar</button>
         </div>
 
@@ -1138,7 +1138,7 @@
   <!-- MODAL DE CONTROL TÁCTIL DE RULETA 3D EN VIVO (CELULAR DJ -> TV)          -->
   <!-- ========================================================================= -->
   <div id="rouletteControlModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-4">
-    <div class="glass-card w-full max-w-xl p-4 sm:p-6 space-y-4 border border-amber-500/40 max-h-[94vh] overflow-y-auto shadow-[0_0_60px_rgba(245,158,11,0.2)]">
+    <div class="glass-card w-full max-w-xl p-4 sm:p-6 space-y-4 border border-cyan-500/40 max-h-[94vh] overflow-y-auto shadow-[0_0_60px_rgba(0,229,255,0.2)]">
       
       <!-- Cabecera -->
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
@@ -1146,7 +1146,7 @@
           <span class="text-2xl">🎰</span>
           <div>
             <h3 class="font-black text-white text-sm sm:text-base uppercase tracking-wider">Ruleta 3D en Vivo (TV)</h3>
-            <p class="text-[11px] text-amber-300 font-semibold">Gírala con tu dedo aquí y mírala girar en el televisor</p>
+            <p class="text-[11px] text-cyan-300 font-semibold">Gírala con tu dedo aquí y mírala girar en el televisor</p>
           </div>
         </div>
         <button onclick="closeRouletteModal()" class="text-gray-400 hover:text-white p-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition" title="Cerrar">✕</button>
@@ -1154,7 +1154,7 @@
 
       <!-- Selector de Modo: 1. Sorteo de Mesas | 2. Ruleta de Premios -->
       <div class="grid grid-cols-2 gap-2 bg-black/50 p-1 rounded-2xl border border-white/10">
-        <button id="btnRouletteModeTables" onclick="switchRouletteMode('tables')" class="py-2 px-3 rounded-xl text-xs font-black transition bg-amber-500 text-black shadow">
+        <button id="btnRouletteModeTables" onclick="switchRouletteMode('tables')" class="py-2 px-3 rounded-xl text-xs font-black transition bg-cyan-500 text-black shadow">
           🎯 1. ¿Qué Mesa Gana?
         </button>
         <button id="btnRouletteModePrizes" onclick="switchRouletteMode('prizes')" class="py-2 px-3 rounded-xl text-xs font-bold transition text-gray-300 hover:text-white">
@@ -1167,7 +1167,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <span class="text-xs font-bold text-gray-300">¿Qué mesas participan?</span>
           <div class="flex items-center gap-1.5">
-            <button id="btnTableFilterActive" onclick="setRouletteTableFilter('active')" class="text-[11px] font-black px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 transition">
+            <button id="btnTableFilterActive" onclick="setRouletteTableFilter('active')" class="text-[11px] font-black px-2.5 py-1 rounded-lg bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 transition">
               🔥 Con pedidos hoy
             </button>
             <button id="btnTableFilterAll" onclick="setRouletteTableFilter('all')" class="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white/5 text-gray-400 border border-white/10 transition">
@@ -1179,7 +1179,7 @@
         <!-- Chips interactivos para activar/desactivar mesas con 1 toque -->
         <div class="bg-black/40 p-2.5 rounded-xl border border-white/10 space-y-1.5">
           <div class="flex items-center justify-between">
-            <p id="rouletteActiveTablesHint" class="text-[10.5px] text-amber-300/90 font-semibold">
+            <p id="rouletteActiveTablesHint" class="text-[10.5px] text-cyan-300/90 font-semibold">
               Toca las mesas ocupadas para incluirlas o quitarlas de la ruleta:
             </p>
           </div>
@@ -1187,13 +1187,13 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-amber-300 uppercase tracking-wider mb-1">Premio a sortear en pantalla:</label>
-          <input type="text" id="roulettePrizeInput" value="🥃 Ronda de Shots Gratis" oninput="syncRouletteConfigToTv()" placeholder="Ej: 🥃 Ronda de Shots Gratis..." class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white font-bold outline-none focus:border-amber-400">
+          <label class="block text-[11px] font-bold text-cyan-300 uppercase tracking-wider mb-1">Premio a sortear en pantalla:</label>
+          <input type="text" id="roulettePrizeInput" value="🥃 Ronda de Shots Gratis" oninput="syncRouletteConfigToTv()" placeholder="Ej: 🥃 Ronda de Shots Gratis..." class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white font-bold outline-none focus:border-cyan-400">
           <div class="flex items-center gap-1.5 flex-wrap mt-2">
-            <button onclick="setQuickRoulettePrize('🥃 Ronda de Shots Gratis')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🥃 Ronda Shots</button>
-            <button onclick="setQuickRoulettePrize('🍺 1 Cerveza / Jarra Gratis')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🍺 Cerveza Gratis</button>
-            <button onclick="setQuickRoulettePrize('👑 2 Canciones VIP Ya Mismo')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">👑 2 Canciones VIP</button>
-            <button onclick="setQuickRoulettePrize('🍟 Picada de Cortesía')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🍟 Picada</button>
+            <button onclick="setQuickRoulettePrize('🥃 Ronda de Shots Gratis')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-cyan-500/20 border border-white/10 text-gray-300 hover:text-cyan-300 transition">🥃 Ronda Shots</button>
+            <button onclick="setQuickRoulettePrize('🍺 1 Cerveza / Jarra Gratis')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-cyan-500/20 border border-white/10 text-gray-300 hover:text-cyan-300 transition">🍺 Cerveza Gratis</button>
+            <button onclick="setQuickRoulettePrize('👑 2 Canciones VIP Ya Mismo')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-cyan-500/20 border border-white/10 text-gray-300 hover:text-cyan-300 transition">👑 2 Canciones VIP</button>
+            <button onclick="setQuickRoulettePrize('🍟 Picada de Cortesía')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-cyan-500/20 border border-white/10 text-gray-300 hover:text-cyan-300 transition">🍟 Picada</button>
           </div>
         </div>
       </div>
@@ -1202,17 +1202,17 @@
       <div id="rouletteConfigPrizes" class="hidden space-y-3 bg-white/[0.03] p-3.5 rounded-2xl border border-white/10">
         <div class="flex items-center gap-2">
           <label class="text-xs font-bold text-gray-300 shrink-0">Para quién gira:</label>
-          <input type="text" id="rouletteTargetTableInput" value="¡TODA LA CASA!" oninput="syncRouletteConfigToTv()" placeholder="Ej: MESA 4 o ¡TODA LA CASA!" class="flex-1 bg-black/60 border border-white/15 rounded-xl px-3 py-1.5 text-xs text-amber-300 font-bold outline-none focus:border-amber-400">
+          <input type="text" id="rouletteTargetTableInput" value="¡TODA LA CASA!" oninput="syncRouletteConfigToTv()" placeholder="Ej: MESA 4 o ¡TODA LA CASA!" class="flex-1 bg-black/60 border border-white/15 rounded-xl px-3 py-1.5 text-xs text-cyan-300 font-bold outline-none focus:border-cyan-400">
         </div>
         <div>
           <label class="block text-[11px] font-bold text-gray-300 mb-1">Casillas de premios (separadas por coma):</label>
-          <input type="text" id="rouletteCustomPrizesInput" value="🥃 Shot Gratis, 🍺 2x1 Cerveza, 👑 Canción VIP, 🎤 Cantar o Shot, 🍟 Nachos Gratis, 😅 ¡Casi!" oninput="onCustomPrizesChanged()" class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-400">
+          <input type="text" id="rouletteCustomPrizesInput" value="🥃 Shot Gratis, 🍺 2x1 Cerveza, 👑 Canción VIP, 🎤 Cantar o Shot, 🍟 Nachos Gratis, 😅 ¡Casi!" oninput="onCustomPrizesChanged()" class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-cyan-400">
         </div>
       </div>
 
       <!-- Rueda Táctil Interactiva en el Celular (Sincronizada a 60fps con la TV) -->
       <div class="flex flex-col items-center justify-center py-2 select-none">
-        <p id="adminRouletteStatusText" class="text-[11px] font-black text-amber-300 uppercase tracking-wider mb-2 text-center">
+        <p id="adminRouletteStatusText" class="text-[11px] font-black text-cyan-300 uppercase tracking-wider mb-2 text-center">
           👆 Desliza la rueda con tu dedo para darle impulso hacia el TV
         </p>
 
@@ -1222,7 +1222,7 @@
             <div class="w-0 h-0 border-l-[11px] border-l-transparent border-r-[11px] border-r-transparent border-t-[22px] border-t-amber-400 drop-shadow"></div>
           </div>
 
-          <div class="p-2 rounded-full bg-gradient-to-b from-amber-400 to-amber-800 shadow-[0_0_40px_rgba(245,158,11,0.4)]">
+          <div class="p-2 rounded-full bg-gradient-to-b from-amber-400 to-amber-800 shadow-[0_0_40px_rgba(0,229,255,0.4)]">
             <canvas id="adminRouletteCanvas" width="260" height="260" style="touch-action: none; -webkit-user-select: none; user-select: none;" class="w-[230px] h-[230px] sm:w-[250px] sm:h-[250px] rounded-full cursor-grab active:cursor-grabbing block"></canvas>
           </div>
         </div>
@@ -1230,10 +1230,10 @@
 
       <!-- Botones de Acción en TV -->
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2 border-t border-white/10">
-        <button onclick="projectRouletteOnTv()" class="btn-secondary py-2.5 px-3 text-xs font-bold flex items-center justify-center gap-1.5 text-amber-300 border-amber-400/40">
+        <button onclick="projectRouletteOnTv()" class="btn-secondary py-2.5 px-3 text-xs font-bold flex items-center justify-center gap-1.5 text-cyan-300 border-cyan-400/40">
           <span>📺</span> <span>Mostrar en TV</span>
         </button>
-        <button onclick="triggerRouletteSpin(1)" class="tactile-btn-gold py-2.5 px-4 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+        <button onclick="triggerRouletteSpin(1)" class="tactile-btn-gold py-2.5 px-4 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow-[0_0_20px_rgba(0,229,255,0.4)]">
           <span>🚀</span> <span>¡GIRAR EN TV!</span>
         </button>
         <button onclick="hideRouletteFromTv()" class="col-span-2 sm:col-span-1 btn-secondary py-2.5 px-3 text-xs font-bold flex items-center justify-center gap-1.5 text-rose-300 border-rose-500/30 hover:bg-rose-500/20">
@@ -1248,7 +1248,7 @@
   <!-- MODAL SANTA CHELA CAM: FOTO / SELFIE EN VIVO AL TV (CON ARRASTRE 3D)     -->
   <!-- ========================================================================= -->
   <div id="santaChelaCamModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-4">
-    <div class="glass-card w-full max-w-xl p-4 sm:p-6 space-y-4 border border-amber-500/40 max-h-[94vh] overflow-y-auto shadow-[0_0_60px_rgba(245,158,11,0.2)]">
+    <div class="glass-card w-full max-w-xl p-4 sm:p-6 space-y-4 border border-cyan-500/40 max-h-[94vh] overflow-y-auto shadow-[0_0_60px_rgba(0,229,255,0.2)]">
       
       <!-- Cabecera -->
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
@@ -1256,33 +1256,33 @@
           <span class="text-2xl">📸</span>
           <div>
             <h3 class="font-black text-white text-sm sm:text-base uppercase tracking-wider">Santa Chela Cam (TV en Vivo)</h3>
-            <p class="text-[11px] text-amber-300 font-semibold">Toma una foto y lánzala con tu dedo hacia arriba al televisor</p>
+            <p class="text-[11px] text-cyan-300 font-semibold">Toma una foto y lánzala con tu dedo hacia arriba al televisor</p>
           </div>
         </div>
         <button onclick="closeSantaChelaCamModal()" class="text-gray-400 hover:text-white p-1.5 rounded-xl bg-white/5 hover:bg-white/10 transition" title="Cerrar">✕</button>
       </div>
 
       <!-- Switch rápido sincronizado con Ajustes: Desbloquear fotos en pedidos QR de mesas -->
-      <div class="flex items-center justify-between p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30">
+      <div class="flex items-center justify-between p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/30">
         <div class="pr-2">
-          <p class="text-xs font-black text-amber-300 flex items-center gap-1.5">
+          <p class="text-xs font-black text-cyan-300 flex items-center gap-1.5">
             <span>🔓</span> <span>Permitir Foto en Pedidos QR de las Mesas</span>
           </p>
           <p class="text-[10.5px] text-gray-300 mt-0.5">
             Si lo activas, los clientes podrán subir selfie junto con su mensaje al pedir canción.
           </p>
         </div>
-        <input type="checkbox" id="camModalAllowQrPhotosToggle" onchange="toggleClientPhotoSettingImmediate(this.checked)" class="w-5 h-5 accent-amber-500 shrink-0 cursor-pointer">
+        <input type="checkbox" id="camModalAllowQrPhotosToggle" onchange="toggleClientPhotoSettingImmediate(this.checked)" class="w-5 h-5 accent-cyan-400 shrink-0 cursor-pointer">
       </div>
 
       <!-- Botones de Captura de Foto con Label Nativo (100% compatible con Galería y Cámara en iOS/Android/PWA) -->
       <div class="grid grid-cols-3 gap-2">
-        <label for="djCamInputRear" class="relative overflow-hidden cursor-pointer select-none py-2.5 px-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-black flex flex-col items-center justify-center gap-1 transition active:scale-95">
+        <label for="djCamInputRear" class="relative overflow-hidden cursor-pointer select-none py-2.5 px-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 text-xs font-black flex flex-col items-center justify-center gap-1 transition active:scale-95">
           <input type="file" id="djCamInputRear" accept="image/*" capture="environment" class="sr-only" onchange="onDjCamPhotoSelected(event)">
           <span class="text-lg pointer-events-none">📷</span>
           <span class="pointer-events-none">Cámara Bar</span>
         </label>
-        <label for="djCamInputSelfie" class="relative overflow-hidden cursor-pointer select-none py-2.5 px-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/50 text-amber-300 text-xs font-black flex flex-col items-center justify-center gap-1 transition active:scale-95">
+        <label for="djCamInputSelfie" class="relative overflow-hidden cursor-pointer select-none py-2.5 px-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 text-xs font-black flex flex-col items-center justify-center gap-1 transition active:scale-95">
           <input type="file" id="djCamInputSelfie" accept="image/*" capture="user" class="sr-only" onchange="onDjCamPhotoSelected(event)">
           <span class="text-lg pointer-events-none">🤳</span>
           <span class="pointer-events-none">Selfie DJ</span>
@@ -1299,19 +1299,19 @@
         <div class="flex flex-col sm:flex-row gap-2">
           <div class="sm:w-1/3">
             <label class="block text-[10.5px] font-bold text-gray-400 uppercase mb-1">Etiqueta superior:</label>
-            <input type="text" id="djCamSenderBadgeInput" value="📸 SANTA CHELA CAM • EN VIVO" class="w-full bg-black/60 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-amber-300 font-bold outline-none focus:border-amber-400">
+            <input type="text" id="djCamSenderBadgeInput" value="📸 SANTA CHELA CAM • EN VIVO" class="w-full bg-black/60 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-cyan-300 font-bold outline-none focus:border-cyan-400">
           </div>
           <div class="flex-1">
-            <label class="block text-[10.5px] font-bold text-amber-300 uppercase mb-1">Mensaje al pie de la foto:</label>
-            <input type="text" id="djCamCaptionInput" oninput="updateDjCamPolaroidPreviewText()" placeholder="Ej: ¡La Mesa 3 prendiendo la noche! 🍻" value="¡Salud y buena rumba en Santa Chela! 🍻" class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white font-bold outline-none focus:border-amber-400">
+            <label class="block text-[10.5px] font-bold text-cyan-300 uppercase mb-1">Mensaje al pie de la foto:</label>
+            <input type="text" id="djCamCaptionInput" oninput="updateDjCamPolaroidPreviewText()" placeholder="Ej: ¡La Mesa 3 prendiendo la noche! 🍻" value="¡Salud y buena rumba en Santa Chela! 🍻" class="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs sm:text-sm text-white font-bold outline-none focus:border-cyan-400">
           </div>
         </div>
 
         <div class="flex items-center gap-1.5 flex-wrap">
-          <button type="button" onclick="setQuickDjCamCaption('¡Salud y buena rumba en Santa Chela! 🍻')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🍻 ¡Salud Santa Chela!</button>
-          <button type="button" onclick="setQuickDjCamCaption('🔥 ¡La mesa más prendida de la noche!')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🔥 Mesa más prendida</button>
-          <button type="button" onclick="setQuickDjCamCaption('🎂 ¡Feliz Cumpleaños! Que siga la fiesta 🎉')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🎂 Feliz Cumpleaños</button>
-          <button type="button" onclick="setQuickDjCamCaption('🥃 ¡Ronda de shots para esta mesa!')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-amber-500/20 border border-white/10 text-gray-300 hover:text-amber-300 transition">🥃 Ronda de Shots</button>
+          <button type="button" onclick="setQuickDjCamCaption('¡Salud y buena rumba en Santa Chela! 🍻')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-cyan-500/20 border border-white/10 text-gray-300 hover:text-cyan-300 transition">🍻 ¡Salud Santa Chela!</button>
+          <button type="button" onclick="setQuickDjCamCaption('🔥 ¡La mesa más prendida de la noche!')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-cyan-500/20 border border-white/10 text-gray-300 hover:text-cyan-300 transition">🔥 Mesa más prendida</button>
+          <button type="button" onclick="setQuickDjCamCaption('🎂 ¡Feliz Cumpleaños! Que siga la fiesta 🎉')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-cyan-500/20 border border-white/10 text-gray-300 hover:text-cyan-300 transition">🎂 Feliz Cumpleaños</button>
+          <button type="button" onclick="setQuickDjCamCaption('🥃 ¡Ronda de shots para esta mesa!')" class="text-[10.5px] px-2.5 py-1 rounded-full bg-white/5 hover:bg-cyan-500/20 border border-white/10 text-gray-300 hover:text-cyan-300 transition">🥃 Ronda de Shots</button>
         </div>
       </div>
 
@@ -1323,15 +1323,15 @@
       </div>
 
       <div id="djCamPolaroidZone" class="hidden flex-col items-center justify-center py-2 select-none space-y-2.5">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500 text-black text-[11px] font-black uppercase tracking-wider shadow-[0_0_20px_rgba(245,158,11,0.6)] animate-pulse">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500 text-black text-[11px] font-black uppercase tracking-wider shadow-[0_0_20px_rgba(0,229,255,0.6)] animate-pulse">
           <span>🚀</span> <span>¡Arrastra la Polaroid hacia arriba para lanzarla al TV! ↑</span>
         </div>
 
         <!-- Tarjeta Polaroid Táctil Arrastrable hacia el TV -->
-        <div id="djCamDraggablePolaroid" style="touch-action: none; -webkit-user-select: none; user-select: none;" class="w-56 sm:w-64 bg-gradient-to-b from-[#fffbeb] via-[#fef3c7] to-[#fde68a] p-3 pb-5 rounded-2xl shadow-[0_15px_45px_rgba(245,158,11,0.5)] border-2 border-amber-300 cursor-grab active:cursor-grabbing transition-transform duration-150">
+        <div id="djCamDraggablePolaroid" style="touch-action: none; -webkit-user-select: none; user-select: none;" class="w-56 sm:w-64 bg-gradient-to-b from-[#fffbeb] via-[#fef3c7] to-[#fde68a] p-3 pb-5 rounded-2xl shadow-[0_15px_45px_rgba(0,229,255,0.5)] border-2 border-amber-300 cursor-grab active:cursor-grabbing transition-transform duration-150">
           <div class="w-full aspect-square rounded-xl overflow-hidden bg-black relative">
             <img id="djCamPreviewImg" src="" alt="Preview" class="w-full h-full object-cover pointer-events-none">
-            <span class="absolute top-2 right-2 bg-black/75 text-amber-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-400/40">⚡ SANTA CHELA</span>
+            <span class="absolute top-2 right-2 bg-black/75 text-cyan-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-cyan-400/40">⚡ SANTA CHELA</span>
           </div>
           <p id="djCamPreviewCaption" class="text-xs font-black text-gray-900 text-center mt-2.5 px-1 truncate">
             ¡Salud y buena rumba en Santa Chela! 🍻
@@ -1341,7 +1341,7 @@
 
       <!-- Botones de Acción Directa -->
       <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
-        <button type="button" onclick="launchDjCamPhotoToTv()" class="tactile-btn-gold py-2.5 px-4 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+        <button type="button" onclick="launchDjCamPhotoToTv()" class="tactile-btn-gold py-2.5 px-4 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 shadow-[0_0_20px_rgba(0,229,255,0.4)]">
           <span>🚀</span> <span>¡LANZAR FOTO AL TV!</span>
         </button>
         <button type="button" onclick="hideDjCamPhotoFromTv()" class="btn-secondary py-2.5 px-3 text-xs font-bold flex items-center justify-center gap-1.5 text-rose-300 border-rose-500/30 hover:bg-rose-500/20">
@@ -1354,10 +1354,10 @@
 
   <!-- Modal de Confirmación para Cambiar Canción que está Sonando -->
   <div id="confirmChangeSongModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="relative bg-gradient-to-b from-[#181d2a] to-[#0e1118] border border-amber-500/40 rounded-3xl max-w-md w-full p-6 shadow-[0_20px_70px_rgba(0,0,0,0.9)] space-y-4 animate-scaleUp">
+    <div class="relative bg-gradient-to-b from-[#181d2a] to-[#0e1118] border border-cyan-500/40 rounded-3xl max-w-md w-full p-6 shadow-[0_20px_70px_rgba(0,0,0,0.9)] space-y-4 animate-scaleUp">
       <!-- Encabezado con ícono de advertencia -->
       <div class="flex items-center gap-3 border-b border-white/10 pb-3">
-        <div class="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-2xl shrink-0">
+        <div class="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-2xl shrink-0">
           ⚠️
         </div>
         <div class="min-w-0 flex-1">
@@ -1382,14 +1382,14 @@
       </div>
 
       <!-- Tarjeta: Nueva Canción que va a sonar -->
-      <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-1">
-        <div class="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+      <div class="p-3 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 space-y-1">
+        <div class="text-[10px] font-black uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
           <span>▶</span> <span>Vas a poner a sonar de inmediato:</span>
         </div>
         <div class="flex items-center gap-3 pt-1">
-          <img id="confirmModalTargetThumb" src="" class="w-11 h-11 rounded-xl object-cover border border-amber-500/40 shrink-0">
+          <img id="confirmModalTargetThumb" src="" class="w-11 h-11 rounded-xl object-cover border border-cyan-500/40 shrink-0">
           <div class="min-w-0 flex-1">
-            <p id="confirmModalTargetTitle" class="text-xs sm:text-sm font-bold text-amber-300 truncate">Canción nueva</p>
+            <p id="confirmModalTargetTitle" class="text-xs sm:text-sm font-bold text-cyan-300 truncate">Canción nueva</p>
             <p id="confirmModalTargetArtist" class="text-[11px] text-gray-300 truncate">Artista nuevo</p>
           </div>
         </div>
@@ -1397,7 +1397,7 @@
 
       <!-- Casilla de verificación de protección -->
       <div class="flex items-center gap-2 pt-1 text-xs text-gray-300">
-        <input type="checkbox" id="chkModalConfirmChangeSetting" checked onchange="toggleConfirmSettingFromModal(this.checked)" class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+        <input type="checkbox" id="chkModalConfirmChangeSetting" checked onchange="toggleConfirmSettingFromModal(this.checked)" class="w-4 h-4 accent-cyan-400 rounded cursor-pointer">
         <label for="chkModalConfirmChangeSetting" class="cursor-pointer select-none text-[11px] text-gray-300">
           Avisarme siempre antes de interrumpir la música actual
         </label>
@@ -1408,7 +1408,7 @@
         <button type="button" onclick="cancelSongChangeConfirmation()" class="btn-secondary py-3 text-xs sm:text-sm font-bold text-gray-300 hover:text-white justify-center">
           ✕ Cancelar
         </button>
-        <button type="button" id="btnConfirmSongChangeProceed" onclick="proceedSongChangeConfirmation()" class="tactile-btn-gold py-3 text-xs sm:text-sm font-black justify-center shadow-lg shadow-amber-500/30">
+        <button type="button" id="btnConfirmSongChangeProceed" onclick="proceedSongChangeConfirmation()" class="tactile-btn-gold py-3 text-xs sm:text-sm font-black justify-center shadow-lg shadow-cyan-500/30">
           ▶ Sí, Cambiar Canción
         </button>
       </div>
@@ -1417,13 +1417,13 @@
 
   <!-- Modal de Instalación de App Nativa (PWA / WebAPK para iPhone y Android) -->
   <div id="pwaInstallGuideModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="relative bg-gradient-to-b from-[#181d2a] to-[#0e1118] border border-amber-500/40 rounded-3xl max-w-md w-full p-6 shadow-[0_20px_70px_rgba(0,0,0,0.95)] space-y-4">
+    <div class="relative bg-gradient-to-b from-[#181d2a] to-[#0e1118] border border-cyan-500/40 rounded-3xl max-w-md w-full p-6 shadow-[0_20px_70px_rgba(0,0,0,0.95)] space-y-4">
       <div class="flex items-center justify-between border-b border-white/10 pb-3">
         <div class="flex items-center gap-3">
-          <img src="/icons/icon-192.png" alt="Santa Chela App" class="w-12 h-12 rounded-2xl border border-amber-400/50 shadow-lg">
+          <img src="/icons/icon-192.png" alt="Santa Chela App" class="w-12 h-12 rounded-2xl border border-cyan-400/50 shadow-lg">
           <div>
             <h3 class="text-base sm:text-lg font-black text-white">Instalar App Santa Chela</h3>
-            <p class="text-[11px] text-amber-400 font-semibold">App directa para iPhone y Android</p>
+            <p class="text-[11px] text-cyan-400 font-semibold">App directa para iPhone y Android</p>
           </div>
         </div>
         <button type="button" onclick="closePwaInstallModal()" class="text-gray-400 hover:text-white p-1.5 rounded-xl bg-white/5">✕</button>
@@ -1431,7 +1431,7 @@
 
       <!-- Selector de Sistema: iPhone vs Android -->
       <div class="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-black/60 border border-white/10 text-xs">
-        <button type="button" id="pwaTabBtnIos" onclick="switchPwaGuideTab('ios')" class="py-2 px-3 rounded-xl font-black transition bg-amber-500 text-black shadow">
+        <button type="button" id="pwaTabBtnIos" onclick="switchPwaGuideTab('ios')" class="py-2 px-3 rounded-xl font-black transition bg-cyan-500 text-black shadow">
           🍎 iPhone / iPad
         </button>
         <button type="button" id="pwaTabBtnAndroid" onclick="switchPwaGuideTab('android')" class="py-2 px-3 rounded-xl font-bold transition text-gray-400 hover:text-white">
@@ -1446,15 +1446,15 @@
         </p>
         <div class="p-3.5 rounded-2xl bg-black/60 border border-white/10 space-y-3">
           <div class="flex items-center gap-3">
-            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">1</span>
-            <p class="text-xs sm:text-sm">Toca el botón <strong>Compartir</strong> <span class="inline-block px-2 py-0.5 rounded bg-white/10 text-amber-300 font-mono text-xs border border-white/15">📤 [↑]</span> en la barra de abajo de Safari.</p>
+            <span class="w-7 h-7 rounded-full bg-cyan-500 text-black font-black flex items-center justify-center text-xs shrink-0">1</span>
+            <p class="text-xs sm:text-sm">Toca el botón <strong>Compartir</strong> <span class="inline-block px-2 py-0.5 rounded bg-white/10 text-cyan-300 font-mono text-xs border border-white/15">📤 [↑]</span> en la barra de abajo de Safari.</p>
           </div>
           <div class="flex items-center gap-3">
-            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">2</span>
-            <p class="text-xs sm:text-sm">Desliza hacia abajo y toca en <strong class="text-amber-300">"Agregar a inicio"</strong> <em>(Add to Home Screen)</em> <span class="inline-block px-1.5 py-0.5 rounded bg-white/10 text-white font-bold text-xs">➕</span>.</p>
+            <span class="w-7 h-7 rounded-full bg-cyan-500 text-black font-black flex items-center justify-center text-xs shrink-0">2</span>
+            <p class="text-xs sm:text-sm">Desliza hacia abajo y toca en <strong class="text-cyan-300">"Agregar a inicio"</strong> <em>(Add to Home Screen)</em> <span class="inline-block px-1.5 py-0.5 rounded bg-white/10 text-white font-bold text-xs">➕</span>.</p>
           </div>
           <div class="flex items-center gap-3">
-            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">3</span>
+            <span class="w-7 h-7 rounded-full bg-cyan-500 text-black font-black flex items-center justify-center text-xs shrink-0">3</span>
             <p class="text-xs sm:text-sm">Toca <strong>"Agregar"</strong> arriba a la derecha ¡y listo! Tendrás el ícono dorado de <strong>Santa Chela</strong> en tu celular.</p>
           </div>
         </div>
@@ -1467,15 +1467,15 @@
         </p>
         <div class="p-3.5 rounded-2xl bg-black/60 border border-white/10 space-y-3">
           <div class="flex items-center gap-3">
-            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">1</span>
+            <span class="w-7 h-7 rounded-full bg-cyan-500 text-black font-black flex items-center justify-center text-xs shrink-0">1</span>
             <p class="text-xs sm:text-sm">Toca los <strong>3 puntos (⋮)</strong> arriba a la derecha en Google Chrome.</p>
           </div>
           <div class="flex items-center gap-3">
-            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">2</span>
-            <p class="text-xs sm:text-sm">Selecciona <strong class="text-amber-300">"Instalar aplicación"</strong> (o <em>"Agregar a la pantalla principal"</em>).</p>
+            <span class="w-7 h-7 rounded-full bg-cyan-500 text-black font-black flex items-center justify-center text-xs shrink-0">2</span>
+            <p class="text-xs sm:text-sm">Selecciona <strong class="text-cyan-300">"Instalar aplicación"</strong> (o <em>"Agregar a la pantalla principal"</em>).</p>
           </div>
           <div class="flex items-center gap-3">
-            <span class="w-7 h-7 rounded-full bg-amber-500 text-black font-black flex items-center justify-center text-xs shrink-0">3</span>
+            <span class="w-7 h-7 rounded-full bg-cyan-500 text-black font-black flex items-center justify-center text-xs shrink-0">3</span>
             <p class="text-xs sm:text-sm">Confirma en <strong>"Instalar"</strong> y aparecerá como una App nativa junto a tus demás aplicaciones.</p>
           </div>
         </div>

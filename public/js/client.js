@@ -126,7 +126,7 @@ function renderQueue(queue) {
   listEl.innerHTML = queue.slice(0, 5).map((song, index) => {
     const isMyTable = song.requestedBy && song.requestedBy.table === currentTable;
     return `
-      <div class="flex items-center gap-3 p-2 rounded-xl ${isMyTable ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-white/5'}">
+      <div class="flex items-center gap-3 p-2 rounded-xl ${isMyTable ? 'bg-cyan-500/15 border border-cyan-500/40 shadow-[0_0_12px_rgba(0,229,255,0.2)]' : 'bg-white/5'}">
         <span class="text-xs font-bold text-gray-400 w-4 text-center">#${index + 1}</span>
         <img src="${song.thumbnail}" class="w-10 h-10 rounded-lg object-cover">
         <div class="flex-1 min-w-0">
@@ -135,7 +135,7 @@ function renderQueue(queue) {
         </div>
         <div class="text-right">
           <span class="genre-badge genre-${song.genre || 'Crossover'} text-[10px] py-0.5 px-2">${song.genre || 'Música'}</span>
-          ${isMyTable ? '<p class="text-[10px] text-amber-400 font-bold mt-0.5">¡Tu pedido!</p>' : ''}
+          ${isMyTable ? '<p class="text-[10px] text-cyan-300 font-bold mt-0.5 flex items-center gap-1 justify-end"><span>✨</span> ¡Tu pedido!</p>' : ''}
         </div>
       </div>
     `;
@@ -194,12 +194,12 @@ function renderPopularHits() {
   const container = document.getElementById('popularHitsList');
   if (!container) return;
   container.innerHTML = POPULAR_HITS.map((song, i) => `
-    <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 hover:border-amber-500/30 transition">
+    <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 hover:border-cyan-500/40 hover:shadow-[0_0_15px_rgba(0,229,255,0.15)] transition">
       <div class="flex items-center gap-2.5 min-w-0 flex-1">
         <img src="${song.thumbnail}" class="w-11 h-9 rounded-lg object-cover">
         <div class="min-w-0 flex-1">
           <p class="font-bold text-white text-xs truncate">${song.title}</p>
-          <p class="text-[10px] text-gray-400 truncate">${song.artist} • <span class="text-amber-400 font-semibold">${song.genre}</span></p>
+          <p class="text-[10px] text-gray-400 truncate">${song.artist} • <span class="text-cyan-400 font-semibold">${song.genre}</span></p>
         </div>
       </div>
       <button onclick="requestDirectHit(${i})" class="btn-primary text-xs py-1.5 px-3 whitespace-nowrap ml-2">
@@ -233,7 +233,7 @@ async function performSearch(query) {
   resultsSection.classList.remove('hidden');
   resultsList.innerHTML = `
     <div class="text-center py-6">
-      <div class="inline-block w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+      <div class="inline-block w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
       <p class="text-xs text-gray-400 mt-2">Buscando canciones individuales en YouTube...</p>
     </div>
   `;
@@ -252,7 +252,7 @@ async function performSearch(query) {
     resultsCount.textContent = `${videos.length} canciones encontradas`;
 
     resultsList.innerHTML = videos.map((v, i) => `
-      <div class="glass-card p-2.5 flex items-center gap-3 hover:border-amber-500/40 transition">
+      <div class="glass-card p-2.5 flex items-center gap-3 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,229,255,0.15)] transition">
         <div class="relative">
           <img src="${v.thumbnail}" class="w-16 h-12 rounded-lg object-cover">
           <span class="absolute bottom-1 right-1 bg-black/80 text-[10px] px-1 rounded text-white font-mono">${v.duration}</span>
@@ -260,7 +260,7 @@ async function performSearch(query) {
         <div class="flex-1 min-w-0">
           <h4 class="text-xs font-bold text-white truncate leading-tight">${escapeHtml(v.title)}</h4>
           <p class="text-[11px] text-gray-400 truncate">${escapeHtml(v.artist)}</p>
-          <span class="text-[10px] text-amber-400/80 font-medium">Canción individual</span>
+          <span class="text-[10px] text-cyan-400/90 font-medium">Canción individual</span>
         </div>
         <button onclick="openConfirmModal(${i})" class="btn-primary text-xs py-2 px-3 whitespace-nowrap">
           Pedir 🎵
@@ -676,7 +676,7 @@ function renderClientPlaylistTracks(tracks) {
   }
 
   listEl.innerHTML = tracks.map((song, i) => `
-    <div class="glass-card p-2.5 flex items-center gap-3 hover:border-amber-500/40 transition">
+    <div class="glass-card p-2.5 flex items-center gap-3 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,229,255,0.15)] transition">
       <div class="relative">
         <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-14 h-11 rounded-lg object-cover">
         <span class="absolute bottom-0.5 right-0.5 bg-black/80 text-[9px] px-1 rounded text-white font-mono">${song.duration || '3:30'}</span>

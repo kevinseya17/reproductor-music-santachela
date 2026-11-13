@@ -69,12 +69,12 @@ function switchPwaGuideTab(os) {
   if (os === 'android') {
     if (androidBox) androidBox.classList.remove('hidden');
     if (iosBox) iosBox.classList.add('hidden');
-    if (btnAndroid) btnAndroid.className = 'py-2 px-3 rounded-xl font-black transition bg-amber-500 text-black shadow';
+    if (btnAndroid) btnAndroid.className = 'py-2 px-3 rounded-xl font-black transition bg-cyan-400 text-black shadow';
     if (btnIos) btnIos.className = 'py-2 px-3 rounded-xl font-bold transition text-gray-400 hover:text-white';
   } else {
     if (iosBox) iosBox.classList.remove('hidden');
     if (androidBox) androidBox.classList.add('hidden');
-    if (btnIos) btnIos.className = 'py-2 px-3 rounded-xl font-black transition bg-amber-500 text-black shadow';
+    if (btnIos) btnIos.className = 'py-2 px-3 rounded-xl font-black transition bg-cyan-400 text-black shadow';
     if (btnAndroid) btnAndroid.className = 'py-2 px-3 rounded-xl font-bold transition text-gray-400 hover:text-white';
   }
 }
@@ -309,7 +309,7 @@ function updatePlayerTelemetry(data) {
     } else {
       playPauseIcon.textContent = '▶️';
       playPauseText.textContent = 'REANUDAR';
-      playPauseBtn.className = 'tactile-btn-dark w-full sm:w-auto justify-center px-2.5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-lg flex items-center gap-1.5 border-amber-400 text-amber-400 whitespace-nowrap';
+      playPauseBtn.className = 'tactile-btn-dark w-full sm:w-auto justify-center px-2.5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-lg flex items-center gap-1.5 border-cyan-400 text-cyan-400 whitespace-nowrap';
     }
   }
 
@@ -488,7 +488,7 @@ function handleQueueDragStart(e, index) {
   e.dataTransfer.setData('text/plain', String(index));
   const row = document.getElementById(`queue-row-${index}`);
   if (row) {
-    row.classList.add('opacity-50', 'scale-[0.99]', 'border-amber-400', 'bg-amber-500/10');
+    row.classList.add('opacity-50', 'scale-[0.99]', 'border-cyan-400', 'bg-cyan-500/15');
   }
 }
 
@@ -504,7 +504,7 @@ function handleQueueDragEnter(e, index) {
   if (draggedQueueIndex === null || draggedQueueIndex === index) return;
   const row = document.getElementById(`queue-row-${index}`);
   if (row) {
-    row.classList.add('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+    row.classList.add('border-cyan-400', 'bg-cyan-500/20', 'ring-2', 'ring-cyan-400/50', 'translate-y-[-2px]');
   }
 }
 
@@ -512,7 +512,7 @@ function handleQueueDragLeave(e, index) {
   if (currentSettings?.dragToCastEnabled === true) return;
   const row = document.getElementById(`queue-row-${index}`);
   if (row) {
-    row.classList.remove('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+    row.classList.remove('border-cyan-400', 'bg-cyan-500/20', 'ring-2', 'ring-cyan-400/50', 'translate-y-[-2px]');
   }
 }
 
@@ -523,7 +523,7 @@ function handleQueueDrop(e, targetIndex) {
 
   const targetRow = document.getElementById(`queue-row-${targetIndex}`);
   if (targetRow) {
-    targetRow.classList.remove('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+    targetRow.classList.remove('border-cyan-400', 'bg-cyan-500/20', 'ring-2', 'ring-cyan-400/50', 'translate-y-[-2px]');
   }
 
   const fromIndex = draggedQueueIndex;
@@ -535,7 +535,7 @@ function handleQueueDragEnd(e) {
   draggedQueueIndex = null;
   const rows = document.querySelectorAll('.queue-row');
   rows.forEach(r => {
-    r.classList.remove('opacity-50', 'scale-[0.99]', 'border-amber-400', 'bg-amber-500/10', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+    r.classList.remove('opacity-50', 'scale-[0.99]', 'border-cyan-400', 'bg-cyan-500/15', 'bg-cyan-500/20', 'ring-2', 'ring-cyan-400/50', 'translate-y-[-2px]');
   });
 }
 
@@ -552,7 +552,7 @@ function initTouchReorder(e, index) {
 
   const row = document.getElementById(`queue-row-${index}`);
   if (row) {
-    row.classList.add('opacity-50', 'scale-[0.99]', 'border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50');
+    row.classList.add('opacity-50', 'scale-[0.99]', 'border-cyan-400', 'bg-cyan-500/20', 'ring-2', 'ring-cyan-400/50');
   }
 
   window.addEventListener('touchmove', handleTouchReorderMove, { passive: false });
@@ -573,12 +573,12 @@ function handleTouchReorderMove(e) {
       if (touchReorderState.currentTargetIndex !== -1 && touchReorderState.currentTargetIndex !== touchReorderState.sourceIndex) {
         const prevTarget = document.getElementById(`queue-row-${touchReorderState.currentTargetIndex}`);
         if (prevTarget) {
-          prevTarget.classList.remove('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+          prevTarget.classList.remove('border-cyan-400', 'bg-cyan-500/20', 'ring-2', 'ring-cyan-400/50', 'translate-y-[-2px]');
         }
       }
       touchReorderState.currentTargetIndex = targetIdx;
       if (targetIdx !== touchReorderState.sourceIndex) {
-        targetRow.classList.add('border-amber-400', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+        targetRow.classList.add('border-cyan-400', 'bg-cyan-500/20', 'ring-2', 'ring-cyan-400/50', 'translate-y-[-2px]');
         if (navigator.vibrate) {
           try { navigator.vibrate(10); } catch(err){}
         }
@@ -598,7 +598,7 @@ function handleTouchReorderEnd(e) {
 
   const rows = document.querySelectorAll('.queue-row');
   rows.forEach(r => {
-    r.classList.remove('opacity-50', 'scale-[0.99]', 'border-amber-400', 'bg-amber-500/10', 'bg-amber-500/15', 'ring-2', 'ring-amber-400/50', 'translate-y-[-2px]');
+    r.classList.remove('opacity-50', 'scale-[0.99]', 'border-cyan-400', 'bg-cyan-500/15', 'bg-cyan-500/20', 'ring-2', 'ring-cyan-400/50', 'translate-y-[-2px]');
   });
 
   if (currentTargetIndex !== -1 && currentTargetIndex !== sourceIndex) {
@@ -614,7 +614,7 @@ function renderQueueList(queue) {
   if (!queue || queue.length === 0) {
     container.innerHTML = `
       <div class="p-8 rounded-2xl bg-black/20 border border-white/5 text-center space-y-2">
-        <div class="text-2xl text-amber-400">✨</div>
+        <div class="text-2xl text-cyan-400">✨</div>
         <p class="text-xs sm:text-sm font-bold text-white">No hay canciones en la cola</p>
         <p class="text-[11px] text-gray-400 max-w-sm mx-auto">
           Las canciones de la lista base o pedidos de las mesas aparecerán aquí. Puedes arrastrarlas o usar las flechas ▲ ▼ para cambiar su orden de reproducción.
@@ -633,7 +633,7 @@ function renderQueueList(queue) {
 
     // Distinción clara: Pedido de Mesa (dorado/destacado) vs Canción Base (sobria con nombre de lista)
     let badgeHtml = '';
-    let rowBorderClass = 'border-white/5 hover:border-amber-500/40 bg-[#141720]';
+    let rowBorderClass = 'border-white/5 hover:border-cyan-500/40 bg-[#141720]';
     let vipButtonHtml = '';
 
     if (isClientReq) {
@@ -641,11 +641,11 @@ function renderQueueList(queue) {
       const hasPhotoBadge = song.requestedBy?.photo
         ? `<span class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">📸 Foto</span>`
         : '';
-      badgeHtml = `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black tracking-wide">👑 MESA ${escapeHtml(tableNum)}</span>${hasPhotoBadge}`;
-      rowBorderClass = 'border-amber-500/40 bg-amber-500/[0.05] hover:border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.06)]';
+      badgeHtml = `<span class="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-500/35 text-[10px] font-black tracking-wide">👑 MESA ${escapeHtml(tableNum)}</span>${hasPhotoBadge}`;
+      rowBorderClass = 'border-cyan-500/40 bg-cyan-400/[0.05] hover:border-cyan-400/80 shadow-[0_0_15px_rgba(245,158,11,0.06)]';
       if (!isFirst) {
         vipButtonHtml = `
-          <button onclick="setSongPriority('${song.id}')" class="no-cast-drag btn-secondary text-[11px] sm:text-xs py-1 px-1.5 sm:px-2.5 text-amber-300 font-bold border-amber-500/40 hover:bg-amber-500/20 whitespace-nowrap" style="touch-action: manipulation;" title="Dar Prioridad VIP para que suene a continuación">
+          <button onclick="setSongPriority('${song.id}')" class="no-cast-drag btn-secondary text-[11px] sm:text-xs py-1 px-1.5 sm:px-2.5 text-cyan-300 font-bold border-cyan-500/40 hover:bg-cyan-500/20 whitespace-nowrap" style="touch-action: manipulation;" title="Dar Prioridad VIP para que suene a continuación">
             <span class="sm:hidden">⭐ VIP</span><span class="hidden sm:inline">⭐ Prioridad VIP</span>
           </button>
         `;
@@ -694,25 +694,25 @@ function renderQueueList(queue) {
 
         <!-- Izquierda: Reordenar ▲ ▼ y Número 1., 2., 3. -->
         <div class="no-cast-drag flex items-center gap-1 sm:gap-1.5 shrink-0" style="touch-action: none;">
-          <span class="queue-drag-handle text-gray-400 hover:text-amber-400 text-xs px-1.5 py-1 cursor-grab active:cursor-grabbing select-none"
+          <span class="queue-drag-handle text-gray-400 hover:text-cyan-400 text-xs px-1.5 py-1 cursor-grab active:cursor-grabbing select-none"
                 title="Arrastra para cambiar de posición"
                 ${!isDragToCast ? `ontouchstart="initTouchReorder(event, ${i})"` : ''}>⋮⋮</span>
           <div class="flex flex-col items-center">
-            <button onclick="reorderQueueItem(${i}, 'up')" class="no-cast-drag text-[9px] sm:text-[10px] leading-none py-0.5 px-0.5 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isFirst ? 'opacity-20 cursor-not-allowed' : ''}" title="Subir turno" ${isFirst ? 'disabled' : ''}>▲</button>
-            <button onclick="reorderQueueItem(${i}, 'down')" class="no-cast-drag text-[9px] sm:text-[10px] leading-none py-0.5 px-0.5 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded transition ${isLast ? 'opacity-20 cursor-not-allowed' : ''}" title="Bajar turno" ${isLast ? 'disabled' : ''}>▼</button>
+            <button onclick="reorderQueueItem(${i}, 'up')" class="no-cast-drag text-[9px] sm:text-[10px] leading-none py-0.5 px-0.5 text-gray-400 hover:text-cyan-400 hover:bg-white/10 rounded transition ${isFirst ? 'opacity-20 cursor-not-allowed' : ''}" title="Subir turno" ${isFirst ? 'disabled' : ''}>▲</button>
+            <button onclick="reorderQueueItem(${i}, 'down')" class="no-cast-drag text-[9px] sm:text-[10px] leading-none py-0.5 px-0.5 text-gray-400 hover:text-cyan-400 hover:bg-white/10 rounded transition ${isLast ? 'opacity-20 cursor-not-allowed' : ''}" title="Bajar turno" ${isLast ? 'disabled' : ''}>▼</button>
           </div>
-          <span class="font-mono font-black text-amber-400 text-xs sm:text-sm w-4 sm:w-5 text-center">${i + 1}.</span>
+          <span class="font-mono font-black text-cyan-400 text-xs sm:text-sm w-4 sm:w-5 text-center">${i + 1}.</span>
         </div>
 
         <!-- Carátula + Info de la canción -->
         <div class="cast-direct-zone flex items-center gap-2 sm:gap-3 min-w-0 flex-1 pointer-events-none" style="touch-action: ${rowTouchAction};">
           <div class="relative shrink-0">
-            <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover border ${isArmed ? 'border-amber-400' : 'border-white/10'} shrink-0 shadow-sm pointer-events-none">
+            <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover border ${isArmed ? 'border-cyan-400' : 'border-white/10'} shrink-0 shadow-sm pointer-events-none">
             ${thumbIconHtml}
           </div>
           <div class="min-w-0 flex-1 pointer-events-none">
             <div class="flex items-center gap-1.5">
-              <p class="text-xs sm:text-sm font-bold ${isArmed ? 'text-amber-300' : 'text-white'} truncate group-hover:text-amber-300 transition" title="${escapeHtml(song.title)}">
+              <p class="text-xs sm:text-sm font-bold ${isArmed ? 'text-cyan-300' : 'text-white'} truncate group-hover:text-cyan-300 transition" title="${escapeHtml(song.title)}">
                 ${escapeHtml(song.title)}
               </p>
               <span class="genre-badge genre-${song.genre || 'Crossover'} text-[8.5px] py-0 px-1.5 hidden lg:inline-flex">${escapeHtml(song.genre || 'Crossover')}</span>
@@ -1418,8 +1418,8 @@ async function adminSearchSong() {
   if (resultsBox) {
     resultsBox.classList.remove('hidden');
     resultsBox.innerHTML = `
-      <div class="flex items-center gap-2 text-xs text-amber-400 py-3">
-        <div class="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+      <div class="flex items-center gap-2 text-xs text-cyan-400 py-3">
+        <div class="w-3.5 h-3.5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
         <span>Buscando en YouTube...</span>
       </div>
     `;
@@ -1437,7 +1437,7 @@ async function adminSearchSong() {
       resultsBox.innerHTML = `
         <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-400 flex items-center justify-between">
           <span>No se encontraron resultados para "<strong>${escapeHtml(query)}</strong>".</span>
-          <button onclick="adminSearchSong()" class="text-amber-400 hover:underline font-semibold ml-2">Reintentar</button>
+          <button onclick="adminSearchSong()" class="text-cyan-400 hover:underline font-semibold ml-2">Reintentar</button>
         </div>
       `;
       return;
@@ -1452,7 +1452,7 @@ async function adminSearchSong() {
       </div>
       <div class="space-y-1.5">
         ${videos.slice(0, 6).map((v, idx) => `
-          <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 hover:border-amber-400/30 transition">
+          <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 hover:border-cyan-400/30 transition">
             <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
               <img src="${v.thumbnail}" class="w-12 h-9 rounded object-cover shrink-0">
               <div class="min-w-0 flex-1">
@@ -1461,7 +1461,7 @@ async function adminSearchSong() {
               </div>
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
-              <button onclick="adminAddSongFromSearch(${idx})" class="btn-secondary text-xs py-1.5 px-2.5 whitespace-nowrap text-amber-400 font-semibold border-amber-400/30 hover:bg-amber-400/10" title="Agregar a la cola de espera sin límite de canciones">
+              <button onclick="adminAddSongFromSearch(${idx})" class="btn-secondary text-xs py-1.5 px-2.5 whitespace-nowrap text-cyan-400 font-semibold border-cyan-400/30 hover:bg-amber-400/10" title="Agregar a la cola de espera sin límite de canciones">
                 + Cola
               </button>
               <button onclick="adminCastSongFromSearch(${idx})" class="tactile-btn-gold text-xs py-1.5 px-2.5 whitespace-nowrap font-black flex items-center gap-1 shadow rounded-xl" title="Hacer sonar en la TV inmediatamente">
@@ -1618,7 +1618,7 @@ async function loadPlaylists() {
       const currentPct = (crossoverPercentages && crossoverPercentages[p.id] !== undefined) ? crossoverPercentages[p.id] : 25;
 
       return `
-        <div class="glass-card p-5 space-y-3 ${isActive ? 'border-amber-400/50 bg-amber-500/5' : ''}">
+        <div class="glass-card p-5 space-y-3 ${isActive ? 'border-cyan-400/50 bg-cyan-400/5' : ''}">
           <div class="flex items-start justify-between">
             <div>
               <h3 class="font-bold text-base text-white">${escapeHtml(p.name)}</h3>
@@ -1637,10 +1637,10 @@ async function loadPlaylists() {
           <div class="text-xs text-gray-400 flex items-center justify-between flex-wrap gap-2">
             <span>${p.tracks ? p.tracks.length : 0} temas listos</span>
             ${isPercentageCrossover ? `
-              <div class="flex items-center gap-1.5 bg-black/50 px-2.5 py-1 rounded-xl border border-amber-500/30">
+              <div class="flex items-center gap-1.5 bg-black/50 px-2.5 py-1 rounded-xl border border-cyan-500/35">
                 <label class="text-[10px] text-gray-300 font-bold">Ponderación:</label>
-                <input type="number" min="1" max="100" value="${currentPct}" onchange="updatePlaylistPercentage('${p.id}', this.value)" class="w-12 bg-black/80 border border-white/20 rounded px-1.5 py-0.5 text-xs text-amber-400 font-black text-center outline-none focus:border-amber-400">
-                <span class="text-xs text-amber-400 font-bold">%</span>
+                <input type="number" min="1" max="100" value="${currentPct}" onchange="updatePlaylistPercentage('${p.id}', this.value)" class="w-12 bg-black/80 border border-white/20 rounded px-1.5 py-0.5 text-xs text-cyan-400 font-black text-center outline-none focus:border-cyan-400">
+                <span class="text-xs text-cyan-400 font-bold">%</span>
               </div>
             ` : ''}
           </div>
@@ -1715,7 +1715,7 @@ function renderBasePlaybackModeControls(settings) {
     const crossoverSummary = distType === 'percentage'
       ? 'Distribución por %'
       : `${settings.crossoverBatchSize || 2} temas x lista`;
-    if (badge) badge.innerHTML = `<span class="text-amber-400 font-bold">Modo: Crossover (${crossoverSummary})</span>`;
+    if (badge) badge.innerHTML = `<span class="text-cyan-400 font-bold">Modo: Crossover (${crossoverSummary})</span>`;
     if (crossoverPanel) crossoverPanel.classList.remove('hidden');
   } else if (mode === 'sequential') {
     const isCustom = settings.sequentialOrderType === 'custom';
@@ -1963,12 +1963,12 @@ function switchImportTab(tab) {
   const viewSearch = document.getElementById('importViewSearch');
 
   if (tab === 'links') {
-    btnLinks.className = 'pb-2 border-b-2 border-amber-400 text-amber-400';
+    btnLinks.className = 'pb-2 border-b-2 border-cyan-400 text-cyan-400';
     btnSearch.className = 'pb-2 border-b-2 border-transparent text-gray-400 hover:text-white';
     viewLinks.classList.remove('hidden');
     viewSearch.classList.add('hidden');
   } else {
-    btnSearch.className = 'pb-2 border-b-2 border-amber-400 text-amber-400';
+    btnSearch.className = 'pb-2 border-b-2 border-cyan-400 text-cyan-400';
     btnLinks.className = 'pb-2 border-b-2 border-transparent text-gray-400 hover:text-white';
     viewSearch.classList.remove('hidden');
     viewLinks.classList.add('hidden');
@@ -2031,12 +2031,12 @@ async function executeSearchPlaylists() {
     }
 
     resultsBox.innerHTML = playlists.map((p) => `
-      <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-amber-500/30 transition text-xs">
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-cyan-500/35 transition text-xs">
         <div class="flex items-center gap-3 min-w-0 flex-1">
           <img src="${p.thumbnail || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100'}" class="w-12 h-9 rounded object-cover">
           <div class="min-w-0 flex-1">
             <p class="font-bold text-white truncate">${escapeHtml(p.title)}</p>
-            <p class="text-[10px] text-gray-400 truncate">${escapeHtml(p.author)} • <span class="text-amber-400 font-semibold">${p.videoCount} canciones</span></p>
+            <p class="text-[10px] text-gray-400 truncate">${escapeHtml(p.author)} • <span class="text-cyan-400 font-semibold">${p.videoCount} canciones</span></p>
           </div>
         </div>
         <button onclick="importFoundPlaylist('${p.url}', this)" class="btn-primary text-xs py-1.5 px-3 whitespace-nowrap ml-2">
@@ -2107,11 +2107,11 @@ async function generatePlaylistAI() {
 
     tracksList.innerHTML = generatedTracksFromAI.map((t, idx) => `
       <div class="flex items-center gap-3 p-2 rounded-xl bg-white/5 border border-white/5 text-xs">
-        <span class="font-bold text-amber-400">#${idx + 1}</span>
+        <span class="font-bold text-cyan-400">#${idx + 1}</span>
         <img src="${t.thumbnail}" class="w-10 h-8 rounded object-cover">
         <div class="min-w-0 flex-1">
           <p class="font-bold text-white truncate">${escapeHtml(t.title)}</p>
-          <p class="text-gray-400 truncate">${escapeHtml(t.artist)} • <span class="text-amber-400">${t.genre}</span></p>
+          <p class="text-gray-400 truncate">${escapeHtml(t.artist)} • <span class="text-cyan-400">${t.genre}</span></p>
         </div>
       </div>
     `).join('');
@@ -2162,7 +2162,7 @@ async function loadTrends() {
       topSongsEl.innerHTML = topSongs.map((s, i) => `
         <div class="flex items-center justify-between p-2 rounded-lg bg-white/5">
           <span class="font-medium truncate flex-1">${i + 1}. ${escapeHtml(s.title)}</span>
-          <span class="font-bold text-amber-400 ml-2">${s.count} pedidos</span>
+          <span class="font-bold text-cyan-400 ml-2">${s.count} pedidos</span>
         </div>
       `).join('');
     } else {
@@ -2175,7 +2175,7 @@ async function loadTrends() {
       topGenresEl.innerHTML = topGenres.map(g => `
         <div class="flex items-center justify-between p-2 rounded-lg bg-white/5">
           <span class="font-medium">${g.genre}</span>
-          <span class="font-bold text-amber-400">${g.count} canciones</span>
+          <span class="font-bold text-cyan-400">${g.count} canciones</span>
         </div>
       `).join('');
     } else {
@@ -2315,7 +2315,7 @@ function updateQueueDragModeUI(isCastMode) {
 
   if (isCastMode) {
     if (btnCast) {
-      btnCast.className = 'px-2.5 py-1 rounded-lg transition bg-amber-500 text-black font-black shadow';
+      btnCast.className = 'px-2.5 py-1 rounded-lg transition bg-cyan-400 text-black font-black shadow';
       btnCast.innerHTML = '🚀 Lanzar a TV (Opcional)';
     }
     if (btnReorder) {
@@ -2323,12 +2323,12 @@ function updateQueueDragModeUI(isCastMode) {
       btnReorder.innerHTML = '⇅ Organizar Lista';
     }
     if (helpBadge) {
-      helpBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/25 to-orange-500/25 border border-amber-400/60 text-[10px] sm:text-xs font-black text-amber-300 shadow';
+      helpBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/25 to-orange-500/25 border border-cyan-400/60 text-[10px] sm:text-xs font-black text-cyan-300 shadow';
       helpBadge.innerHTML = '<span>👆</span> <span>Toca una canción para engancharla y arrástrala al TV 🚀</span>';
     }
   } else {
     if (btnReorder) {
-      btnReorder.className = 'px-2.5 py-1 rounded-lg transition bg-amber-500 text-black font-black shadow';
+      btnReorder.className = 'px-2.5 py-1 rounded-lg transition bg-cyan-400 text-black font-black shadow';
       btnReorder.innerHTML = '⇅ Organizar Lista';
     }
     if (btnCast) {
@@ -2385,7 +2385,7 @@ function switchTab(tabId) {
     if (!btn || !content) return;
 
     if (id === tabId) {
-      btn.className = 'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]';
+      btn.className = 'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]';
       content.classList.remove('hidden');
     } else {
       btn.className = 'w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-transparent transition';
@@ -2602,7 +2602,7 @@ function renderSchedule(schedule, scheduleEnabled) {
       <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-bold text-amber-400 font-mono">${escapeHtml(b.start)} - ${escapeHtml(b.end)}</span>
+            <span class="font-bold text-cyan-400 font-mono">${escapeHtml(b.start)} - ${escapeHtml(b.end)}</span>
             <span class="font-semibold text-white">${escapeHtml(b.name || 'Tanda')}</span>
           </div>
           <p class="text-[11px] text-gray-400 mt-0.5">Lista: <span class="text-gray-300 font-medium">${escapeHtml(plName)}</span></p>
@@ -2857,20 +2857,20 @@ function renderPlaylistTracksInModal(playlist) {
     return `
       <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition gap-2">
         <div class="flex items-center gap-2.5 min-w-0 flex-1">
-          <span class="font-bold text-amber-400 text-xs w-5">#${idx + 1}</span>
+          <span class="font-bold text-cyan-400 text-xs w-5">#${idx + 1}</span>
           <img src="${t.thumbnail}" class="w-12 h-9 rounded-lg object-cover">
           <div class="min-w-0 flex-1">
             <p class="font-bold text-white text-xs truncate">${escapeHtml(t.title)}</p>
             <div class="flex items-center gap-2 mt-0.5">
               <span class="text-[10px] text-gray-400 truncate max-w-[130px] sm:max-w-[180px]">${escapeHtml(t.artist)}</span>
-              <select onchange="changeTrackGenre(${idx}, this.value)" class="bg-black/70 border border-white/20 rounded px-1.5 py-0.5 text-[10px] text-amber-400 font-semibold outline-none cursor-pointer hover:border-amber-400/50" title="Cambiar género de esta canción">
+              <select onchange="changeTrackGenre(${idx}, this.value)" class="bg-black/70 border border-white/20 rounded px-1.5 py-0.5 text-[10px] text-cyan-400 font-semibold outline-none cursor-pointer hover:border-cyan-400/50" title="Cambiar género de esta canción">
                 ${genreOptions}
               </select>
             </div>
           </div>
         </div>
         <div class="flex items-center gap-1.5 shrink-0">
-          <button onclick="adminAddTrackFromPlaylistModal(${idx})" class="btn-secondary text-[11px] py-1.5 px-2 text-amber-400 font-semibold border-amber-400/30 hover:bg-amber-400/10" title="Agregar a la cola de espera">
+          <button onclick="adminAddTrackFromPlaylistModal(${idx})" class="btn-secondary text-[11px] py-1.5 px-2 text-cyan-400 font-semibold border-cyan-400/30 hover:bg-amber-400/10" title="Agregar a la cola de espera">
             + Cola
           </button>
           <button onclick="playNowDirect('${t.videoId}', '${escapeHtml(t.title)}', '${escapeHtml(t.artist)}', '${currentGenre}', '${t.thumbnail || ''}'); closeViewPlaylistModal();" class="btn-primary text-[11px] py-1.5 px-2.5">
@@ -3251,7 +3251,7 @@ function renderRouletteTableChips() {
     const fireIcon = hasOrder ? '🔥 ' : '';
     const safeLabel = escapeHtml(label);
     if (isSelected) {
-      return `<button type="button" onclick="toggleRouletteTableChip('${safeLabel}')" class="px-2.5 py-1 rounded-lg text-[11px] font-black bg-amber-500 text-black border border-amber-300 shadow-sm transition active:scale-95">${fireIcon}${safeLabel} ✓</button>`;
+      return `<button type="button" onclick="toggleRouletteTableChip('${safeLabel}')" class="px-2.5 py-1 rounded-lg text-[11px] font-black bg-cyan-400 text-black border border-amber-300 shadow-sm transition active:scale-95">${fireIcon}${safeLabel} ✓</button>`;
     } else {
       return `<button type="button" onclick="toggleRouletteTableChip('${safeLabel}')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white/5 text-gray-400 border border-white/10 hover:text-white transition active:scale-95">${fireIcon}${safeLabel}</button>`;
     }
@@ -3414,12 +3414,12 @@ function switchRouletteMode(mode) {
   const cfgPrizes = document.getElementById('rouletteConfigPrizes');
 
   if (mode === 'tables') {
-    if (btnTables) btnTables.className = 'py-2 px-3 rounded-xl text-xs font-black transition bg-amber-500 text-black shadow';
+    if (btnTables) btnTables.className = 'py-2 px-3 rounded-xl text-xs font-black transition bg-cyan-400 text-black shadow';
     if (btnPrizes) btnPrizes.className = 'py-2 px-3 rounded-xl text-xs font-bold transition text-gray-300 hover:text-white';
     cfgTables?.classList.remove('hidden');
     cfgPrizes?.classList.add('hidden');
   } else {
-    if (btnPrizes) btnPrizes.className = 'py-2 px-3 rounded-xl text-xs font-black transition bg-amber-500 text-black shadow';
+    if (btnPrizes) btnPrizes.className = 'py-2 px-3 rounded-xl text-xs font-black transition bg-cyan-400 text-black shadow';
     if (btnTables) btnTables.className = 'py-2 px-3 rounded-xl text-xs font-bold transition text-gray-300 hover:text-white';
     cfgPrizes?.classList.remove('hidden');
     cfgTables?.classList.add('hidden');
@@ -3435,10 +3435,10 @@ function setRouletteTableFilter(filter) {
   const btnAll = document.getElementById('btnTableFilterAll');
 
   if (filter === 'active') {
-    if (btnActive) btnActive.className = 'text-[11px] font-black px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 transition';
+    if (btnActive) btnActive.className = 'text-[11px] font-black px-2.5 py-1 rounded-lg bg-cyan-400/25 text-cyan-300 border border-cyan-400/50 transition';
     if (btnAll) btnAll.className = 'text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white/5 text-gray-400 border border-white/10 transition';
   } else {
-    if (btnAll) btnAll.className = 'text-[11px] font-black px-2.5 py-1 rounded-lg bg-amber-500/25 text-amber-300 border border-amber-400/50 transition';
+    if (btnAll) btnAll.className = 'text-[11px] font-black px-2.5 py-1 rounded-lg bg-cyan-400/25 text-cyan-300 border border-cyan-400/50 transition';
     if (btnActive) btnActive.className = 'text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white/5 text-gray-400 border border-white/10 transition';
   }
 
@@ -3783,7 +3783,7 @@ async function onDjCamPhotoSelected(event) {
   if (emptyState && !emptyState.classList.contains('hidden')) {
     emptyState.innerHTML = `
       <div class="text-3xl animate-bounce">⏳</div>
-      <p class="text-xs font-bold text-amber-300">Cargando foto de tu galería...</p>
+      <p class="text-xs font-bold text-cyan-300">Cargando foto de tu galería...</p>
       <p class="text-[11px] text-gray-400">Preparando marco Polaroid para el TV</p>
     `;
   }
