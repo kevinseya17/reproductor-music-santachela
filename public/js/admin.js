@@ -202,18 +202,20 @@ function renderAdminState(data) {
     renderSchedule(settings.schedule, settings.scheduleEnabled);
   }
 
-  // Sonando Ahora (Deck Principal y Mini Player de Barra Lateral)
+  // Sonando Ahora (Deck Principal, Monitor Desplegable y Mini Player de Barra Lateral)
   if (currentlyPlaying) {
     const titleEl = document.getElementById('adminNowTitle');
     const artistEl = document.getElementById('adminNowArtist');
     const thumbEl = document.getElementById('adminNowThumb');
     const thumbBlurEl = document.getElementById('adminNowThumbBlur');
+    const stageMonitorImgEl = document.getElementById('adminStageMonitorImg');
     const originTextEl = document.getElementById('adminNowOriginText');
 
     if (titleEl) titleEl.textContent = currentlyPlaying.title;
     if (artistEl) artistEl.textContent = currentlyPlaying.artist;
     if (thumbEl) thumbEl.src = currentlyPlaying.thumbnail;
     if (thumbBlurEl) thumbBlurEl.src = currentlyPlaying.thumbnail;
+    if (stageMonitorImgEl) stageMonitorImgEl.src = currentlyPlaying.thumbnail;
     
     const miniThumb = document.getElementById('adminSidebarMiniThumb');
     const miniTitle = document.getElementById('adminSidebarMiniTitle');
@@ -225,17 +227,17 @@ function renderAdminState(data) {
     const genreEl = document.getElementById('adminNowGenre');
     if (genreEl) {
       genreEl.textContent = currentlyPlaying.genre || 'Crossover';
-      genreEl.className = `genre-badge genre-${currentlyPlaying.genre || 'Crossover'}`;
+      genreEl.className = `genre-badge genre-${currentlyPlaying.genre || 'Crossover'} text-[8.5px] sm:text-[10px] shrink-0`;
     }
 
     const reqEl = document.getElementById('adminNowRequested');
     if (reqEl) {
       if (currentlyPlaying.requestedBy && currentlyPlaying.requestedBy.table) {
         const ded = currentlyPlaying.requestedBy.dedication ? ` | "${escapeHtml(currentlyPlaying.requestedBy.dedication)}"` : '';
-        reqEl.innerHTML = `• Pedida por: Mesa ${escapeHtml(currentlyPlaying.requestedBy.table)}${ded}`;
+        reqEl.innerHTML = `• Mesa ${escapeHtml(currentlyPlaying.requestedBy.table)}${ded}`;
         if (originTextEl) originTextEl.textContent = `Pedido Mesa ${currentlyPlaying.requestedBy.table}`;
       } else {
-        reqEl.textContent = `• Lista Base`;
+        reqEl.textContent = '';
         if (originTextEl) originTextEl.textContent = `Lista Base del Bar`;
       }
     }
@@ -305,11 +307,11 @@ function updatePlayerTelemetry(data) {
 
   if (playPauseBtn && playPauseIcon && playPauseText) {
     if (playerTelemetry.isPlaying) {
-      playPauseIcon.textContent = '⏸️';
+      playPauseIcon.textContent = '❚❚';
       playPauseText.textContent = 'PAUSAR';
       playPauseBtn.className = 'tactile-btn-gold w-full sm:w-auto justify-center px-2.5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-lg flex items-center gap-1.5 whitespace-nowrap';
     } else {
-      playPauseIcon.textContent = '▶️';
+      playPauseIcon.textContent = '▶';
       playPauseText.textContent = 'REANUDAR';
       playPauseBtn.className = 'tactile-btn-dark w-full sm:w-auto justify-center px-2.5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-lg flex items-center gap-1.5 border-cyan-400 text-cyan-400 whitespace-nowrap';
     }
@@ -446,6 +448,35 @@ function toggleSidebarMobile() {
     backdrop?.classList.add('hidden');
   }
 }
+
+// Mostrar / Esconder la Pantalla Monitor Grande en la Consola DJ
+function toggleAdminStageMonitor(forceState) {
+  const wrap = document.getElementById('adminStageMonitorWrap');
+  const label = document.getElementById('stageMonitorToggleLabel');
+  if (!wrap) return;
+
+  const isCurrentlyOpen = wrap.classList.contains('open');
+  const nextState = typeof forceState === 'boolean' ? forceState : !isCurrentlyOpen;
+
+  if (nextState) {
+    wrap.classList.add('open');
+    if (label) label.textContent = 'Esconder Pantalla';
+    try { localStorage.setItem('mocd_admin_monitor_open', '1'); } catch (e) {}
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+  } else {
+    wrap.classList.remove('open');
+    if (label) label.textContent = 'Ver Pantalla';
+    try { localStorage.setItem('mocd_admin_monitor_open', '0'); } catch (e) {}
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    if (localStorage.getItem('mocd_admin_monitor_open') === '1') {
+      toggleAdminStageMonitor(true);
+    }
+  } catch (e) {}
+});
 
 // ============================================================
 // DRAG & DROP REORDENAMIENTO DE COLA EN VIVO

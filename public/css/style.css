@@ -123,6 +123,33 @@ h1, h2, h3, h4, .font-display, .brand-font {
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
+/* Fondo ambiental difuminado de la carátula (nunca ocupa flujo normal) */
+.now-playing-backdrop-blur {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  filter: blur(42px) saturate(1.4) !important;
+  opacity: 0.18 !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+/* Monitor Grande Desplegable (Opcional con botón Mostrar / Ocultar) */
+.mocd-stage-monitor {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.3s ease;
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+}
+.mocd-stage-monitor.open {
+  max-height: 320px;
+  opacity: 1;
+  margin-bottom: 0.75rem;
+}
+
 /* Tarjeta Individual de Canción Estilizada */
 .mocd-track-card {
   background: linear-gradient(145deg, rgba(16, 22, 43, 0.88) 0%, rgba(9, 12, 24, 0.94) 100%);
@@ -193,11 +220,12 @@ h1, h2, h3, h4, .font-display, .brand-font {
 
 /* Cápsula Holográfica (idéntica al lema de ventas.html) */
 .mocd-holo-capsule {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(0, 229, 255, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(0, 229, 255, 0.32);
+  border-radius: 9999px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Barras de Ecualizador tipo Cápsula (ventas.html) */
