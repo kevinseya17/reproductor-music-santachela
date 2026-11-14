@@ -207,11 +207,13 @@ function renderAdminState(data) {
     const titleEl = document.getElementById('adminNowTitle');
     const artistEl = document.getElementById('adminNowArtist');
     const thumbEl = document.getElementById('adminNowThumb');
+    const thumbBlurEl = document.getElementById('adminNowThumbBlur');
     const originTextEl = document.getElementById('adminNowOriginText');
 
     if (titleEl) titleEl.textContent = currentlyPlaying.title;
     if (artistEl) artistEl.textContent = currentlyPlaying.artist;
     if (thumbEl) thumbEl.src = currentlyPlaying.thumbnail;
+    if (thumbBlurEl) thumbBlurEl.src = currentlyPlaying.thumbnail;
     
     const miniThumb = document.getElementById('adminSidebarMiniThumb');
     const miniTitle = document.getElementById('adminSidebarMiniTitle');
@@ -631,9 +633,9 @@ function renderQueueList(queue) {
     const isLast = i === queue.length - 1;
     const isClientReq = song.isBaseTrack !== true;
 
-    // Distinción clara: Pedido de Mesa (dorado/destacado) vs Canción Base (sobria con nombre de lista)
+    // Distinción clara: Pedido de Mesa (cian neón destacado) vs Canción Base (sobria con nombre de lista)
     let badgeHtml = '';
-    let rowBorderClass = 'border-white/5 hover:border-cyan-500/40 bg-[#141720]';
+    let rowBorderClass = 'mocd-track-card';
     let vipButtonHtml = '';
 
     if (isClientReq) {
@@ -641,8 +643,8 @@ function renderQueueList(queue) {
       const hasPhotoBadge = song.requestedBy?.photo
         ? `<span class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">📸 Foto</span>`
         : '';
-      badgeHtml = `<span class="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-500/35 text-[10px] font-black tracking-wide">👑 MESA ${escapeHtml(tableNum)}</span>${hasPhotoBadge}`;
-      rowBorderClass = 'border-cyan-500/40 bg-cyan-400/[0.05] hover:border-cyan-400/80 shadow-[0_0_15px_rgba(245,158,11,0.06)]';
+      badgeHtml = `<span class="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-[10px] font-black tracking-wide">👑 MESA ${escapeHtml(tableNum)}</span>${hasPhotoBadge}`;
+      rowBorderClass = 'mocd-track-card border-cyan-400/50 bg-cyan-500/[0.08] shadow-[0_0_20px_rgba(0,229,255,0.12)]';
       if (!isFirst) {
         vipButtonHtml = `
           <button onclick="setSongPriority('${song.id}')" class="no-cast-drag btn-secondary text-[11px] sm:text-xs py-1 px-1.5 sm:px-2.5 text-cyan-300 font-bold border-cyan-500/40 hover:bg-cyan-500/20 whitespace-nowrap" style="touch-action: manipulation;" title="Dar Prioridad VIP para que suene a continuación">
@@ -659,17 +661,17 @@ function renderQueueList(queue) {
     const hasAnyArmed = isDragToCast && (typeof armedSongIndex !== 'undefined' && armedSongIndex !== -1);
     const rowTouchAction = isArmed ? 'none' : 'pan-y';
     const armedStyle = isArmed
-      ? 'transform: scale(1.025) translateY(-3px); box-shadow: 0 14px 34px rgba(245, 158, 11, 0.5), 0 0 20px rgba(245, 158, 11, 0.35); border-color: #fbbf24; border-width: 2px; background: linear-gradient(90deg, rgba(245,158,11,0.22), #181d2c, rgba(245,158,11,0.18)); z-index: 20;'
+      ? 'transform: scale(1.025) translateY(-3px); box-shadow: 0 14px 34px rgba(0, 229, 255, 0.45), 0 0 20px rgba(139, 92, 246, 0.35); border-color: #00e5ff; border-width: 2px; background: linear-gradient(90deg, rgba(0,229,255,0.22), #11182c, rgba(139,92,246,0.22)); z-index: 20;'
       : (hasAnyArmed ? 'opacity: 0.5;' : '');
 
     const armedBadgeHtml = isDragToCast ? `
-      <div id="armed-badge-${i}" class="${isArmed ? 'flex' : 'hidden'} absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-500 text-black text-[9.5px] font-black px-3 py-0.5 rounded-full shadow-[0_0_18px_rgba(245,158,11,0.95)] whitespace-nowrap uppercase tracking-wider items-center gap-1 z-30 pointer-events-none animate-bounce">
+      <div id="armed-badge-${i}" class="${isArmed ? 'flex' : 'hidden'} absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-cyan-400 to-indigo-500 text-white text-[9.5px] font-black px-3 py-0.5 rounded-full shadow-[0_0_18px_rgba(0,229,255,0.95)] whitespace-nowrap uppercase tracking-wider items-center gap-1 z-30 pointer-events-none animate-bounce">
         <span>🚀</span> <span>¡Enganchada! Arrástrala hacia arriba ↑</span>
       </div>
     ` : '';
 
     const thumbIconHtml = isDragToCast ? `
-      <span id="armed-icon-${i}" class="md:hidden absolute -top-1 -right-1 text-[9px] ${isArmed ? 'bg-amber-400 scale-125' : 'bg-white/20 text-white'} text-black font-black rounded-full w-4 h-4 flex items-center justify-center shadow pointer-events-none transition-transform">${isArmed ? '🚀' : '👆'}</span>
+      <span id="armed-icon-${i}" class="md:hidden absolute -top-1 -right-1 text-[9px] ${isArmed ? 'bg-cyan-400 scale-125' : 'bg-white/20 text-white'} text-black font-black rounded-full w-4 h-4 flex items-center justify-center shadow pointer-events-none transition-transform">${isArmed ? '🚀' : '👆'}</span>
     ` : '';
 
     const rowDraggableAttr = !isDragToCast ? 'draggable="true"' : 'draggable="false"';
@@ -688,7 +690,7 @@ function renderQueueList(queue) {
            ondragend="handleQueueDragEnd(event)"
            ${rowTouchStartAttr}
            style="touch-action: ${rowTouchAction}; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; ${armedStyle}"
-           class="queue-row flex items-center justify-between p-2 sm:p-2.5 rounded-2xl ${rowBorderClass} gap-1.5 sm:gap-2.5 group select-none ${cursorClass} transition-all duration-150 relative ${isArmed ? 'overflow-visible' : 'overflow-hidden'}">
+           class="queue-row flex items-center justify-between p-2.5 sm:p-3 rounded-2xl ${rowBorderClass} gap-1.5 sm:gap-2.5 group select-none ${cursorClass} transition-all duration-150 relative ${isArmed ? 'overflow-visible' : 'overflow-hidden'}">
         
         ${armedBadgeHtml}
 
@@ -730,7 +732,7 @@ function renderQueueList(queue) {
         <div class="flex items-center gap-1 sm:gap-2 shrink-0">
           <span class="font-mono text-xs text-gray-400 hidden lg:inline">${song.duration || '3:30'}</span>
           ${vipButtonHtml}
-          <button onclick="castSongDirect(${i})" style="touch-action: manipulation;" class="no-cast-drag tactile-btn-gold text-[10.5px] sm:text-xs py-1.5 px-2.5 sm:px-3 font-black whitespace-nowrap flex items-center gap-1 shadow-[0_0_12px_rgba(245,158,11,0.25)] hover:scale-105 active:scale-95 transition rounded-xl" title="Hacer sonar en la TV ahora mismo">
+          <button onclick="castSongDirect(${i})" style="touch-action: manipulation;" class="no-cast-drag tactile-btn-gold text-[10.5px] sm:text-xs py-1.5 px-2.5 sm:px-3 font-black whitespace-nowrap flex items-center gap-1 shadow-[0_0_14px_rgba(0,229,255,0.28)] hover:scale-105 active:scale-95 transition rounded-xl" title="Hacer sonar en la TV ahora mismo">
             <span class="text-xs">▶</span> <span>Sonar</span>
           </button>
           <button onclick="removeQueueItem('${song.id}')" style="touch-action: pan-y;" class="no-cast-drag text-gray-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-white/10 transition shrink-0" title="Eliminar de la cola">

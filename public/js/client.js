@@ -93,9 +93,12 @@ function renderStatus(data) {
 
   // Sonando Ahora
   if (currentlyPlaying) {
+    const thumbUrl = currentlyPlaying.thumbnail || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150';
     document.getElementById('currentTitle').textContent = currentlyPlaying.title || 'Música del bar';
     document.getElementById('currentArtist').textContent = currentlyPlaying.artist || '';
-    document.getElementById('currentThumb').src = currentlyPlaying.thumbnail || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150';
+    document.getElementById('currentThumb').src = thumbUrl;
+    const blurThumb = document.getElementById('currentThumbBlur');
+    if (blurThumb) blurThumb.src = thumbUrl;
     
     const genreBadge = document.getElementById('currentGenreBadge');
     genreBadge.textContent = currentlyPlaying.genre || 'Música';
@@ -103,9 +106,9 @@ function renderStatus(data) {
 
     const requestedByEl = document.getElementById('currentRequestedBy');
     if (currentlyPlaying.requestedBy && currentlyPlaying.requestedBy.name) {
-      requestedByEl.textContent = `✨ Pedida por: ${currentlyPlaying.requestedBy.name}`;
+      requestedByEl.textContent = `✨ Solicitud en vivo: ${currentlyPlaying.requestedBy.name}`;
     } else {
-      requestedByEl.textContent = `✨ Lista del bar`;
+      requestedByEl.textContent = `✨ Mezcla Inteligente MOCD`;
     }
   }
 
@@ -119,30 +122,34 @@ function renderQueue(queue) {
   countEl.textContent = queue.length;
 
   if (!queue || queue.length === 0) {
-    listEl.innerHTML = `<p class="text-xs text-gray-500 text-center py-3">No hay pedidos pendientes. ¡Sé el primero en pedir una canción!</p>`;
+    listEl.innerHTML = `
+      <div class="text-center py-5 px-3 rounded-2xl bg-white/[0.02] border border-dashed border-white/10">
+        <p class="text-xs text-gray-400 font-medium">No hay solicitudes en espera. ¡Sé el primero en programar tu canción en las pantallas!</p>
+      </div>
+    `;
     return;
   }
 
-  listEl.innerHTML = queue.slice(0, 5).map((song, index) => {
+  listEl.innerHTML = queue.slice(0, 6).map((song, index) => {
     const isMyTable = song.requestedBy && song.requestedBy.table === currentTable;
     return `
-      <div class="flex items-center gap-3 p-2 rounded-xl ${isMyTable ? 'bg-cyan-500/15 border border-cyan-500/40 shadow-[0_0_12px_rgba(0,229,255,0.2)]' : 'bg-white/5'}">
-        <span class="text-xs font-bold text-gray-400 w-4 text-center">#${index + 1}</span>
-        <img src="${song.thumbnail}" class="w-10 h-10 rounded-lg object-cover">
+      <div class="mocd-track-card flex items-center gap-3 p-2.5 sm:p-3 ${isMyTable ? '!border-cyan-400/60 !bg-gradient-to-r !from-cyan-500/15 !via-indigo-500/10 !to-purple-500/15 shadow-[0_0_20px_rgba(0,229,255,0.2)]' : ''}">
+        <span class="w-6 h-6 rounded-lg bg-white/[0.06] border border-white/10 text-[11px] font-black text-cyan-300 flex items-center justify-center shrink-0">#${index + 1}</span>
+        <img src="${song.thumbnail}" class="w-11 h-11 rounded-xl object-cover border border-white/15 shrink-0">
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-semibold text-white truncate">${escapeHtml(song.title)}</p>
-          <p class="text-[11px] text-gray-400 truncate">${escapeHtml(song.artist)}</p>
+          <p class="font-display text-xs sm:text-sm font-bold text-white truncate leading-tight">${escapeHtml(song.title)}</p>
+          <p class="text-[11px] text-gray-300 truncate mt-0.5">${escapeHtml(song.artist)}</p>
         </div>
-        <div class="text-right">
-          <span class="genre-badge genre-${song.genre || 'Crossover'} text-[10px] py-0.5 px-2">${song.genre || 'Música'}</span>
-          ${isMyTable ? '<p class="text-[10px] text-cyan-300 font-bold mt-0.5 flex items-center gap-1 justify-end"><span>✨</span> ¡Tu pedido!</p>' : ''}
+        <div class="text-right shrink-0 flex flex-col items-end gap-1">
+          <span class="genre-badge genre-${song.genre || 'Crossover'} !text-[9px] !py-0.5 !px-2">${song.genre || 'Música'}</span>
+          ${isMyTable ? '<span class="text-[9.5px] px-2 py-0.5 rounded-md bg-cyan-400/20 border border-cyan-400/40 text-cyan-300 font-extrabold tracking-wider uppercase">✨ Tu Mesa</span>' : ''}
         </div>
       </div>
     `;
   }).join('');
 
-  if (queue.length > 5) {
-    listEl.innerHTML += `<p class="text-[11px] text-gray-500 text-center pt-1">+${queue.length - 5} canciones más organizadas en bloques</p>`;
+  if (queue.length > 6) {
+    listEl.innerHTML += `<p class="text-[11px] text-cyan-300/80 font-semibold text-center pt-1">+${queue.length - 6} canciones más organizadas por bloques inteligentes</p>`;
   }
 }
 
@@ -194,16 +201,22 @@ function renderPopularHits() {
   const container = document.getElementById('popularHitsList');
   if (!container) return;
   container.innerHTML = POPULAR_HITS.map((song, i) => `
-    <div class="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5 hover:border-cyan-500/40 hover:shadow-[0_0_15px_rgba(0,229,255,0.15)] transition">
-      <div class="flex items-center gap-2.5 min-w-0 flex-1">
-        <img src="${song.thumbnail}" class="w-11 h-9 rounded-lg object-cover">
+    <div class="mocd-track-card flex items-center justify-between p-2.5 sm:p-3 gap-3">
+      <div class="flex items-center gap-3 min-w-0 flex-1">
+        <div class="relative shrink-0">
+          <img src="${song.thumbnail}" class="w-14 h-11 rounded-xl object-cover border border-white/15">
+          <span class="absolute bottom-0.5 right-0.5 bg-black/85 text-[8.5px] px-1 rounded text-cyan-300 font-mono font-bold">${song.duration || '3:45'}</span>
+        </div>
         <div class="min-w-0 flex-1">
-          <p class="font-bold text-white text-xs truncate">${song.title}</p>
-          <p class="text-[10px] text-gray-400 truncate">${song.artist} • <span class="text-cyan-400 font-semibold">${song.genre}</span></p>
+          <p class="font-display font-bold text-white text-xs sm:text-sm truncate leading-tight">${song.title}</p>
+          <p class="text-[11px] text-gray-300 truncate mt-0.5">${song.artist} <span class="text-purple-400">•</span> <span class="text-cyan-300 font-bold">${song.genre}</span></p>
         </div>
       </div>
-      <button onclick="requestDirectHit(${i})" class="btn-primary text-xs py-1.5 px-3 whitespace-nowrap ml-2">
-        Pedir 🎵
+      <button onclick="requestDirectHit(${i})" class="btn-neon-mocd text-xs py-2 px-3.5 rounded-xl whitespace-nowrap shrink-0">
+        <span>Pedir</span>
+        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
       </button>
     </div>
   `).join('');
@@ -213,6 +226,7 @@ function requestDirectHit(index) {
   const song = POPULAR_HITS[index];
   if (!song) return;
 
+  if (typeof window.waveEnergyBoost !== 'undefined') window.waveEnergyBoost = 1.65;
   selectedSongForModal = song;
 
   document.getElementById('modalThumb').src = song.thumbnail;
@@ -229,12 +243,13 @@ async function performSearch(query) {
   const resultsList = document.getElementById('searchResultsList');
   const resultsCount = document.getElementById('resultsCount');
 
+  if (typeof window.waveEnergyBoost !== 'undefined') window.waveEnergyBoost = 1.5;
   if (suggestionsSection) suggestionsSection.classList.add('hidden');
   resultsSection.classList.remove('hidden');
   resultsList.innerHTML = `
-    <div class="text-center py-6">
-      <div class="inline-block w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-xs text-gray-400 mt-2">Buscando canciones individuales en YouTube...</p>
+    <div class="glass-card text-center py-8 px-4">
+      <div class="inline-block w-7 h-7 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(0,229,255,0.4)]"></div>
+      <p class="text-xs text-cyan-200 font-semibold mt-2.5">Motor IA buscando canciones verificadas...</p>
     </div>
   `;
 
@@ -244,26 +259,31 @@ async function performSearch(query) {
     const videos = data.results || [];
 
     if (videos.length === 0) {
-      resultsList.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">No se encontraron canciones individuales. Intenta escribir el nombre del artista o canción.</p>`;
-      resultsCount.textContent = '0 canciones';
+      resultsList.innerHTML = `<p class="text-xs text-gray-400 text-center py-6 glass-card">No se encontraron canciones verificadas. Intenta con el nombre del tema o artista.</p>`;
+      resultsCount.textContent = '0 resultados';
       return;
     }
 
-    resultsCount.textContent = `${videos.length} canciones encontradas`;
+    resultsCount.textContent = `${videos.length} temas`;
 
     resultsList.innerHTML = videos.map((v, i) => `
-      <div class="glass-card p-2.5 flex items-center gap-3 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,229,255,0.15)] transition">
-        <div class="relative">
-          <img src="${v.thumbnail}" class="w-16 h-12 rounded-lg object-cover">
-          <span class="absolute bottom-1 right-1 bg-black/80 text-[10px] px-1 rounded text-white font-mono">${v.duration}</span>
+      <div class="mocd-track-card p-2.5 sm:p-3 flex items-center gap-3">
+        <div class="relative shrink-0">
+          <img src="${v.thumbnail}" class="w-16 h-12 rounded-xl object-cover border border-white/15">
+          <span class="absolute bottom-1 right-1 bg-black/85 text-[9px] px-1.5 py-0.5 rounded text-cyan-300 font-mono font-bold">${v.duration}</span>
         </div>
         <div class="flex-1 min-w-0">
-          <h4 class="text-xs font-bold text-white truncate leading-tight">${escapeHtml(v.title)}</h4>
-          <p class="text-[11px] text-gray-400 truncate">${escapeHtml(v.artist)}</p>
-          <span class="text-[10px] text-cyan-400/90 font-medium">Canción individual</span>
+          <h4 class="font-display text-xs sm:text-sm font-bold text-white truncate leading-tight">${escapeHtml(v.title)}</h4>
+          <p class="text-[11px] text-gray-300 truncate mt-0.5">${escapeHtml(v.artist)}</p>
+          <span class="inline-flex items-center gap-1 text-[9.5px] text-cyan-300 font-bold mt-0.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Pista Oficial Verificada
+          </span>
         </div>
-        <button onclick="openConfirmModal(${i})" class="btn-primary text-xs py-2 px-3 whitespace-nowrap">
-          Pedir 🎵
+        <button onclick="openConfirmModal(${i})" class="btn-neon-mocd text-xs py-2 px-3.5 rounded-xl whitespace-nowrap shrink-0">
+          <span>Pedir</span>
+          <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
         </button>
       </div>
     `).join('');
@@ -676,18 +696,21 @@ function renderClientPlaylistTracks(tracks) {
   }
 
   listEl.innerHTML = tracks.map((song, i) => `
-    <div class="glass-card p-2.5 flex items-center gap-3 hover:border-cyan-500/50 hover:shadow-[0_0_15px_rgba(0,229,255,0.15)] transition">
-      <div class="relative">
-        <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-14 h-11 rounded-lg object-cover">
-        <span class="absolute bottom-0.5 right-0.5 bg-black/80 text-[9px] px-1 rounded text-white font-mono">${song.duration || '3:30'}</span>
+    <div class="mocd-track-card p-2.5 sm:p-3 flex items-center gap-3">
+      <div class="relative shrink-0">
+        <img src="${song.thumbnail || 'https://i.ytimg.com/vi/' + song.videoId + '/hqdefault.jpg'}" class="w-15 h-11 rounded-xl object-cover border border-white/15">
+        <span class="absolute bottom-0.5 right-0.5 bg-black/85 text-[8.5px] px-1 rounded text-cyan-300 font-mono font-bold">${song.duration || '3:30'}</span>
       </div>
       <div class="flex-1 min-w-0">
-        <h4 class="text-xs font-bold text-white truncate leading-tight">${escapeHtml(song.title)}</h4>
-        <p class="text-[11px] text-gray-400 truncate">${escapeHtml(song.artist || 'Artista')}</p>
-        <span class="genre-badge genre-${song.genre || 'Crossover'} text-[9px] py-0 px-1.5">${song.genre || 'Música'}</span>
+        <h4 class="font-display text-xs sm:text-sm font-bold text-white truncate leading-tight">${escapeHtml(song.title)}</h4>
+        <p class="text-[11px] text-gray-300 truncate mt-0.5">${escapeHtml(song.artist || 'Artista')}</p>
+        <span class="genre-badge genre-${song.genre || 'Crossover'} !text-[9px] !py-0.5 !px-2 mt-1">${song.genre || 'Música'}</span>
       </div>
-      <button onclick="requestPlaylistTrack(${i})" class="btn-primary text-xs py-1.5 px-3 whitespace-nowrap">
-        Pedir 🎵
+      <button onclick="requestPlaylistTrack(${i})" class="btn-neon-mocd text-xs py-2 px-3.5 rounded-xl whitespace-nowrap shrink-0">
+        <span>Pedir</span>
+        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
       </button>
     </div>
   `).join('');
